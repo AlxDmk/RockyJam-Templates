@@ -106,13 +106,14 @@ class HooksConfig {
 			];
 			foreach ( $hook_def['callbacks'] ?? [] as $cb ) {
 				$entry['callbacks'][] = [
-					'id'       => $cb['id'],
-					'function' => $cb['function'],
-					'priority' => (int) $cb['priority'],
-					'enabled'  => (bool) $cb['enabled'],
-					'custom'   => false,
-					'label'    => $cb['label'] ?? $cb['function'],
-					'code'     => '',
+					'id'               => $cb['id'],
+					'function'         => $cb['function'],
+					'priority'         => (int) $cb['priority'],
+					'original_priority' => (int) $cb['priority'],
+					'enabled'          => (bool) $cb['enabled'],
+					'custom'           => false,
+					'label'            => $cb['label'] ?? $cb['function'],
+					'code'             => '',
 				];
 			}
 			$config[] = $entry;
@@ -176,12 +177,13 @@ class HooksConfig {
 			$lines[] = '// Hook: ' . $hook;
 
 			foreach ( $callbacks as $cb ) {
-				$priority = (int) ( $cb['priority'] ?? 10 );
-				$enabled  = (bool) ( $cb['enabled']  ?? true );
-				$custom   = (bool) ( $cb['custom']   ?? false );
-				$func     = $cb['function'] ?? '';
-				$code     = $cb['code']     ?? '';
-				$id       = $cb['id']       ?? '';
+				$priority          = (int) ( $cb['priority']          ?? 10 );
+				$original_priority = (int) ( $cb['original_priority'] ?? $priority );
+				$enabled           = (bool) ( $cb['enabled']          ?? true );
+				$custom            = (bool) ( $cb['custom']           ?? false );
+				$func              = $cb['function'] ?? '';
+				$code              = $cb['code']     ?? '';
+				$id                = $cb['id']       ?? '';
 
 				if ( $custom ) {
 					// ── Custom inline function ───────────────────────────────────
@@ -209,8 +211,9 @@ class HooksConfig {
 						continue;
 					}
 					$is_addon = str_starts_with( $id, 'addon_' );
-					// Remove whatever WC/addon registered at this priority.
-					$lines[] = 'remove_action( \'' . $hook . '\', \'' . $func . '\', ' . $priority . ' );';
+					// remove_action MUST use original_priority (what WC/addon actually registered),
+					// not the user-edited priority — otherwise WC's registration stays and we get duplicates.
+					$lines[] = 'remove_action( \'' . $hook . '\', \'' . $func . '\', ' . $original_priority . ' );';
 					if ( $enabled ) {
 						if ( $is_addon ) {
 							// Guard: only add if addon function is actually loaded.
@@ -268,12 +271,18 @@ class HooksConfig {
 				if ( ! is_array( $cb ) ) {
 					continue;
 				}
-				$custom   = (bool) ( $cb['custom']   ?? false );
-				$func     = sanitize_key( $cb['function'] ?? '' );
-				$priority = max( 1, min( 999, (int) ( $cb['priority'] ?? 10 ) ) );
-				$enabled  = (bool) ( $cb['enabled']  ?? true );
-				$label    = sanitize_text_field( $cb['label'] ?? $func );
-				$id       = sanitize_key( $cb['id'] ?? $func );
+				$custom            = (bool) ( $cb['custom']   ?? false );
+				$func              = sanitize_key( $cb['function'] ?? '' );
+				$priority          = max( 1, min( 999, (int) ( $cb['priority'] ?? 10 ) ) );
+				// original_priority: the WC-registered priority — used in remove_action.
+				// For standard callbacks: preserve from incoming data (set on first save from registry).
+				// For custom callbacks: same as priority (no WC registration to remove).
+				$original_priority = $custom
+					? $priority
+					: max( 1, min( 999, (int) ( $cb['original_priority'] ?? $cb['priority'] ?? 10 ) ) );
+				$enabled           = (bool) ( $cb['enabled']  ?? true );
+				$label             = sanitize_text_field( $cb['label'] ?? $func );
+				$id                = sanitize_key( $cb['id'] ?? $func );
 				// Raw PHP code — keep as-is (admin-only, manage_options required).
 				$code = $cb['code'] ?? '';
 
@@ -282,13 +291,14 @@ class HooksConfig {
 				}
 
 				$entry['callbacks'][] = [
-					'id'       => $id,
-					'function' => $func,
-					'priority' => $priority,
-					'enabled'  => $enabled,
-					'custom'   => $custom,
-					'label'    => $label,
-					'code'     => $code,
+					'id'               => $id,
+					'function'         => $func,
+					'priority'         => $priority,
+					'original_priority' => $original_priority,
+					'enabled'          => $enabled,
+					'custom'           => $custom,
+					'label'            => $label,
+					'code'             => $code,
 				];
 			}
 

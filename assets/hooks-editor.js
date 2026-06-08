@@ -71,13 +71,14 @@
 			const callbacks = [];
 			group.querySelectorAll( '.rjt-callback' ).forEach( cbEl => {
 				callbacks.push( {
-					id:       cbEl.dataset.id,
-					function: cbEl.dataset.function,
-					priority: parseInt( cbEl.querySelector( '.rjt-priority-input' ).value, 10 ) || 10,
-					enabled:  cbEl.querySelector( '.rjt-toggle-enabled' ).checked,
-					custom:   cbEl.dataset.custom === '1',
-					label:    cbEl.dataset.label,
-					code:     cbEl.dataset.code || '',
+					id:                cbEl.dataset.id,
+					function:          cbEl.dataset.function,
+					priority:          parseInt( cbEl.querySelector( '.rjt-priority-input' ).value, 10 ) || 10,
+					original_priority: parseInt( cbEl.dataset.originalPriority, 10 ) || parseInt( cbEl.querySelector( '.rjt-priority-input' ).value, 10 ) || 10,
+					enabled:           cbEl.querySelector( '.rjt-toggle-enabled' ).checked,
+					custom:            cbEl.dataset.custom === '1',
+					label:             cbEl.dataset.label,
+					code:              cbEl.dataset.code || '',
 				} );
 			} );
 			config.push( { hook, callbacks } );
@@ -243,14 +244,15 @@
 	function buildCallbackElement( data ) {
 		const div = document.createElement( 'div' );
 		div.className = 'rjt-callback rjt-callback--custom';
-		div.dataset.id       = data.id;
-		div.dataset.hook     = data.hook;
-		div.dataset.function = data.function;
-		div.dataset.priority = data.priority;
-		div.dataset.enabled  = '1';
-		div.dataset.custom   = '1';
-		div.dataset.label    = data.label;
-		div.dataset.code     = data.code;
+		div.dataset.id               = data.id;
+		div.dataset.hook             = data.hook;
+		div.dataset.function         = data.function;
+		div.dataset.priority         = data.priority;
+		div.dataset.originalPriority = data.priority; // custom: original = current (no WC registration)
+		div.dataset.enabled          = '1';
+		div.dataset.custom           = '1';
+		div.dataset.label            = data.label;
+		div.dataset.code             = data.code;
 
 		div.innerHTML = `
 			<span class="rjt-callback__drag dashicons dashicons-menu" title="${ RjtHooks.i18n.dragToReorder }"></span>
@@ -487,15 +489,16 @@
 	function buildAddonRow( hookName, cb ) {
 		const div = document.createElement( 'div' );
 		div.className = 'rjt-callback rjt-callback--addon';
-		div.dataset.id       = 'addon_' + cb.addon_id + '_' + cb.function;
-		div.dataset.hook     = hookName;
-		div.dataset.function = cb.function;
-		div.dataset.priority = cb.priority;
-		div.dataset.enabled  = '1';
-		div.dataset.custom   = '0';
-		div.dataset.label    = cb.label || cb.function;
-		div.dataset.code     = '';
-		div.dataset.addonId  = cb.addon_id;
+		div.dataset.id               = 'addon_' + cb.addon_id + '_' + cb.function;
+		div.dataset.hook             = hookName;
+		div.dataset.function         = cb.function;
+		div.dataset.priority         = cb.priority;
+		div.dataset.originalPriority = cb.priority; // addon: original = what addon registered
+		div.dataset.enabled          = '1';
+		div.dataset.custom           = '0';
+		div.dataset.label            = cb.label || cb.function;
+		div.dataset.code             = '';
+		div.dataset.addonId          = cb.addon_id;
 
 		const addonBadge = `<span class="rjt-badge rjt-badge--addon" title="${ escAttr( cb.addon_name || cb.addon_id ) }">${ escHtml( cb.addon_name || cb.addon_id ) }</span>`;
 		const sourceBadge = cb.source === 'autodiscovered'

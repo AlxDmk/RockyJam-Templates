@@ -174,13 +174,14 @@ class HooksPage {
 							</div>
 							<?php endif; ?>
 							<?php foreach ( $hook_entry['callbacks'] as $cb ) :
-								$cb_id      = $cb['id'];
-								$func       = $cb['function'];
-								$priority   = (int) $cb['priority'];
-								$enabled    = (bool) $cb['enabled'];
-								$custom     = (bool) $cb['custom'];
-								$label      = $cb['label'] ?? $func;
-								$code       = $cb['code'] ?? '';
+								$cb_id             = $cb['id'];
+								$func              = $cb['function'];
+								$priority          = (int) $cb['priority'];
+								$original_priority = (int) ( $cb['original_priority'] ?? $priority );
+								$enabled           = (bool) $cb['enabled'];
+								$custom            = (bool) $cb['custom'];
+								$label             = $cb['label'] ?? $func;
+								$code              = $cb['code'] ?? '';
 								// Detect addon callbacks by id prefix and resolve addon name.
 								$is_addon   = str_starts_with( $cb_id, 'addon_' );
 								$addon_name = '';
@@ -202,6 +203,7 @@ class HooksPage {
 								 data-priority="<?php echo esc_attr( $priority ); ?>"
 								 data-enabled="<?php echo $enabled ? '1' : '0'; ?>"
 								 data-custom="<?php echo $custom ? '1' : '0'; ?>"
+								 data-original-priority="<?php echo esc_attr( $original_priority ); ?>"
 								 data-label="<?php echo esc_attr( $label ); ?>"
 								 data-code="<?php echo esc_attr( $code ); ?>">
 
