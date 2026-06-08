@@ -184,31 +184,33 @@ class HooksConfig {
 				$id       = $cb['id']       ?? '';
 
 				if ( $custom ) {
-					// Custom inline function.
-					if ( ! $enabled ) {
+					// ── Custom inline function ───────────────────────────────────
+					if ( ! $enabled || ! $func || ! $code ) {
 						continue;
 					}
-					if ( ! $func || ! $code ) {
-						continue;
-					}
-					// Emit the function definition.
+					// Wrap body in a proper named function declaration.
 					$safe_code = $this->indent_code( trim( $code ) );
 					$lines[]   = 'if ( ! function_exists( \'' . $func . '\' ) ) {';
+					$lines[]   = '\tfunction ' . $func . '() {';
 					$lines[]   = $safe_code;
+					$lines[]   = '\t}';
 					$lines[]   = '}';
 					$lines[]   = 'add_action( \'' . $hook . '\', \'' . $func . '\', ' . $priority . ' );';
 				} else {
-					// Standard WC callback.
+					// ── Standard WC callback ─────────────────────────────────────
+					// Strategy: always remove_action first (safe even if not registered),
+					// then re-add only if enabled. This correctly handles:
+					//   disabled          → remove only  (turns WC default off)
+					//   enabled, same p   → remove + re-add at same priority (net: no change, but correct)
+					//   enabled, new p    → remove old + add at new priority
 					if ( ! $func ) {
 						continue;
 					}
+					// Remove whatever WC registered at this priority.
+					$lines[] = 'remove_action( \'' . $hook . '\', \'' . $func . '\', ' . $priority . ' );';
 					if ( $enabled ) {
-						// Standard enabled — add_action with the (possibly changed) priority.
+						// Re-register at the (possibly changed) priority.
 						$lines[] = 'add_action( \'' . $hook . '\', \'' . $func . '\', ' . $priority . ' );';
-					} else {
-						// Standard disabled — remove the default hook.
-						// WC registers most callbacks at the same priority as the registry default.
-						$lines[] = 'remove_action( \'' . $hook . '\', \'' . $func . '\', ' . $priority . ' );';
 					}
 				}
 			}
