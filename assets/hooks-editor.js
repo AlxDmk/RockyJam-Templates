@@ -87,15 +87,38 @@
 	// ----------------------------------------------------------------
 	// Sortable (drag-and-drop within each hook group)
 	// ----------------------------------------------------------------
+	/**
+	 * Reassign priority values by DOM order after a drag.
+	 * Step is computed from the existing priorities so manual edits are respected;
+	 * fall back to step=10 when there's only one item or all are equal.
+	 */
+	function reprioritizeAfterDrag( list ) {
+		const inputs = Array.from( list.querySelectorAll( '.rjt-callback .rjt-priority-input' ) );
+		if ( inputs.length === 0 ) return;
+
+		// Compute a sensible step from the current spread.
+		const values = inputs.map( i => parseInt( i.value, 10 ) || 10 );
+		const minVal = Math.min( ...values );
+		const maxVal = Math.max( ...values );
+		const step   = inputs.length > 1 ? Math.max( 1, Math.round( ( maxVal - minVal ) / ( inputs.length - 1 ) ) || 10 ) : 10;
+		const start  = Math.max( 1, minVal );
+
+		inputs.forEach( ( input, idx ) => {
+			input.value = start + idx * step;
+		} );
+	}
+
 	function initSortable() {
 		const lists = listEl.querySelectorAll( '.sortable-list' );
 		lists.forEach( list => {
 			if ( typeof Sortable !== 'undefined' ) {
 				Sortable.create( list, {
 					animation:  150,
+					// Accept both standard and addon drag handles.
 					handle:     '.rjt-callback__drag',
 					ghostClass: 'rjt-callback--ghost',
-					onEnd() {
+					onEnd( evt ) {
+						reprioritizeAfterDrag( evt.to );
 						markDirty();
 					},
 				} );
@@ -341,7 +364,10 @@
 						animation:  150,
 						handle:     '.rjt-callback__drag',
 						ghostClass: 'rjt-callback--ghost',
-						onEnd() { markDirty(); },
+						onEnd( evt ) {
+							reprioritizeAfterDrag( evt.to );
+							markDirty();
+						},
 					} );
 				}
 			}
@@ -480,7 +506,7 @@
 			: '';
 
 		div.innerHTML = `
-			<span class="rjt-callback__drag rjt-callback__drag--addon dashicons dashicons-menu" title="${ RjtHooks.i18n.dragToReorder }"></span>
+			<span class="rjt-callback__drag dashicons dashicons-menu" title="${ RjtHooks.i18n.dragToReorder }"></span>
 			<label class="rjt-callback__toggle">
 				<input type="checkbox" class="rjt-toggle-enabled" checked>
 				<span class="rjt-toggle-slider"></span>
