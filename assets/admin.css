@@ -176,3 +176,42 @@
 	border-radius: 3px;
 	font-size: 13px;
 }
+
+/* ==========================================================================
+   Section tabs (Files | Hooks) — added for Hook Manager UI
+   ========================================================================== */
+.rjt-section-tabs {
+	display: flex;
+	gap: 0;
+	margin-bottom: 16px;
+	border-bottom: 2px solid #ddd;
+}
+
+.rjt-section-tab {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	padding: 8px 18px;
+	font-size: 14px;
+	font-weight: 500;
+	color: #555;
+	text-decoration: none;
+	border: 1px solid transparent;
+	border-bottom: none;
+	border-radius: 4px 4px 0 0;
+	margin-bottom: -2px;
+	transition: color 0.15s, background 0.15s;
+}
+
+.rjt-section-tab:hover {
+	color: #2271b1;
+	background: #f6f7f7;
+}
+
+.rjt-section-tab--active {
+	color: #1d2327;
+	background: #fff;
+	border-color: #ddd;
+	border-bottom-color: #fff;
+	font-weight: 600;
+}

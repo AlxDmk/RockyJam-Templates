@@ -1,0 +1,341 @@
+/* ==========================================================================
+   RockyJam Templates — Hooks Editor styles
+   ========================================================================== */
+
+/* ---- Toolbar ---- */
+.rjt-hooks-toolbar {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin-bottom: 20px;
+	padding: 12px 16px;
+	background: #fff;
+	border: 1px solid #ddd;
+	border-radius: 4px;
+}
+
+.rjt-hooks-status {
+	margin-left: 4px;
+	font-size: 13px;
+	font-style: italic;
+}
+.rjt-hooks-status--info    { color: #666; }
+.rjt-hooks-status--success { color: #46b450; font-style: normal; font-weight: 600; }
+.rjt-hooks-status--warning { color: #f0a030; }
+.rjt-hooks-status--error   { color: #dc3232; }
+
+/* ---- Hook groups ---- */
+.rjt-hook-group {
+	background: #fff;
+	border: 1px solid #ddd;
+	border-radius: 4px;
+	margin-bottom: 10px;
+	overflow: hidden;
+}
+
+.rjt-hook-group__header {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	padding: 10px 14px;
+	background: #f6f7f7;
+	border-bottom: 1px solid #ddd;
+	cursor: pointer;
+	user-select: none;
+	flex-wrap: wrap;
+}
+
+.rjt-hook-group--collapsed .rjt-hook-group__body {
+	display: none;
+}
+
+.rjt-hook-group__toggle {
+	color: #777;
+	flex-shrink: 0;
+}
+
+.rjt-hook-group__name {
+	font-weight: 600;
+	font-size: 14px;
+	color: #1d2327;
+}
+
+.rjt-hook-group__slug {
+	font-size: 11px;
+	background: #e8ecf0;
+	color: #2271b1;
+	padding: 2px 6px;
+	border-radius: 3px;
+}
+
+.rjt-hook-group__desc {
+	font-size: 12px;
+	color: #888;
+	flex: 1;
+}
+
+.rjt-add-callback {
+	margin-left: auto !important;
+	flex-shrink: 0;
+}
+
+/* ---- Callbacks list ---- */
+.rjt-hook-group__body {
+	padding: 6px 0;
+}
+
+.rjt-callbacks {
+	min-height: 36px;
+}
+
+.rjt-callbacks__empty {
+	padding: 14px 16px;
+	font-size: 13px;
+	color: #888;
+	font-style: italic;
+}
+
+/* ---- Single callback row ---- */
+.rjt-callback {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	padding: 8px 12px;
+	border-bottom: 1px solid #f0f0f0;
+	background: #fff;
+	transition: background 0.15s;
+}
+
+.rjt-callback:last-child {
+	border-bottom: none;
+}
+
+.rjt-callback:hover {
+	background: #f8f9fa;
+}
+
+.rjt-callback--disabled {
+	opacity: 0.5;
+}
+
+.rjt-callback--ghost {
+	background: #e8f0fe !important;
+	border: 2px dashed #2271b1;
+	opacity: 0.8;
+}
+
+.rjt-callback__drag {
+	cursor: grab;
+	color: #aaa;
+	flex-shrink: 0;
+	font-size: 16px;
+}
+.rjt-callback__drag:active {
+	cursor: grabbing;
+}
+
+/* ---- Toggle switch ---- */
+.rjt-callback__toggle {
+	position: relative;
+	display: inline-block;
+	width: 36px;
+	height: 20px;
+	flex-shrink: 0;
+}
+
+.rjt-callback__toggle input {
+	opacity: 0;
+	width: 0;
+	height: 0;
+}
+
+.rjt-toggle-slider {
+	position: absolute;
+	inset: 0;
+	background-color: #ccc;
+	border-radius: 20px;
+	cursor: pointer;
+	transition: background 0.2s;
+}
+
+.rjt-toggle-slider::before {
+	content: '';
+	position: absolute;
+	width: 14px;
+	height: 14px;
+	left: 3px;
+	top: 3px;
+	background: #fff;
+	border-radius: 50%;
+	transition: transform 0.2s;
+}
+
+.rjt-callback__toggle input:checked + .rjt-toggle-slider {
+	background-color: #2271b1;
+}
+
+.rjt-callback__toggle input:checked + .rjt-toggle-slider::before {
+	transform: translateX(16px);
+}
+
+/* ---- Callback label & meta ---- */
+.rjt-callback__label {
+	flex: 1;
+	font-size: 13px;
+	color: #1d2327;
+	min-width: 0;
+}
+
+.rjt-callback--custom .rjt-callback__label {
+	color: #2271b1;
+}
+
+.rjt-callback__func {
+	font-size: 11px;
+	color: #888;
+	background: #f0f0f0;
+	padding: 1px 5px;
+	border-radius: 3px;
+	white-space: nowrap;
+	max-width: 220px;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+/* ---- Priority input ---- */
+.rjt-callback__priority-wrap {
+	display: flex;
+	align-items: center;
+	gap: 4px;
+}
+
+.rjt-priority-input {
+	width: 58px !important;
+	text-align: center;
+	font-size: 12px;
+}
+
+/* ---- Actions ---- */
+.rjt-callback__actions {
+	display: flex;
+	gap: 4px;
+	flex-shrink: 0;
+}
+
+.rjt-callback__actions .button-small {
+	padding: 2px 6px !important;
+	min-height: 26px;
+	line-height: 22px;
+}
+
+/* ---- Badges ---- */
+.rjt-badge--custom {
+	display: inline-block;
+	font-size: 10px;
+	background: #e8f0fe;
+	color: #2271b1;
+	padding: 1px 5px;
+	border-radius: 3px;
+	font-weight: 600;
+	text-transform: uppercase;
+	margin-left: 4px;
+	vertical-align: middle;
+}
+
+/* ---- Screen reader only ---- */
+.rjt-sr-only {
+	position: absolute !important;
+	width: 1px;
+	height: 1px;
+	padding: 0;
+	margin: -1px;
+	overflow: hidden;
+	clip: rect(0, 0, 0, 0);
+	white-space: nowrap;
+	border: 0;
+}
+
+/* ==========================================================================
+   Modal
+   ========================================================================== */
+.rjt-modal {
+	position: fixed;
+	inset: 0;
+	z-index: 99999;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.rjt-modal__backdrop {
+	position: absolute;
+	inset: 0;
+	background: rgba(0, 0, 0, 0.55);
+}
+
+.rjt-modal__box {
+	position: relative;
+	z-index: 1;
+	background: #fff;
+	border-radius: 6px;
+	box-shadow: 0 8px 40px rgba(0, 0, 0, 0.25);
+	width: 620px;
+	max-width: calc(100vw - 40px);
+	max-height: calc(100vh - 60px);
+	display: flex;
+	flex-direction: column;
+}
+
+.rjt-modal__header {
+	display: flex;
+	align-items: center;
+	padding: 16px 20px;
+	border-bottom: 1px solid #ddd;
+}
+
+.rjt-modal__title {
+	flex: 1;
+	margin: 0;
+	font-size: 16px;
+	font-weight: 600;
+	color: #1d2327;
+}
+
+.rjt-modal__close {
+	background: none;
+	border: none;
+	cursor: pointer;
+	padding: 4px;
+	color: #888;
+	border-radius: 3px;
+}
+.rjt-modal__close:hover {
+	color: #dc3232;
+}
+
+.rjt-modal__body {
+	flex: 1;
+	overflow-y: auto;
+	padding: 20px;
+}
+
+.rjt-modal__footer {
+	padding: 14px 20px;
+	border-top: 1px solid #ddd;
+	display: flex;
+	gap: 8px;
+	justify-content: flex-end;
+}
+
+/* ---- Code textarea in modal ---- */
+.rjt-code-textarea {
+	font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace !important;
+	font-size: 12px !important;
+	line-height: 1.6 !important;
+	background: #1e1e1e !important;
+	color: #d4d4d4 !important;
+	border: 1px solid #444 !important;
+	border-radius: 4px !important;
+	resize: vertical;
+	tab-size: 4;
+}

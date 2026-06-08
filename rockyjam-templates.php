@@ -3,7 +3,7 @@
  * Plugin Name: RockyJam Templates
  * Plugin URI:  https://github.com/AlxDmk/RockyJam-Templates
  * Description: Custom page templates for WooCommerce product and category pages.
- * Version:     0.2.0
+ * Version:     0.3.0
  * Author:      AlxDmk
  * Author URI:  https://github.com/AlxDmk
  * Text Domain: rockyjam-templates
@@ -18,7 +18,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'RJT_VERSION',  '0.2.0' );
+define( 'RJT_VERSION',  '0.3.0' );
 define( 'RJT_FILE',     __FILE__ );
 define( 'RJT_PATH',     plugin_dir_path( __FILE__ ) );
 define( 'RJT_URL',      plugin_dir_url( __FILE__ ) );
@@ -27,8 +27,10 @@ define( 'RJT_CPT',      'rj_template' );
 
 // Load class files (no side-effects, just definitions).
 require_once RJT_PATH . 'includes/Core/TemplateManager.php';
+require_once RJT_PATH . 'includes/Core/HooksConfig.php';
 require_once RJT_PATH . 'includes/Core/Plugin.php';
 require_once RJT_PATH . 'includes/Admin/AdminPage.php';
+require_once RJT_PATH . 'includes/Admin/HooksPage.php';
 require_once RJT_PATH . 'includes/Admin/ProductMeta.php';
 
 /**

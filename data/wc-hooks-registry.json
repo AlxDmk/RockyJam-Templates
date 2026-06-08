@@ -1,0 +1,180 @@
+{
+  "hooks": [
+    {
+      "hook": "woocommerce_before_single_product",
+      "label": "Before Single Product",
+      "description": "Fires before the single product page wrapper begins",
+      "callbacks": []
+    },
+    {
+      "hook": "woocommerce_before_single_product_summary",
+      "label": "Before Product Summary",
+      "description": "Fires before the product summary column (images area)",
+      "callbacks": [
+        {
+          "id": "woocommerce_show_product_sale_flash",
+          "function": "woocommerce_show_product_sale_flash",
+          "priority": 10,
+          "label": "Sale Flash Badge",
+          "enabled": true,
+          "custom": false
+        },
+        {
+          "id": "woocommerce_show_product_images",
+          "function": "woocommerce_show_product_images",
+          "priority": 20,
+          "label": "Product Images / Gallery",
+          "enabled": true,
+          "custom": false
+        }
+      ]
+    },
+    {
+      "hook": "woocommerce_single_product_summary",
+      "label": "Product Summary",
+      "description": "Main product summary column — title, price, excerpt, add-to-cart, meta",
+      "callbacks": [
+        {
+          "id": "woocommerce_template_single_title",
+          "function": "woocommerce_template_single_title",
+          "priority": 5,
+          "label": "Product Title",
+          "enabled": true,
+          "custom": false
+        },
+        {
+          "id": "woocommerce_template_single_rating",
+          "function": "woocommerce_template_single_rating",
+          "priority": 10,
+          "label": "Star Rating",
+          "enabled": true,
+          "custom": false
+        },
+        {
+          "id": "woocommerce_template_single_price",
+          "function": "woocommerce_template_single_price",
+          "priority": 10,
+          "label": "Price",
+          "enabled": true,
+          "custom": false
+        },
+        {
+          "id": "woocommerce_template_single_excerpt",
+          "function": "woocommerce_template_single_excerpt",
+          "priority": 20,
+          "label": "Short Description",
+          "enabled": true,
+          "custom": false
+        },
+        {
+          "id": "woocommerce_template_single_add_to_cart",
+          "function": "woocommerce_template_single_add_to_cart",
+          "priority": 30,
+          "label": "Add to Cart Button",
+          "enabled": true,
+          "custom": false
+        },
+        {
+          "id": "woocommerce_template_single_meta",
+          "function": "woocommerce_template_single_meta",
+          "priority": 40,
+          "label": "Product Meta (SKU, Categories, Tags)",
+          "enabled": true,
+          "custom": false
+        },
+        {
+          "id": "woocommerce_template_single_sharing",
+          "function": "woocommerce_template_single_sharing",
+          "priority": 50,
+          "label": "Social Sharing",
+          "enabled": true,
+          "custom": false
+        },
+        {
+          "id": "wc_upsell_display",
+          "function": "wc_upsell_display",
+          "priority": 15,
+          "label": "Upsell Products",
+          "enabled": false,
+          "custom": false
+        }
+      ]
+    },
+    {
+      "hook": "woocommerce_after_single_product_summary",
+      "label": "After Product Summary",
+      "description": "Fires after the summary column — tabs, related products",
+      "callbacks": [
+        {
+          "id": "woocommerce_output_product_data_tabs",
+          "function": "woocommerce_output_product_data_tabs",
+          "priority": 10,
+          "label": "Product Tabs (Description, Reviews, etc.)",
+          "enabled": true,
+          "custom": false
+        },
+        {
+          "id": "woocommerce_upsell_display",
+          "function": "woocommerce_upsell_display",
+          "priority": 15,
+          "label": "Upsell Products",
+          "enabled": true,
+          "custom": false
+        },
+        {
+          "id": "woocommerce_output_related_products",
+          "function": "woocommerce_output_related_products",
+          "priority": 20,
+          "label": "Related Products",
+          "enabled": true,
+          "custom": false
+        }
+      ]
+    },
+    {
+      "hook": "woocommerce_after_single_product",
+      "label": "After Single Product",
+      "description": "Fires after the single product page wrapper closes",
+      "callbacks": []
+    },
+    {
+      "hook": "woocommerce_product_thumbnails",
+      "label": "Product Thumbnails",
+      "description": "Fires inside the product images block (thumbnails strip)",
+      "callbacks": [
+        {
+          "id": "woocommerce_show_product_thumbnails",
+          "function": "woocommerce_show_product_thumbnails",
+          "priority": 20,
+          "label": "Thumbnail Strip",
+          "enabled": true,
+          "custom": false
+        }
+      ]
+    },
+    {
+      "hook": "woocommerce_before_add_to_cart_form",
+      "label": "Before Add to Cart Form",
+      "description": "Fires before the add-to-cart form",
+      "callbacks": []
+    },
+    {
+      "hook": "woocommerce_after_add_to_cart_form",
+      "label": "After Add to Cart Form",
+      "description": "Fires after the add-to-cart form",
+      "callbacks": []
+    },
+    {
+      "hook": "woocommerce_before_add_to_cart_button",
+      "label": "Before Add to Cart Button",
+      "description": "Fires just before the add-to-cart button",
+      "callbacks": []
+    },
+    {
+      "hook": "woocommerce_after_add_to_cart_button",
+      "label": "After Add to Cart Button",
+      "description": "Fires just after the add-to-cart button",
+      "callbacks": []
+    }
+  ]
+}

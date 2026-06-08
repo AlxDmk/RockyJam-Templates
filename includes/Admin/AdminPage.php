@@ -3,6 +3,8 @@
 namespace RockyJamTemplates\Admin;
 
 use RockyJamTemplates\Core\TemplateManager;
+use RockyJamTemplates\Core\HooksConfig;
+use RockyJamTemplates\Admin\HooksPage;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -65,6 +67,37 @@ class AdminPage {
 			'cmSettings'    => $cm_settings,
 			'confirmDelete' => __( 'Delete this template? Its folder will be permanently removed from disk.', 'rockyjam-templates' ),
 		] );
+
+		// Hooks editor assets (only when editing a template).
+		$action = sanitize_key( $_GET['action'] ?? '' );
+		if ( 'edit' === $action ) {
+			// SortableJS from CDN.
+			wp_enqueue_script(
+				'sortablejs',
+				'https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js',
+				[],
+				'1.15.2',
+				true
+			);
+			wp_enqueue_style(  'rjt-hooks-editor', RJT_URL . 'assets/hooks-editor.css', [], RJT_VERSION );
+			wp_enqueue_script( 'rjt-hooks-editor', RJT_URL . 'assets/hooks-editor.js', [ 'sortablejs' ], RJT_VERSION, true );
+			wp_localize_script( 'rjt-hooks-editor', 'RjtHooks', [
+				'i18n' => [
+					'unsaved'         => __( 'Unsaved changes', 'rockyjam-templates' ),
+					'saving'          => __( 'Saving…', 'rockyjam-templates' ),
+					'saved'           => __( 'Saved!', 'rockyjam-templates' ),
+					'error'           => __( 'Error saving hooks.', 'rockyjam-templates' ),
+					'confirmRemove'   => __( 'Remove this function from the hook?', 'rockyjam-templates' ),
+					'confirmReset'    => __( 'Reset all hooks to WooCommerce defaults? This cannot be undone.', 'rockyjam-templates' ),
+					'noCallbacks'     => __( 'No functions hooked. Click "Add Function" to add one.', 'rockyjam-templates' ),
+					'addFunction'     => __( 'Add Custom Function', 'rockyjam-templates' ),
+					'editFunction'    => __( 'Edit Custom Function', 'rockyjam-templates' ),
+					'custom'          => __( 'custom', 'rockyjam-templates' ),
+					'dragToReorder'   => __( 'Drag to reorder', 'rockyjam-templates' ),
+					'invalidFuncName' => __( 'Function name must start with a letter or underscore, and contain only letters, numbers, underscores.', 'rockyjam-templates' ),
+				],
+			] );
+		}
 	}
 
 	// ------------------------------------------------------------------
@@ -215,7 +248,8 @@ class AdminPage {
 				break;
 			case 'edit':
 				$meta = $slug ? $this->manager->get_meta( $slug ) : null;
-				$this->render_editor( $meta );
+				$tab  = sanitize_key( $_GET['tab'] ?? 'files' );
+				$this->render_editor( $meta, $tab );
 				break;
 			default:
 				$this->render_list();
@@ -330,7 +364,7 @@ class AdminPage {
 	// Editor view
 	// ------------------------------------------------------------------
 
-	private function render_editor( ?array $tpl ): void {
+	private function render_editor( ?array $tpl, string $active_tab = 'files' ): void {
 		$is_new = null === $tpl;
 		$nonce  = wp_create_nonce( 'rjt_action' );
 
@@ -367,14 +401,32 @@ class AdminPage {
 
 			<div class="rjt-editor-layout">
 
-				<!-- ===== Left: file tabs ===== -->
+				<!-- ===== Left: main area with section tabs ===== -->
 				<div class="rjt-editor-main">
 
 					<?php if ( $is_new ) : ?>
 						<div class="rjt-notice rjt-notice--info">
 							<span class="dashicons dashicons-info"></span>
-							<?php esc_html_e( 'Fill in the settings on the right and click "Create Template". You will be able to edit the files after creation.', 'rockyjam-templates' ); ?>
+							<?php esc_html_e( 'Fill in the settings on the right and click \"Create Template\". You will be able to edit the files after creation.', 'rockyjam-templates' ); ?>
 						</div>
+					<?php else : ?>
+
+					<!-- Section tabs: Files | Hooks -->
+					<div class="rjt-section-tabs">
+						<a href="<?php echo esc_url( admin_url( 'admin.php?page=rjt-templates&action=edit&slug=' . urlencode( $slug ) . '&tab=files' ) ); ?>"
+						   class="rjt-section-tab<?php echo 'files' === $active_tab ? ' rjt-section-tab--active' : ''; ?>">
+							<span class="dashicons dashicons-editor-code"></span>
+							<?php esc_html_e( 'Files', 'rockyjam-templates' ); ?>
+						</a>
+						<a href="<?php echo esc_url( admin_url( 'admin.php?page=rjt-templates&action=edit&slug=' . urlencode( $slug ) . '&tab=hooks' ) ); ?>"
+						   class="rjt-section-tab<?php echo 'hooks' === $active_tab ? ' rjt-section-tab--active' : ''; ?>">
+							<span class="dashicons dashicons-networking"></span>
+							<?php esc_html_e( 'Hooks', 'rockyjam-templates' ); ?>
+						</a>
+					</div>
+
+					<?php if ( 'hooks' === $active_tab ) : ?>
+						<?php ( new HooksPage() )->render( $slug ); ?>
 					<?php else : ?>
 
 					<!-- File editor tabs -->
@@ -424,6 +476,7 @@ class AdminPage {
 						<?php endforeach; ?>
 					</div><!-- .rjt-tabs -->
 
+					<?php endif; // hooks tab ?>
 					<?php endif; // ! $is_new ?>
 				</div><!-- .rjt-editor-main -->
 
