@@ -3,7 +3,7 @@
  * Plugin Name: RockyJam Templates
  * Plugin URI:  https://github.com/AlxDmk/RockyJam-Templates
  * Description: Custom page templates for WooCommerce product and category pages.
- * Version:     0.1.0
+ * Version:     0.2.0
  * Author:      AlxDmk
  * Author URI:  https://github.com/AlxDmk
  * Text Domain: rockyjam-templates
@@ -18,14 +18,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'RJT_VERSION',  '0.1.0' );
+define( 'RJT_VERSION',  '0.2.0' );
 define( 'RJT_FILE',     __FILE__ );
 define( 'RJT_PATH',     plugin_dir_path( __FILE__ ) );
 define( 'RJT_URL',      plugin_dir_url( __FILE__ ) );
 define( 'RJT_BASENAME', plugin_basename( __FILE__ ) );
 define( 'RJT_CPT',      'rj_template' );
 
-// Load classes (no side effects here — just class definitions).
+// Load class files (no side-effects, just definitions).
 require_once RJT_PATH . 'includes/Core/TemplateManager.php';
 require_once RJT_PATH . 'includes/Core/Plugin.php';
 require_once RJT_PATH . 'includes/Admin/AdminPage.php';
@@ -40,15 +40,15 @@ function rockyjam_templates(): \RockyJamTemplates\Core\Plugin {
 	return \RockyJamTemplates\Core\Plugin::instance();
 }
 
-// Boot on plugins_loaded so WooCommerce and all plugins are already loaded.
+// Boot after all plugins are loaded so WooCommerce is available.
 add_action( 'plugins_loaded', function () {
 	rockyjam_templates()->boot();
 } );
 
 register_activation_hook( __FILE__, function () {
-	// Must happen during activation: register CPT and create default template.
 	\RockyJamTemplates\Core\TemplateManager::register_cpt();
 	flush_rewrite_rules();
+	// Create default template folder on disk.
 	( new \RockyJamTemplates\Core\TemplateManager() )->maybe_create_default_template();
 } );
 
