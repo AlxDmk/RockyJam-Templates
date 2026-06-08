@@ -25,9 +25,9 @@ define( 'RJT_URL',      plugin_dir_url( __FILE__ ) );
 define( 'RJT_BASENAME', plugin_basename( __FILE__ ) );
 define( 'RJT_CPT',      'rj_template' );
 
-// Autoload classes.
-require_once RJT_PATH . 'includes/Core/Plugin.php';
+// Load classes (no side effects here — just class definitions).
 require_once RJT_PATH . 'includes/Core/TemplateManager.php';
+require_once RJT_PATH . 'includes/Core/Plugin.php';
 require_once RJT_PATH . 'includes/Admin/AdminPage.php';
 require_once RJT_PATH . 'includes/Admin/ProductMeta.php';
 
@@ -40,14 +40,16 @@ function rockyjam_templates(): \RockyJamTemplates\Core\Plugin {
 	return \RockyJamTemplates\Core\Plugin::instance();
 }
 
-rockyjam_templates()->boot();
+// Boot on plugins_loaded so WooCommerce and all plugins are already loaded.
+add_action( 'plugins_loaded', function () {
+	rockyjam_templates()->boot();
+} );
 
 register_activation_hook( __FILE__, function () {
-	// Register CPT so flush works.
+	// Must happen during activation: register CPT and create default template.
 	\RockyJamTemplates\Core\TemplateManager::register_cpt();
 	flush_rewrite_rules();
-	// Create the built-in default template if it doesn't exist yet.
-	\RockyJamTemplates\Core\TemplateManager::maybe_create_default_template();
+	( new \RockyJamTemplates\Core\TemplateManager() )->maybe_create_default_template();
 } );
 
 register_deactivation_hook( __FILE__, function () {
