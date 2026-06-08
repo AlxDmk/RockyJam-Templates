@@ -89,19 +89,16 @@
 	// ----------------------------------------------------------------
 	/**
 	 * Reassign priority values by DOM order after a drag.
-	 * Step is computed from the existing priorities so manual edits are respected;
-	 * fall back to step=10 when there's only one item or all are equal.
+	 * Uses a fixed step of 10 starting from the lowest current priority value,
+	 * so the relative ordering is always reflected in the numbers.
 	 */
 	function reprioritizeAfterDrag( list ) {
 		const inputs = Array.from( list.querySelectorAll( '.rjt-callback .rjt-priority-input' ) );
 		if ( inputs.length === 0 ) return;
 
-		// Compute a sensible step from the current spread.
 		const values = inputs.map( i => parseInt( i.value, 10 ) || 10 );
-		const minVal = Math.min( ...values );
-		const maxVal = Math.max( ...values );
-		const step   = inputs.length > 1 ? Math.max( 1, Math.round( ( maxVal - minVal ) / ( inputs.length - 1 ) ) || 10 ) : 10;
-		const start  = Math.max( 1, minVal );
+		const start  = Math.max( 1, Math.min( ...values ) );
+		const step   = 10;
 
 		inputs.forEach( ( input, idx ) => {
 			input.value = start + idx * step;
@@ -513,7 +510,7 @@
 			</label>
 			<span class="rjt-callback__label">
 				${ escHtml( cb.label || cb.function ) }
-				${ addonBadge }
+				<span class="rjt-badge rjt-badge--addon-name">${ escHtml( cb.addon_name || cb.addon_id ) }</span>
 				${ sourceBadge }
 			</span>
 			<code class="rjt-callback__func">${ escHtml( cb.function ) }</code>

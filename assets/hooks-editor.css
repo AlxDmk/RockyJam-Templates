@@ -359,6 +359,20 @@
 	color: #bbb;
 }
 
+/* Addon name badge — shown inline next to callback label (like "custom" badge) */
+.rjt-badge--addon-name {
+	display: inline-block;
+	font-size: 10px;
+	background: #ede9ff;
+	color: #5b4fcf;
+	padding: 1px 6px;
+	border-radius: 3px;
+	font-weight: 600;
+	text-transform: uppercase;
+	margin-left: 4px;
+	vertical-align: middle;
+}
+
 /* Addon badge */
 .rjt-badge--addon {
 	display: inline-block;
