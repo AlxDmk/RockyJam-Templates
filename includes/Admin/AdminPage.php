@@ -26,6 +26,7 @@ class AdminPage {
 	}
 
 	public function register(): void {
+		add_action( 'admin_menu',            [ $this, 'register_parent_menu' ], 5 );
 		add_action( 'admin_menu',            [ $this, 'add_menu' ] );
 		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_assets' ] );
 		add_action( 'admin_post_rjt_handle', [ $this, 'handle_post' ] );
@@ -35,16 +36,45 @@ class AdminPage {
 	// Menu
 	// ------------------------------------------------------------------
 
+	public function register_parent_menu(): void {
+		// Register the top-level "RockyJam" menu only once.
+		// Both plugins call this; duplicate slug is silently ignored by WP.
+		if ( ! $this->parent_menu_exists() ) {
+			add_menu_page(
+				'RockyJam',
+				'RockyJam',
+				'manage_options',
+				'rockyjam',
+				'__return_null',
+				'data:image/svg+xml;base64,' . base64_encode( '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><circle cx="10" cy="10" r="9" fill="none" stroke="#a7aaad" stroke-width="1.5"/><text x="10" y="14.5" text-anchor="middle" font-size="11" font-weight="bold" fill="#a7aaad" font-family="sans-serif">RJ</text></svg>' ),
+				57
+			);
+		}
+	}
+
 	public function add_menu(): void {
-		add_menu_page(
+		add_submenu_page(
+			'rockyjam',
 			__( 'RockyJam Templates', 'rockyjam-templates' ),
-			__( 'RJ Templates', 'rockyjam-templates' ),
+			__( 'Templates', 'rockyjam-templates' ),
 			'manage_options',
 			'rjt-templates',
-			[ $this, 'render' ],
-			'dashicons-layout',
-			58
+			[ $this, 'render' ]
 		);
+	}
+
+	/** Check if the top-level RockyJam menu already exists. */
+	private function parent_menu_exists(): bool {
+		global $menu;
+		if ( ! is_array( $menu ) ) {
+			return false;
+		}
+		foreach ( $menu as $item ) {
+			if ( isset( $item[2] ) && 'rockyjam' === $item[2] ) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	// ------------------------------------------------------------------
@@ -52,7 +82,7 @@ class AdminPage {
 	// ------------------------------------------------------------------
 
 	public function enqueue_assets( string $hook ): void {
-		if ( 'toplevel_page_rjt-templates' !== $hook ) {
+		if ( 'rockyjam_page_rjt-templates' !== $hook ) {
 			return;
 		}
 
