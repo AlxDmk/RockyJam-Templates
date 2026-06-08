@@ -339,3 +339,64 @@
 	resize: vertical;
 	tab-size: 4;
 }
+
+/* ==========================================================================
+   Addon callbacks (Этап 2)
+   ========================================================================== */
+
+/* Addon row has a subtle left accent */
+.rjt-callback--addon {
+	border-left: 3px solid #7b68ee;
+	background: #faf9ff;
+}
+
+.rjt-callback--addon:hover {
+	background: #f3f0ff;
+}
+
+/* Drag handle is greyed out on addon rows — they can still be sorted */
+.rjt-callback__drag--addon {
+	color: #bbb;
+}
+
+/* Addon badge */
+.rjt-badge--addon {
+	display: inline-block;
+	font-size: 10px;
+	background: #7b68ee;
+	color: #fff;
+	padding: 1px 6px;
+	border-radius: 3px;
+	font-weight: 600;
+	text-transform: uppercase;
+	margin-left: 4px;
+	vertical-align: middle;
+	max-width: 120px;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+/* Autodiscovered badge */
+.rjt-badge--autodiscovered {
+	display: inline-block;
+	font-size: 10px;
+	background: #e0e0e0;
+	color: #555;
+	padding: 1px 5px;
+	border-radius: 3px;
+	font-style: italic;
+	margin-left: 4px;
+	vertical-align: middle;
+}
+
+/* Lock icon instead of delete button */
+.rjt-callback__actions--addon {
+	color: #bbb;
+}
+
+.rjt-addon-lock {
+	font-size: 16px;
+	color: #ccc;
+	cursor: default;
+}

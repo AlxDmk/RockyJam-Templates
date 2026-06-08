@@ -28,6 +28,7 @@ define( 'RJT_CPT',      'rj_template' );
 // Load class files (no side-effects, just definitions).
 require_once RJT_PATH . 'includes/Core/TemplateManager.php';
 require_once RJT_PATH . 'includes/Core/HooksConfig.php';
+require_once RJT_PATH . 'includes/Core/AddonsRegistry.php';
 require_once RJT_PATH . 'includes/Core/Plugin.php';
 require_once RJT_PATH . 'includes/Admin/AdminPage.php';
 require_once RJT_PATH . 'includes/Admin/HooksPage.php';

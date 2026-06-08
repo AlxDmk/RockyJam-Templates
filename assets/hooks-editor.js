@@ -32,6 +32,18 @@
 	const statusEl  = document.getElementById( 'rjt-hooks-status' );
 	const listEl    = document.getElementById( 'rjt-hooks-list' );
 
+	// Addon hooks data (Этап 2).
+	let addonHooks   = {};   // hook_name => [ { addon_id, addon_name, function, priority, label, source } ]
+	let addonsActive = false;
+	const addonHooksEl = document.getElementById( 'rjt-addon-hooks' );
+	const addonsActiveEl = document.getElementById( 'rjt-addons-active' );
+	if ( addonHooksEl ) {
+		try { addonHooks = JSON.parse( addonHooksEl.textContent ); } catch(e) {}
+	}
+	if ( addonsActiveEl ) {
+		addonsActive = addonsActiveEl.textContent.trim() === 'true';
+	}
+
 	// ----------------------------------------------------------------
 	// Utility
 	// ----------------------------------------------------------------
@@ -415,5 +427,78 @@
 	initPriorityInputs();
 	initRemoveCallbacks();
 	initModalButtons();
+	injectAddonRows();
+
+	// ----------------------------------------------------------------
+	// Inject addon function rows into hook groups (Этап 2)
+	// ----------------------------------------------------------------
+	function injectAddonRows() {
+		if ( ! addonsActive || ! Object.keys( addonHooks ).length ) {
+			return;
+		}
+
+		for ( const [ hookName, callbacks ] of Object.entries( addonHooks ) ) {
+			const container = listEl.querySelector( `.rjt-callbacks[data-hook="${ hookName }"]` );
+			if ( ! container ) continue;
+
+			// Remove "empty" placeholder if present.
+			const emptyEl = container.querySelector( '.rjt-callbacks__empty' );
+
+			for ( const cb of callbacks ) {
+				// Skip if already shown (e.g. saved in hooks-config.json as custom).
+				if ( container.querySelector( `[data-function="${ cb.function }"]` ) ) continue;
+
+				if ( emptyEl ) emptyEl.remove();
+
+				const row = buildAddonRow( hookName, cb );
+				container.appendChild( row );
+			}
+		}
+	}
+
+	/**
+	 * Builds a read-only (non-draggable, non-removable) addon callback row.
+	 * Addon rows are always visible but cannot be reordered or deleted from here
+	 * (they are managed by the addon itself). The user can only toggle them.
+	 */
+	function buildAddonRow( hookName, cb ) {
+		const div = document.createElement( 'div' );
+		div.className = 'rjt-callback rjt-callback--addon';
+		div.dataset.id       = 'addon_' + cb.addon_id + '_' + cb.function;
+		div.dataset.hook     = hookName;
+		div.dataset.function = cb.function;
+		div.dataset.priority = cb.priority;
+		div.dataset.enabled  = '1';
+		div.dataset.custom   = '0';
+		div.dataset.label    = cb.label || cb.function;
+		div.dataset.code     = '';
+		div.dataset.addonId  = cb.addon_id;
+
+		const addonBadge = `<span class="rjt-badge rjt-badge--addon" title="${ escAttr( cb.addon_name || cb.addon_id ) }">${ escHtml( cb.addon_name || cb.addon_id ) }</span>`;
+		const sourceBadge = cb.source === 'autodiscovered'
+			? `<span class="rjt-badge rjt-badge--autodiscovered" title="${ escAttr( RjtHooks.i18n.autodiscovered ) }">${ RjtHooks.i18n.autodiscovered }</span>`
+			: '';
+
+		div.innerHTML = `
+			<span class="rjt-callback__drag rjt-callback__drag--addon dashicons dashicons-menu" title="${ RjtHooks.i18n.dragToReorder }"></span>
+			<label class="rjt-callback__toggle">
+				<input type="checkbox" class="rjt-toggle-enabled" checked>
+				<span class="rjt-toggle-slider"></span>
+			</label>
+			<span class="rjt-callback__label">
+				${ escHtml( cb.label || cb.function ) }
+				${ addonBadge }
+				${ sourceBadge }
+			</span>
+			<code class="rjt-callback__func">${ escHtml( cb.function ) }</code>
+			<div class="rjt-callback__priority-wrap">
+				<input type="number" class="rjt-priority-input" value="${ cb.priority }" min="1" max="999" step="1">
+			</div>
+			<div class="rjt-callback__actions rjt-callback__actions--addon">
+				<span class="rjt-addon-lock dashicons dashicons-lock" title="${ escAttr( RjtHooks.i18n.addonManaged ) }"></span>
+			</div>
+		`;
+		return div;
+	}
 
 } )();

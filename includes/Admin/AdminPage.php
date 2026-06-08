@@ -95,6 +95,8 @@ class AdminPage {
 					'custom'          => __( 'custom', 'rockyjam-templates' ),
 					'dragToReorder'   => __( 'Drag to reorder', 'rockyjam-templates' ),
 					'invalidFuncName' => __( 'Function name must start with a letter or underscore, and contain only letters, numbers, underscores.', 'rockyjam-templates' ),
+					'addonManaged'    => __( 'This function is provided by an addon. Remove or configure it in the addon settings.', 'rockyjam-templates' ),
+					'autodiscovered'  => __( 'auto', 'rockyjam-templates' ),
 				],
 			] );
 		}

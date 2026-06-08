@@ -4,6 +4,7 @@ namespace RockyJamTemplates\Admin;
 
 use RockyJamTemplates\Core\HooksConfig;
 use RockyJamTemplates\Core\TemplateManager;
+use RockyJamTemplates\Core\AddonsRegistry;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -77,6 +78,10 @@ class HooksPage {
 		$config       = $hooks_config->read();
 		$registry     = HooksConfig::load_registry();
 		$nonce        = wp_create_nonce( 'rjt_hooks_action' );
+
+		// Collect addon hook declarations (Этап 2).
+		$addon_hooks_by_hook  = AddonsRegistry::get_by_hook();
+		$addons_active        = AddonsRegistry::is_addons_active();
 
 		// Build a map hook_name => registry entry for label/description lookup.
 		$registry_map = [];
@@ -234,6 +239,13 @@ class HooksPage {
 			<!-- Hidden initial config for JS -->
 			<script type="application/json" id="rjt-hooks-config">
 				<?php echo $config_json; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+			</script>
+			<!-- Addon hooks data for JS (Этап 2) -->
+			<script type="application/json" id="rjt-addon-hooks">
+				<?php echo wp_json_encode( $addon_hooks_by_hook, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ); // phpcs:ignore ?>
+			</script>
+			<script type="application/json" id="rjt-addons-active">
+				<?php echo $addons_active ? 'true' : 'false'; ?>
 			</script>
 		</div><!-- .rjt-hooks-editor -->
 
