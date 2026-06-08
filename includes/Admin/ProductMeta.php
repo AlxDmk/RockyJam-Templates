@@ -9,10 +9,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Adds a "Template" metabox to the WooCommerce product editor.
- *
- * Uses string type hints instead of \WC_Product where the parameter
- * arrives as WP_Post (to avoid Fatal Error when WooCommerce is missing).
+ * Metabox for selecting a template in the product editor.
  *
  * @package RockyJamTemplates
  */
@@ -25,18 +22,12 @@ class ProductMeta {
 	}
 
 	public function register(): void {
-		// Only register hooks if WooCommerce is active.
 		if ( ! class_exists( 'WooCommerce' ) ) {
 			return;
 		}
-
-		add_action( 'add_meta_boxes', [ $this, 'add_metabox' ] );
-		add_action( 'save_post_product', [ $this, 'save_meta' ], 10, 2 );
+		add_action( 'add_meta_boxes',      [ $this, 'add_metabox' ] );
+		add_action( 'save_post_product',   [ $this, 'save_meta' ], 10, 2 );
 	}
-
-	// ------------------------------------------------------------------
-	// Metabox
-	// ------------------------------------------------------------------
 
 	public function add_metabox(): void {
 		add_meta_box(
@@ -49,65 +40,57 @@ class ProductMeta {
 		);
 	}
 
-	/**
-	 * @param \WP_Post $post  WordPress post object (product).
-	 */
 	public function render_metabox( \WP_Post $post ): void {
 		wp_nonce_field( 'rjt_product_meta', 'rjt_product_nonce' );
 
-		$current_id = (int) get_post_meta( $post->ID, '_rj_template_id', true );
-		$templates  = $this->manager->get_all_templates( 'product' );
-		$default    = $this->manager->get_default_template( 'product' );
+		$current_slug = (string) get_post_meta( $post->ID, '_rj_template_slug', true );
+		$templates    = $this->manager->get_all( 'product' );
+		$default_slug = $this->manager->get_default_slug( 'product' );
 
-		$default_label = $default
+		$default_name = '';
+		foreach ( $templates as $t ) {
+			if ( $t['slug'] === $default_slug ) {
+				$default_name = $t['name'];
+				break;
+			}
+		}
+
+		$default_label = $default_name
 			/* translators: %s: template name */
-			? sprintf( __( 'Default (%s)', 'rockyjam-templates' ), $default['title'] )
+			? sprintf( __( 'Default (%s)', 'rockyjam-templates' ), $default_name )
 			: __( 'Default', 'rockyjam-templates' );
 		?>
 		<div class="rjt-metabox">
-			<p class="rjt-metabox__desc description">
-				<?php esc_html_e( 'Choose a custom template for this product. Leave on "Default" to use the global default.', 'rockyjam-templates' ); ?>
+			<p class="description" style="margin-bottom:8px;">
+				<?php esc_html_e( 'Choose a custom template for this product.', 'rockyjam-templates' ); ?>
 			</p>
-
-			<select name="rjt_template_id" id="rjt_template_id" class="widefat">
-				<option value="0" <?php selected( $current_id, 0 ); ?>>
+			<select name="rjt_template_slug" id="rjt_template_slug" class="widefat">
+				<option value="" <?php selected( $current_slug, '' ); ?>>
 					— <?php echo esc_html( $default_label ); ?> —
 				</option>
 				<?php foreach ( $templates as $tpl ) : ?>
-					<option value="<?php echo esc_attr( $tpl['id'] ); ?>" <?php selected( $current_id, $tpl['id'] ); ?>>
-						<?php echo esc_html( $tpl['title'] ); ?>
+					<option value="<?php echo esc_attr( $tpl['slug'] ); ?>" <?php selected( $current_slug, $tpl['slug'] ); ?>>
+						<?php echo esc_html( $tpl['name'] ); ?>
 						<?php if ( $tpl['is_default'] ) : ?>
 							(<?php esc_html_e( 'default', 'rockyjam-templates' ); ?>)
 						<?php endif; ?>
 					</option>
 				<?php endforeach; ?>
 			</select>
-
-			<?php if ( ! empty( $templates ) ) : ?>
-			<p class="rjt-metabox__link">
-				<a href="<?php echo esc_url( admin_url( 'admin.php?page=rjt-templates' ) ); ?>" target="_blank">
+			<p style="margin-top:8px;">
+				<a href="<?php echo esc_url( admin_url( 'admin.php?page=rjt-templates' ) ); ?>" target="_blank" style="font-size:12px;">
 					<?php esc_html_e( 'Manage templates ↗', 'rockyjam-templates' ); ?>
 				</a>
 			</p>
-			<?php endif; ?>
 		</div>
 		<?php
 	}
 
-	// ------------------------------------------------------------------
-	// Save
-	// ------------------------------------------------------------------
-
-	/**
-	 * @param int      $post_id
-	 * @param \WP_Post $post
-	 */
 	public function save_meta( int $post_id, \WP_Post $post ): void {
 		$nonce = sanitize_text_field( wp_unslash( $_POST['rjt_product_nonce'] ?? '' ) );
 		if ( ! wp_verify_nonce( $nonce, 'rjt_product_meta' ) ) {
 			return;
 		}
-
 		if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) {
 			return;
 		}
@@ -118,15 +101,13 @@ class ProductMeta {
 			return;
 		}
 
-		$template_id = (int) ( $_POST['rjt_template_id'] ?? 0 );
+		$slug = sanitize_title( $_POST['rjt_template_slug'] ?? '' );
 
-		if ( $template_id > 0 ) {
-			$tpl = $this->manager->get_template_data( $template_id );
-			if ( ! $tpl || 'product' !== $tpl['type'] ) {
-				$template_id = 0;
-			}
+		// Validate the slug actually exists on disk.
+		if ( $slug && ! $this->manager->get_meta( $slug ) ) {
+			$slug = '';
 		}
 
-		update_post_meta( $post_id, '_rj_template_id', $template_id );
+		update_post_meta( $post_id, '_rj_template_slug', $slug );
 	}
 }
