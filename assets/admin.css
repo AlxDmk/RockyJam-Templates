@@ -2,108 +2,50 @@
    RockyJam Templates — Admin Styles
    ===================================================== */
 
-/* ---------- Shared ---------- */
-.rjt-wrap {
-	max-width: 1200px;
-}
+.rjt-wrap { max-width: 1280px; }
 
+/* ---------- Header ---------- */
 .rjt-header {
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
 	margin: 16px 0 24px;
-	gap: 12px;
 }
-
-.rjt-header h1 {
-	margin: 0;
-	padding: 0;
-	font-size: 23px;
-}
-
-.rjt-breadcrumb-sep {
-	color: #a7aaad;
-	margin: 0 6px;
-}
-
+.rjt-header h1 { margin: 0; padding: 0; font-size: 23px; }
+.rjt-breadcrumb-sep { color: #a7aaad; margin: 0 6px; }
 .rjt-header .button .dashicons {
-	vertical-align: middle;
-	margin-top: -2px;
-	margin-right: 3px;
-	font-size: 16px;
-	width: 16px;
-	height: 16px;
+	vertical-align: middle; margin-top: -2px;
+	margin-right: 3px; font-size: 16px; width: 16px; height: 16px;
 }
 
-/* ---------- Empty state ---------- */
-.rjt-empty {
-	text-align: center;
-	padding: 60px 20px;
-	color: #a7aaad;
-}
-
-.rjt-empty .dashicons {
-	font-size: 52px;
-	width: 52px;
-	height: 52px;
-	display: block;
-	margin: 0 auto 12px;
-}
+/* ---------- Empty ---------- */
+.rjt-empty { text-align: center; padding: 60px 20px; color: #a7aaad; }
+.rjt-empty .dashicons { font-size: 52px; width: 52px; height: 52px; display: block; margin: 0 auto 12px; }
 
 /* ---------- Table ---------- */
-.rjt-table .rjt-col-title   { width: 35%; }
-.rjt-table .rjt-col-type    { width: 15%; }
-.rjt-table .rjt-col-default { width: 20%; }
-.rjt-table .rjt-col-actions { width: 30%; }
+.rjt-table .rjt-col-title   { width: 28%; }
+.rjt-table .rjt-col-slug    { width: 18%; }
+.rjt-table .rjt-col-type    { width: 12%; }
+.rjt-table .rjt-col-default { width: 18%; }
+.rjt-table .rjt-col-actions { width: 24%; }
 
-.rjt-actions {
-	display: flex;
-	align-items: center;
-	gap: 8px;
-	flex-wrap: wrap;
-}
+.rjt-actions { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
 
 /* ---------- Badges ---------- */
 .rjt-badge {
-	display: inline-flex;
-	align-items: center;
-	gap: 3px;
-	font-size: 11px;
-	font-weight: 600;
-	padding: 2px 8px;
-	border-radius: 3px;
-	text-transform: uppercase;
-	letter-spacing: .4px;
+	display: inline-flex; align-items: center; gap: 3px;
+	font-size: 11px; font-weight: 600; padding: 2px 8px;
+	border-radius: 3px; text-transform: uppercase; letter-spacing: .4px;
 }
-
 .rjt-badge--product  { background: #e8f3ff; color: #2271b1; }
 .rjt-badge--category { background: #edfaef; color: #1a7a3f; }
 .rjt-badge--default  { background: #fef8e7; color: #856404; }
-
-.rjt-badge .dashicons {
-	font-size: 14px;
-	width: 14px;
-	height: 14px;
-}
+.rjt-badge .dashicons { font-size: 14px; width: 14px; height: 14px; }
 
 /* ---------- Delete button ---------- */
-.rjt-btn-delete {
-	border-color: #d63638 !important;
-	color: #d63638 !important;
-}
-
-.rjt-btn-delete:hover {
-	background: #d63638 !important;
-	color: #fff !important;
-}
-
-.rjt-btn-delete .dashicons {
-	font-size: 14px;
-	width: 14px;
-	height: 14px;
-	vertical-align: middle;
-	margin-top: -2px;
-}
+.rjt-btn-delete { border-color: #d63638 !important; color: #d63638 !important; }
+.rjt-btn-delete:hover { background: #d63638 !important; color: #fff !important; }
+.rjt-btn-delete .dashicons { font-size: 14px; width: 14px; height: 14px; vertical-align: middle; margin-top: -2px; }
 
 /* ---------- Editor layout ---------- */
 .rjt-editor-layout {
@@ -111,16 +53,8 @@
 	gap: 20px;
 	align-items: flex-start;
 }
-
-.rjt-editor-main {
-	flex: 1 1 0;
-	min-width: 0;
-}
-
-.rjt-editor-sidebar {
-	width: 280px;
-	flex-shrink: 0;
-}
+.rjt-editor-main { flex: 1 1 0; min-width: 0; }
+.rjt-editor-sidebar { width: 300px; flex-shrink: 0; display: flex; flex-direction: column; gap: 16px; }
 
 /* ---------- Sidebar card ---------- */
 .rjt-card {
@@ -129,80 +63,105 @@
 	border-radius: 6px;
 	padding: 16px;
 }
-
 .rjt-card h3 {
-	margin: 0 0 16px;
-	padding: 0 0 10px;
+	margin: 0 0 16px; padding: 0 0 10px;
 	border-bottom: 1px solid #f0f0f0;
-	font-size: 13px;
-	font-weight: 600;
-	text-transform: uppercase;
-	letter-spacing: .5px;
-	color: #646970;
+	font-size: 11px; font-weight: 700;
+	text-transform: uppercase; letter-spacing: .6px; color: #646970;
+}
+.rjt-card--info { background: #f6f7f7; }
+
+/* ---------- File tree in sidebar ---------- */
+.rjt-file-tree { margin: 0; padding: 0; list-style: none; }
+.rjt-file-tree li { padding: 4px 0; font-size: 12px; }
+.rjt-file-tree code { font-size: 12px; }
+.rjt-file-tree .description { display: block; color: #646970; font-size: 11px; margin-top: 1px; }
+
+/* ---------- Folder path ---------- */
+.rjt-folder-path {
+	display: block; font-size: 12px;
+	background: #f6f7f7; padding: 4px 8px;
+	border-radius: 3px; color: #646970;
 }
 
 /* ---------- Form fields ---------- */
-.rjt-field {
-	margin-bottom: 16px;
-}
+.rjt-field { margin-bottom: 14px; }
+.rjt-field:last-child { margin-bottom: 0; }
+.rjt-label { display: block; font-weight: 600; margin-bottom: 5px; font-size: 13px; }
+.rjt-field--checkbox label { display: flex; align-items: flex-start; gap: 6px; font-size: 13px; cursor: pointer; }
+.rjt-field--checkbox input[type="checkbox"] { margin-top: 2px; flex-shrink: 0; }
+.rjt-field .description { margin-top: 5px; font-size: 12px; color: #646970; }
+.required { color: #d63638; }
 
-.rjt-field:last-child {
-	margin-bottom: 0;
-}
-
-.rjt-label {
-	display: block;
-	font-weight: 600;
-	margin-bottom: 6px;
-	font-size: 13px;
-}
-
-.rjt-field--checkbox label {
-	display: flex;
-	align-items: flex-start;
-	gap: 6px;
-	font-size: 13px;
-	cursor: pointer;
-}
-
-.rjt-field--checkbox input[type="checkbox"] {
-	margin-top: 2px;
-	flex-shrink: 0;
-}
-
-.rjt-field .description {
-	margin-top: 6px;
-	font-size: 12px;
-	color: #646970;
-}
-
-.rjt-field .description code {
-	background: #f6f7f7;
-	padding: 1px 5px;
-	border-radius: 3px;
-	font-size: 11px;
-}
-
-/* ---------- Actions row in sidebar ---------- */
-.rjt-actions-row {
-	display: flex;
-	flex-direction: column;
-	gap: 8px;
-}
-
+/* ---------- Actions row ---------- */
+.rjt-actions-row { display: flex; flex-direction: column; gap: 8px; }
+.rjt-actions-row .button, .rjt-actions-row form { width: 100%; }
 .rjt-actions-row .button {
+	display: flex; align-items: center; justify-content: center;
+	gap: 5px; text-align: center;
+}
+.rjt-actions-row .dashicons { font-size: 16px; width: 16px; height: 16px; }
+
+/* ---------- Info notice ---------- */
+.rjt-notice {
+	display: flex; align-items: flex-start; gap: 8px;
+	background: #e8f3ff; border-left: 4px solid #2271b1;
+	padding: 12px 16px; border-radius: 0 4px 4px 0;
+	margin-bottom: 16px; font-size: 13px;
+}
+.rjt-notice .dashicons { color: #2271b1; flex-shrink: 0; margin-top: 1px; }
+
+/* ---------- File Tabs ---------- */
+.rjt-tabs__nav {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 2px;
+	margin-bottom: 0;
+	border-bottom: 2px solid #dcdcde;
+}
+
+.rjt-tab-btn {
+	background: #f6f7f7;
+	border: 1px solid #dcdcde;
+	border-bottom: none;
+	border-radius: 4px 4px 0 0;
+	padding: 7px 14px;
+	font-size: 12px;
+	font-family: Consolas, 'Courier New', monospace;
+	cursor: pointer;
+	color: #50575e;
+	position: relative;
+	bottom: -2px;
+	transition: background .1s;
+}
+
+.rjt-tab-btn:hover { background: #fff; color: #1d2327; }
+
+.rjt-tab-btn--active {
+	background: #fff;
+	color: #1d2327;
+	font-weight: 600;
+	border-bottom: 2px solid #fff;
+	z-index: 1;
+}
+
+.rjt-tab-panel {
+	background: #fff;
+	border: 1px solid #dcdcde;
+	border-top: none;
+	padding: 16px;
+}
+
+/* ---------- File form ---------- */
+.rjt-file-actions {
+	margin-top: 12px;
 	display: flex;
 	align-items: center;
-	justify-content: center;
-	gap: 5px;
-	width: 100%;
-	text-align: center;
+	gap: 10px;
 }
-
-.rjt-actions-row .dashicons {
-	font-size: 16px;
-	width: 16px;
-	height: 16px;
+.rjt-file-actions .button .dashicons {
+	font-size: 14px; width: 14px; height: 14px;
+	vertical-align: middle; margin-top: -2px; margin-right: 3px;
 }
 
 /* ---------- Code editor ---------- */
@@ -211,25 +170,9 @@
 	font-size: 13px !important;
 	line-height: 1.6 !important;
 }
-
-/* CodeMirror wrapper keeps editor full-width */
-.rjt-editor-main .CodeMirror {
-	height: 600px;
+.rjt-tab-panel .CodeMirror {
+	height: 520px;
 	border: 1px solid #8c8f94;
 	border-radius: 3px;
-}
-
-/* ---------- Metabox ---------- */
-.rjt-metabox__desc {
-	margin-bottom: 10px !important;
-}
-
-.rjt-metabox__link {
-	margin-top: 8px;
-	font-size: 12px;
-}
-
-/* ---------- Required marker ---------- */
-.required {
-	color: #d63638;
+	font-size: 13px;
 }
