@@ -197,20 +197,30 @@ class HooksConfig {
 					$lines[]   = '}';
 					$lines[]   = 'add_action( \'' . $hook . '\', \'' . $func . '\', ' . $priority . ' );';
 				} else {
-					// ── Standard WC callback ─────────────────────────────────────
+					// ── Standard / Addon callback ────────────────────────────────
 					// Strategy: always remove_action first (safe even if not registered),
 					// then re-add only if enabled. This correctly handles:
 					//   disabled          → remove only  (turns WC default off)
 					//   enabled, same p   → remove + re-add at same priority (net: no change, but correct)
 					//   enabled, new p    → remove old + add at new priority
+					// Addon callbacks (id starts with 'addon_') are guarded by function_exists
+					// because the addon may be disabled/missing at render time.
 					if ( ! $func ) {
 						continue;
 					}
-					// Remove whatever WC registered at this priority.
+					$is_addon = str_starts_with( $id, 'addon_' );
+					// Remove whatever WC/addon registered at this priority.
 					$lines[] = 'remove_action( \'' . $hook . '\', \'' . $func . '\', ' . $priority . ' );';
 					if ( $enabled ) {
-						// Re-register at the (possibly changed) priority.
-						$lines[] = 'add_action( \'' . $hook . '\', \'' . $func . '\', ' . $priority . ' );';
+						if ( $is_addon ) {
+							// Guard: only add if addon function is actually loaded.
+							$lines[] = 'if ( function_exists( \'' . $func . '\' ) ) {';
+							$lines[] = "\t" . 'add_action( \'' . $hook . '\', \'' . $func . '\', ' . $priority . ' );';
+							$lines[] = '}';
+						} else {
+							// Standard WC callback — always exists, no guard needed.
+							$lines[] = 'add_action( \'' . $hook . '\', \'' . $func . '\', ' . $priority . ' );';
+						}
 					}
 				}
 			}
