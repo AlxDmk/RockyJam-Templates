@@ -191,9 +191,9 @@ class HooksConfig {
 					// Wrap body in a proper named function declaration.
 					$safe_code = $this->indent_code( trim( $code ) );
 					$lines[]   = 'if ( ! function_exists( \'' . $func . '\' ) ) {';
-					$lines[]   = '\tfunction ' . $func . '() {';
+					$lines[]   = "\tfunction " . $func . '() {';
 					$lines[]   = $safe_code;
-					$lines[]   = '\t}';
+					$lines[]   = "\t}";
 					$lines[]   = '}';
 					$lines[]   = 'add_action( \'' . $hook . '\', \'' . $func . '\', ' . $priority . ' );';
 				} else {
