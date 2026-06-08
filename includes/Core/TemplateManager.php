@@ -296,7 +296,13 @@ class TemplateManager {
 		$hooks_php = $slug ? $this->get_template_file( $slug, 'hooks.php' ) : null;
 
 		if ( $hooks_php ) {
-			require_once $hooks_php;
+			try {
+				require_once $hooks_php;
+			} catch ( \Throwable $e ) {
+				if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+					error_log( 'RockyJam Templates: hooks.php error for template [' . $slug . ']: ' . $e->getMessage() );
+				}
+			}
 		}
 	}
 
