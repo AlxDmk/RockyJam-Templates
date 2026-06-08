@@ -193,7 +193,8 @@ class AdminPage {
 				} else {
 					$notice = __( 'Template saved.', 'rockyjam-templates' );
 				}
-				$redirect = $list_url . '&action=edit&slug=' . urlencode( $slug );
+				$tab      = sanitize_key( $_POST['rjt_current_tab'] ?? '' );
+				$redirect = $list_url . '&action=edit&slug=' . urlencode( $slug ) . ( $tab ? '&tab=' . $tab : '' );
 				break;
 
 			// ---- Delete ----
@@ -521,6 +522,7 @@ class AdminPage {
 							<input type="hidden" name="action"       value="rjt_handle">
 							<input type="hidden" name="rjt_action"   value="<?php echo $is_new ? 'create' : 'update'; ?>">
 							<input type="hidden" name="rjt_nonce"    value="<?php echo esc_attr( $nonce ); ?>">
+							<input type="hidden" name="rjt_current_tab" id="rjt_current_tab" value="<?php echo esc_attr( $active_tab ); ?>">
 							<?php if ( ! $is_new ) : ?>
 							<input type="hidden" name="template_slug" value="<?php echo esc_attr( $slug ); ?>">
 							<?php endif; ?>
@@ -583,21 +585,21 @@ class AdminPage {
 										? esc_html__( 'Create Template', 'rockyjam-templates' )
 										: esc_html__( 'Save Settings', 'rockyjam-templates' ); ?>
 								</button>
-
-								<?php if ( ! $is_new ) : ?>
-								<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" class="rjt-delete-form">
-									<input type="hidden" name="action"        value="rjt_handle">
-									<input type="hidden" name="rjt_action"    value="delete">
-									<input type="hidden" name="rjt_nonce"     value="<?php echo esc_attr( $nonce ); ?>">
-									<input type="hidden" name="template_slug" value="<?php echo esc_attr( $slug ); ?>">
-									<button type="submit" class="button rjt-btn-delete">
-										<span class="dashicons dashicons-trash"></span>
-										<?php esc_html_e( 'Delete Template', 'rockyjam-templates' ); ?>
-									</button>
-								</form>
-								<?php endif; ?>
 							</div>
+						</form><!-- #rjt-meta-form -->
+
+						<?php if ( ! $is_new ) : ?>
+						<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" class="rjt-delete-form">
+							<input type="hidden" name="action"        value="rjt_handle">
+							<input type="hidden" name="rjt_action"    value="delete">
+							<input type="hidden" name="rjt_nonce"     value="<?php echo esc_attr( $nonce ); ?>">
+							<input type="hidden" name="template_slug" value="<?php echo esc_attr( $slug ); ?>">
+							<button type="submit" class="button rjt-btn-delete">
+								<span class="dashicons dashicons-trash"></span>
+								<?php esc_html_e( 'Delete Template', 'rockyjam-templates' ); ?>
+							</button>
 						</form>
+						<?php endif; ?>
 					</div><!-- .rjt-card -->
 
 					<?php if ( ! $is_new ) : ?>
