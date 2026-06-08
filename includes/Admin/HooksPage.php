@@ -174,15 +174,28 @@ class HooksPage {
 							</div>
 							<?php endif; ?>
 							<?php foreach ( $hook_entry['callbacks'] as $cb ) :
-								$cb_id    = $cb['id'];
-								$func     = $cb['function'];
-								$priority = (int) $cb['priority'];
-								$enabled  = (bool) $cb['enabled'];
-								$custom   = (bool) $cb['custom'];
-								$label    = $cb['label'] ?? $func;
-								$code     = $cb['code'] ?? '';
+								$cb_id      = $cb['id'];
+								$func       = $cb['function'];
+								$priority   = (int) $cb['priority'];
+								$enabled    = (bool) $cb['enabled'];
+								$custom     = (bool) $cb['custom'];
+								$label      = $cb['label'] ?? $func;
+								$code       = $cb['code'] ?? '';
+								// Detect addon callbacks by id prefix and resolve addon name.
+								$is_addon   = str_starts_with( $cb_id, 'addon_' );
+								$addon_name = '';
+								if ( $is_addon ) {
+									foreach ( $addon_hooks_by_hook as $addon_cbs ) {
+										foreach ( $addon_cbs as $acb ) {
+											if ( ( $acb['function'] ?? '' ) === $func ) {
+												$addon_name = $acb['addon_name'] ?? $acb['addon_id'] ?? '';
+												break 2;
+											}
+										}
+									}
+								}
 							?>
-							<div class="rjt-callback<?php echo $enabled ? '' : ' rjt-callback--disabled'; ?><?php echo $custom ? ' rjt-callback--custom' : ''; ?>"
+							<div class="rjt-callback<?php echo $enabled ? '' : ' rjt-callback--disabled'; ?><?php echo $custom ? ' rjt-callback--custom' : ''; ?><?php echo $is_addon ? ' rjt-callback--addon' : ''; ?>"
 								 data-id="<?php echo esc_attr( $cb_id ); ?>"
 								 data-hook="<?php echo esc_attr( $hook ); ?>"
 								 data-function="<?php echo esc_attr( $func ); ?>"
@@ -204,6 +217,9 @@ class HooksPage {
 									<?php echo esc_html( $label ); ?>
 									<?php if ( $custom ) : ?>
 									<span class="rjt-badge rjt-badge--custom"><?php esc_html_e( 'custom', 'rockyjam-templates' ); ?></span>
+									<?php endif; ?>
+									<?php if ( $is_addon && $addon_name ) : ?>
+									<span class="rjt-badge rjt-badge--addon-name"><?php echo esc_html( $addon_name ); ?></span>
 									<?php endif; ?>
 								</span>
 
