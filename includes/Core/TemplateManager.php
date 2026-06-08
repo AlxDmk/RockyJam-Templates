@@ -7,453 +7,645 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Manages the rj_template Custom Post Type and template resolution.
+ * Manages template folders on disk and their metadata in wp_options / wp_postmeta.
  *
- * Template types
- * --------------
- * product  — single product page (woocommerce/single-product.php)
- * category — product category archive (woocommerce/taxonomy-product_cat.php)
+ * Directory layout
+ * ----------------
+ * {plugin}/templates/{slug}/
+ *   template.json   — metadata: name, type, is_default, version, description
+ *   hooks.php       — remove_action / add_action / priority overrides
+ *   content.php     — the actual page markup (has $product in scope)
+ *   functions.php   — helper functions specific to this template
+ *   assets/
+ *     style.css
+ *     script.js
  *
- * Meta fields on rj_template posts
- * ----------------------------------
- * _rj_template_type     : 'product' | 'category'
- * _rj_template_content  : raw HTML / shortcodes / template tags
- * _rj_is_default        : '1' if this is the site-wide default for its type
- *
- * Meta field on wc_product posts
- * --------------------------------
- * _rj_template_id : post ID of the chosen rj_template (0 = use default)
+ * Template metadata is stored on disk only (template.json).
+ * Which template is assigned to a product is stored in wp_postmeta (_rj_template_slug).
+ * The active default slug is stored in wp_options (rjt_default_product_template).
  *
  * @package RockyJamTemplates
  */
 class TemplateManager {
 
-	// ------------------------------------------------------------------
-	// CPT registration
-	// ------------------------------------------------------------------
+	/** Base directory for all templates. */
+	public static function templates_dir(): string {
+		return RJT_PATH . 'templates/';
+	}
+
+	// =========================================================================
+	// CPT — still used to power the admin list screen, but content lives on disk.
+	// We keep a lightweight post per template so WP handles revisions / caps.
+	// =========================================================================
 
 	public static function register_cpt(): void {
 		register_post_type(
 			RJT_CPT,
 			[
-				'label'               => __( 'Product Templates', 'rockyjam-templates' ),
-				'labels'              => [
-					'name'          => __( 'Product Templates', 'rockyjam-templates' ),
-					'singular_name' => __( 'Product Template', 'rockyjam-templates' ),
-					'add_new_item'  => __( 'Add New Template', 'rockyjam-templates' ),
-					'edit_item'     => __( 'Edit Template', 'rockyjam-templates' ),
-				],
-				'public'              => false,
-				'publicly_queryable'  => false,
-				'show_ui'             => false,   // We have our own UI.
-				'show_in_menu'        => false,
-				'show_in_rest'        => false,
-				'capability_type'     => 'post',
-				'map_meta_cap'        => true,
-				'hierarchical'        => false,
-				'supports'            => [ 'title' ],
-				'rewrite'             => false,
-				'query_var'           => false,
+				'label'              => __( 'Product Templates', 'rockyjam-templates' ),
+				'public'             => false,
+				'publicly_queryable' => false,
+				'show_ui'            => false,
+				'show_in_menu'       => false,
+				'show_in_rest'       => false,
+				'capability_type'    => 'post',
+				'map_meta_cap'       => true,
+				'hierarchical'       => false,
+				'supports'           => [ 'title' ],
+				'rewrite'            => false,
+				'query_var'          => false,
 			]
 		);
 	}
 
-	// ------------------------------------------------------------------
-	// Default template
-	// ------------------------------------------------------------------
+	// =========================================================================
+	// Discovery — read templates from disk
+	// =========================================================================
 
 	/**
-	 * Create the built-in "Default" template on first activation (or if deleted).
-	 */
-	public function maybe_create_default_template(): void {
-		// Check if a default product template already exists.
-		$existing = get_posts( [
-			'post_type'      => RJT_CPT,
-			'post_status'    => 'publish',
-			'posts_per_page' => 1,
-			'meta_query'     => [
-				[
-					'key'   => '_rj_is_default',
-					'value' => '1',
-				],
-				[
-					'key'   => '_rj_template_type',
-					'value' => 'product',
-				],
-			],
-			'fields' => 'ids',
-		] );
-
-		if ( ! empty( $existing ) ) {
-			return;
-		}
-
-		$default_content = $this->get_default_template_content();
-
-		$post_id = wp_insert_post( [
-			'post_title'   => __( 'Default Product Template', 'rockyjam-templates' ),
-			'post_type'    => RJT_CPT,
-			'post_status'  => 'publish',
-			'post_content' => '',
-		] );
-
-		if ( $post_id && ! is_wp_error( $post_id ) ) {
-			update_post_meta( $post_id, '_rj_template_type',    'product' );
-			update_post_meta( $post_id, '_rj_template_content', $default_content );
-			update_post_meta( $post_id, '_rj_is_default',       '1' );
-		}
-	}
-
-	// ------------------------------------------------------------------
-	// Frontend hooks
-	// ------------------------------------------------------------------
-
-	public function register_hooks(): void {
-		// Override WooCommerce single product template.
-		add_filter( 'wc_get_template', [ $this, 'filter_product_template' ], 10, 2 );
-	}
-
-	/**
-	 * Swap WooCommerce's single-product/content.php with our custom template
-	 * when the current product has one assigned (or a global default exists).
+	 * Scan templates/ directory and return all valid template slugs.
 	 *
-	 * @param string $template Full path to the template file WC is about to load.
-	 * @param string $template_name Template slug (e.g. "single-product/content.php").
-	 * @return string
+	 * @return string[]
 	 */
-	public function filter_product_template( string $template, string $template_name ): string {
-		if ( 'single-product/content.php' !== $template_name ) {
-			return $template;
+	public function get_available_slugs(): array {
+		$dir  = self::templates_dir();
+		$list = [];
+
+		if ( ! is_dir( $dir ) ) {
+			return $list;
 		}
 
-		global $product;
-
-		if ( ! $product instanceof \WC_Product ) {
-			return $template;
-		}
-
-		$tpl = $this->resolve_product_template( $product->get_id() );
-
-		if ( ! $tpl ) {
-			return $template;
-		}
-
-		// Write content to a temp file and return its path.
-		// (Cleaner alternative: use output buffer in a WC action.)
-		return $this->render_to_temp_file( $tpl, $product );
-	}
-
-	// ------------------------------------------------------------------
-	// Resolution
-	// ------------------------------------------------------------------
-
-	/**
-	 * Find the template to use for a product.
-	 *
-	 * Priority: product-specific → global default → null
-	 *
-	 * @param  int $product_id
-	 * @return array|null Array with keys: id, title, content. Null if nothing found.
-	 */
-	public function resolve_product_template( int $product_id ): ?array {
-		// 1. Product-specific template.
-		$template_id = (int) get_post_meta( $product_id, '_rj_template_id', true );
-
-		if ( $template_id > 0 ) {
-			$data = $this->get_template_data( $template_id );
-			if ( $data ) {
-				return $data;
+		foreach ( (array) glob( $dir . '*', GLOB_ONLYDIR ) as $folder ) {
+			$slug = basename( $folder );
+			if ( file_exists( $folder . '/template.json' ) ) {
+				$list[] = $slug;
 			}
-		}
-
-		// 2. Global default for product type.
-		return $this->get_default_template( 'product' );
-	}
-
-	/**
-	 * @param  int $template_id Post ID of rj_template.
-	 * @return array|null
-	 */
-	public function get_template_data( int $template_id ): ?array {
-		$post = get_post( $template_id );
-
-		if ( ! $post || RJT_CPT !== $post->post_type || 'publish' !== $post->post_status ) {
-			return null;
-		}
-
-		return [
-			'id'         => $post->ID,
-			'title'      => $post->post_title,
-			'content'    => get_post_meta( $post->ID, '_rj_template_content', true ),
-			'type'       => get_post_meta( $post->ID, '_rj_template_type', true ),
-			'is_default' => (bool) get_post_meta( $post->ID, '_rj_is_default', true ),
-		];
-	}
-
-	/**
-	 * @param  string $type 'product' or 'category'.
-	 * @return array|null
-	 */
-	public function get_default_template( string $type ): ?array {
-		$posts = get_posts( [
-			'post_type'      => RJT_CPT,
-			'post_status'    => 'publish',
-			'posts_per_page' => 1,
-			'meta_query'     => [
-				'relation' => 'AND',
-				[
-					'key'   => '_rj_is_default',
-					'value' => '1',
-				],
-				[
-					'key'   => '_rj_template_type',
-					'value' => $type,
-				],
-			],
-		] );
-
-		if ( empty( $posts ) ) {
-			return null;
-		}
-
-		return $this->get_template_data( $posts[0]->ID );
-	}
-
-	/**
-	 * Return all templates of a given type.
-	 *
-	 * @param  string $type 'product' | 'category' | '' (all)
-	 * @return array[]
-	 */
-	public function get_all_templates( string $type = '' ): array {
-		$args = [
-			'post_type'      => RJT_CPT,
-			'post_status'    => 'publish',
-			'posts_per_page' => -1,
-			'orderby'        => 'title',
-			'order'          => 'ASC',
-		];
-
-		if ( $type ) {
-			$args['meta_query'] = [ [
-				'key'   => '_rj_template_type',
-				'value' => $type,
-			] ];
-		}
-
-		$posts = get_posts( $args );
-		$list  = [];
-
-		foreach ( $posts as $post ) {
-			$list[] = [
-				'id'         => $post->ID,
-				'title'      => $post->post_title,
-				'content'    => get_post_meta( $post->ID, '_rj_template_content', true ),
-				'type'       => get_post_meta( $post->ID, '_rj_template_type', true ),
-				'is_default' => (bool) get_post_meta( $post->ID, '_rj_is_default', true ),
-			];
 		}
 
 		return $list;
 	}
 
-	// ------------------------------------------------------------------
-	// CRUD
-	// ------------------------------------------------------------------
-
 	/**
-	 * Create or update a template.
+	 * Read template.json for a given slug. Returns null if invalid.
 	 *
-	 * @param  array $data Keys: title, type, content, is_default. Add 'id' to update.
-	 * @return int|\WP_Error Post ID on success.
+	 * @param  string $slug
+	 * @return array{slug:string,name:string,type:string,version:string,description:string,is_default:bool}|null
 	 */
-	public function save_template( array $data ) {
-		$title      = sanitize_text_field( $data['title'] ?? '' );
-		$type       = in_array( $data['type'] ?? '', [ 'product', 'category' ], true )
-			? $data['type']
-			: 'product';
-		$content    = wp_kses_post( $data['content'] ?? '' );
-		$is_default = ! empty( $data['is_default'] );
-		$id         = isset( $data['id'] ) ? (int) $data['id'] : 0;
+	public function get_meta( string $slug ): ?array {
+		$file = self::templates_dir() . $slug . '/template.json';
 
-		if ( empty( $title ) ) {
-			return new \WP_Error( 'empty_title', __( 'Template title is required.', 'rockyjam-templates' ) );
+		if ( ! file_exists( $file ) ) {
+			return null;
 		}
 
-		$post_data = [
-			'post_title'   => $title,
-			'post_type'    => RJT_CPT,
-			'post_status'  => 'publish',
-			'post_content' => '',
+		$raw = json_decode( file_get_contents( $file ), true );
+
+		if ( ! is_array( $raw ) ) {
+			return null;
+		}
+
+		return [
+			'slug'        => $slug,
+			'name'        => $raw['name']        ?? $slug,
+			'type'        => $raw['type']        ?? 'product',
+			'version'     => $raw['version']     ?? '1.0.0',
+			'description' => $raw['description'] ?? '',
+			'author'      => $raw['author']       ?? '',
+			'is_default'  => $this->get_default_slug( $raw['type'] ?? 'product' ) === $slug,
 		];
-
-		if ( $id > 0 ) {
-			$post_data['ID'] = $id;
-			$post_id = wp_update_post( $post_data, true );
-		} else {
-			$post_id = wp_insert_post( $post_data, true );
-		}
-
-		if ( is_wp_error( $post_id ) ) {
-			return $post_id;
-		}
-
-		update_post_meta( $post_id, '_rj_template_type',    $type );
-		update_post_meta( $post_id, '_rj_template_content', $content );
-		update_post_meta( $post_id, '_rj_is_default',       $is_default ? '1' : '' );
-
-		// If this is set as default — unset all others of the same type.
-		if ( $is_default ) {
-			$this->clear_other_defaults( $post_id, $type );
-		}
-
-		return $post_id;
 	}
 
 	/**
-	 * Delete a template. Refuses to delete the last default template.
+	 * Return metadata for all templates, optionally filtered by type.
 	 *
-	 * @param  int $template_id
+	 * @param  string $type  'product' | 'category' | '' (all)
+	 * @return array[]
+	 */
+	public function get_all( string $type = '' ): array {
+		$list = [];
+
+		foreach ( $this->get_available_slugs() as $slug ) {
+			$meta = $this->get_meta( $slug );
+			if ( ! $meta ) {
+				continue;
+			}
+			if ( $type && $meta['type'] !== $type ) {
+				continue;
+			}
+			$list[] = $meta;
+		}
+
+		// Sort: default first, then alphabetically.
+		usort( $list, fn( $a, $b ) =>
+			( $b['is_default'] <=> $a['is_default'] ) ?: strcmp( $a['name'], $b['name'] )
+		);
+
+		return $list;
+	}
+
+	// =========================================================================
+	// Default template
+	// =========================================================================
+
+	/**
+	 * Return the slug of the current default template for a type.
+	 *
+	 * @param  string $type  'product' | 'category'
+	 * @return string
+	 */
+	public function get_default_slug( string $type = 'product' ): string {
+		return (string) get_option( 'rjt_default_' . $type . '_template', '' );
+	}
+
+	/**
+	 * Set the default template for a type.
+	 *
+	 * @param string $slug
+	 * @param string $type
+	 */
+	public function set_default( string $slug, string $type = 'product' ): void {
+		update_option( 'rjt_default_' . $type . '_template', $slug );
+	}
+
+	/**
+	 * If no default has been set yet, pick the first available template.
+	 * Called on 'init' priority 6 (after register_cpt).
+	 */
+	public function maybe_set_default(): void {
+		foreach ( [ 'product', 'category' ] as $type ) {
+			if ( '' !== $this->get_default_slug( $type ) ) {
+				continue;
+			}
+			$all = $this->get_all( $type );
+			if ( ! empty( $all ) ) {
+				$this->set_default( $all[0]['slug'], $type );
+			}
+		}
+	}
+
+	/**
+	 * Create the built-in default template on disk if it doesn't exist.
+	 * Safe to call multiple times.
+	 */
+	public function maybe_create_default_template(): void {
+		$this->maybe_set_default();
+
+		$slug = 'default-product';
+		$dir  = self::templates_dir() . $slug . '/';
+
+		if ( is_dir( $dir ) && file_exists( $dir . 'template.json' ) ) {
+			return;
+		}
+
+		$this->scaffold_template( $slug, 'Default Product Template', 'product', true );
+	}
+
+	// =========================================================================
+	// Resolution — which template to use for a product
+	// =========================================================================
+
+	/**
+	 * Resolve the template slug for a product ID.
+	 *
+	 * Priority: product-specific → global default → null
+	 *
+	 * @param  int $product_id
+	 * @return string|null Template slug or null if nothing found.
+	 */
+	public function resolve_for_product( int $product_id ): ?string {
+		// 1. Product-specific.
+		$slug = (string) get_post_meta( $product_id, '_rj_template_slug', true );
+
+		if ( $slug && $this->get_meta( $slug ) ) {
+			return $slug;
+		}
+
+		// 2. Global default.
+		$default = $this->get_default_slug( 'product' );
+
+		if ( $default && $this->get_meta( $default ) ) {
+			return $default;
+		}
+
+		return null;
+	}
+
+	/**
+	 * Return the absolute path to a template file.
+	 *
+	 * @param  string $slug
+	 * @param  string $file  e.g. 'content.php', 'hooks.php'
+	 * @return string|null
+	 */
+	public function get_template_file( string $slug, string $file ): ?string {
+		$path = self::templates_dir() . $slug . '/' . $file;
+		return file_exists( $path ) ? $path : null;
+	}
+
+	// =========================================================================
+	// Frontend hooks
+	// =========================================================================
+
+	public function register_hooks(): void {
+		add_filter( 'woocommerce_locate_template', [ $this, 'locate_template' ], 10, 3 );
+		add_action( 'woocommerce_before_single_product', [ $this, 'apply_product_hooks' ], 1 );
+		// Enqueue template assets.
+		add_action( 'wp_enqueue_scripts', [ $this, 'enqueue_template_assets' ] );
+	}
+
+	/**
+	 * Enqueue CSS/JS from the active template's assets/ directory.
+	 */
+	public function enqueue_template_assets(): void {
+		if ( ! is_product() ) {
+			return;
+		}
+
+		global $post;
+		$slug = $this->resolve_for_product( (int) $post->ID );
+
+		if ( ! $slug ) {
+			return;
+		}
+
+		$base_path = self::templates_dir() . $slug . '/assets/';
+		$base_url  = RJT_URL . 'templates/' . $slug . '/assets/';
+		$meta      = $this->get_meta( $slug );
+		$ver       = $meta ? $meta['version'] : RJT_VERSION;
+
+		if ( file_exists( $base_path . 'style.css' ) ) {
+			wp_enqueue_style( 'rjt-tpl-' . $slug, $base_url . 'style.css', [], $ver );
+		}
+		if ( file_exists( $base_path . 'script.js' ) ) {
+			wp_enqueue_script( 'rjt-tpl-' . $slug, $base_url . 'script.js', [ 'jquery' ], $ver, true );
+		}
+	}
+
+	/**
+	 * Load the template's hooks.php to apply its WC hook modifications.
+	 * Called on woocommerce_before_single_product (before any WC output).
+	 */
+	public function apply_product_hooks(): void {
+		global $post;
+
+		if ( ! $post ) {
+			return;
+		}
+
+		$slug      = $this->resolve_for_product( (int) $post->ID );
+		$hooks_php = $slug ? $this->get_template_file( $slug, 'hooks.php' ) : null;
+
+		if ( $hooks_php ) {
+			require_once $hooks_php;
+		}
+	}
+
+	/**
+	 * Override WC template files with ours from content.php.
+	 * We only intercept single-product/content.php.
+	 *
+	 * @param  string $template      Located template file path.
+	 * @param  string $template_name Template name (relative path).
+	 * @param  string $template_path Template path (theme override dir).
+	 * @return string
+	 */
+	public function locate_template( string $template, string $template_name, string $template_path ): string {
+		if ( 'single-product/content.php' !== $template_name ) {
+			return $template;
+		}
+
+		if ( ! is_product() ) {
+			return $template;
+		}
+
+		global $post;
+		$slug        = $this->resolve_for_product( (int) $post->ID );
+		$content_php = $slug ? $this->get_template_file( $slug, 'content.php' ) : null;
+
+		return $content_php ?? $template;
+	}
+
+	// =========================================================================
+	// CRUD — create / update / delete on disk
+	// =========================================================================
+
+	/**
+	 * Create or update a template folder on disk.
+	 *
+	 * @param  array{slug?:string,name:string,type:string,description?:string,author?:string,version?:string} $data
+	 * @param  bool  $is_new   True when creating, false when updating metadata only.
+	 * @return string|\WP_Error  Slug on success.
+	 */
+	public function save( array $data, bool $is_new = false ) {
+		$slug = sanitize_title( $data['slug'] ?? '' );
+		$name = sanitize_text_field( $data['name'] ?? '' );
+		$type = in_array( $data['type'] ?? '', [ 'product', 'category' ], true )
+			? $data['type'] : 'product';
+
+		if ( empty( $name ) ) {
+			return new \WP_Error( 'empty_name', __( 'Template name is required.', 'rockyjam-templates' ) );
+		}
+
+		if ( empty( $slug ) ) {
+			return new \WP_Error( 'empty_slug', __( 'Template slug is required.', 'rockyjam-templates' ) );
+		}
+
+		$dir = self::templates_dir() . $slug . '/';
+
+		if ( $is_new && is_dir( $dir ) ) {
+			return new \WP_Error( 'exists', __( 'A template with this slug already exists.', 'rockyjam-templates' ) );
+		}
+
+		if ( $is_new ) {
+			$result = $this->scaffold_template( $slug, $name, $type, false );
+			if ( is_wp_error( $result ) ) {
+				return $result;
+			}
+		}
+
+		// Always update template.json with latest metadata.
+		$json = [
+			'name'        => $name,
+			'type'        => $type,
+			'version'     => sanitize_text_field( $data['version'] ?? '1.0.0' ),
+			'description' => sanitize_textarea_field( $data['description'] ?? '' ),
+			'author'      => sanitize_text_field( $data['author'] ?? '' ),
+		];
+
+		file_put_contents( $dir . 'template.json', wp_json_encode( $json, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE ) );
+
+		// Handle default flag.
+		if ( ! empty( $data['is_default'] ) ) {
+			$this->set_default( $slug, $type );
+		}
+
+		return $slug;
+	}
+
+	/**
+	 * Delete a template directory. Refuses if it's the only template.
+	 *
+	 * @param  string $slug
 	 * @return true|\WP_Error
 	 */
-	public function delete_template( int $template_id ) {
-		$post = get_post( $template_id );
+	public function delete( string $slug ) {
+		$slug = sanitize_title( $slug );
+		$dir  = self::templates_dir() . $slug . '/';
 
-		if ( ! $post || RJT_CPT !== $post->post_type ) {
+		if ( ! is_dir( $dir ) ) {
 			return new \WP_Error( 'not_found', __( 'Template not found.', 'rockyjam-templates' ) );
 		}
 
-		$is_default = (bool) get_post_meta( $template_id, '_rj_is_default', true );
-		$type       = get_post_meta( $template_id, '_rj_template_type', true );
+		$meta = $this->get_meta( $slug );
+		$type = $meta['type'] ?? 'product';
 
-		// Don't allow deleting the only default.
-		if ( $is_default ) {
-			$others = get_posts( [
-				'post_type'      => RJT_CPT,
-				'post_status'    => 'publish',
-				'posts_per_page' => 1,
-				'post__not_in'   => [ $template_id ],
-				'meta_query'     => [
-					[ 'key' => '_rj_template_type', 'value' => $type ],
-				],
-				'fields' => 'ids',
-			] );
+		// Refuse to delete if it's the last template of this type.
+		$others = array_filter(
+			$this->get_all( $type ),
+			fn( $t ) => $t['slug'] !== $slug
+		);
 
-			if ( empty( $others ) ) {
-				return new \WP_Error(
-					'last_default',
-					__( 'Cannot delete the only template. Create another template first.', 'rockyjam-templates' )
-				);
-			}
-
-			// Auto-assign default to the next available template.
-			$next_id = $others[0];
-			update_post_meta( $next_id, '_rj_is_default', '1' );
+		if ( empty( $others ) ) {
+			return new \WP_Error(
+				'last_template',
+				__( 'Cannot delete the only template. Create another template first.', 'rockyjam-templates' )
+			);
 		}
 
-		// Remove template assignment from all products that used this template.
-		$this->detach_from_products( $template_id );
+		$this->rmdir_recursive( $dir );
 
-		wp_delete_post( $template_id, true );
+		// If this was the default, reassign to the next available.
+		if ( $this->get_default_slug( $type ) === $slug ) {
+			$next = array_values( $others )[0];
+			$this->set_default( $next['slug'], $type );
+		}
+
+		// Remove assignment from products.
+		$this->detach_from_products( $slug );
 
 		return true;
 	}
 
+	// =========================================================================
+	// Scaffold — create all files for a new template
+	// =========================================================================
+
 	/**
-	 * Set the default template for a type (unsets all others).
+	 * Create the full directory structure for a new template.
 	 *
-	 * @param  int    $template_id
-	 * @param  string $type
+	 * @param  string $slug
+	 * @param  string $name
+	 * @param  string $type  'product' | 'category'
+	 * @param  bool   $is_default
+	 * @return string|\WP_Error  Slug on success.
 	 */
-	public function set_as_default( int $template_id, string $type ): void {
-		update_post_meta( $template_id, '_rj_is_default', '1' );
-		$this->clear_other_defaults( $template_id, $type );
-	}
+	private function scaffold_template( string $slug, string $name, string $type, bool $is_default ) {
+		$dir = self::templates_dir() . $slug . '/';
 
-	// ------------------------------------------------------------------
-	// Helpers
-	// ------------------------------------------------------------------
-
-	/**
-	 * Unset _rj_is_default on all templates of $type except $except_id.
-	 */
-	private function clear_other_defaults( int $except_id, string $type ): void {
-		$others = get_posts( [
-			'post_type'      => RJT_CPT,
-			'post_status'    => 'publish',
-			'posts_per_page' => -1,
-			'post__not_in'   => [ $except_id ],
-			'meta_query'     => [
-				[ 'key' => '_rj_template_type', 'value' => $type ],
-				[ 'key' => '_rj_is_default', 'value' => '1' ],
-			],
-			'fields' => 'ids',
-		] );
-
-		foreach ( $others as $id ) {
-			update_post_meta( $id, '_rj_is_default', '' );
+		if ( ! wp_mkdir_p( $dir . 'assets/' ) ) {
+			return new \WP_Error( 'mkdir', __( 'Could not create template directory.', 'rockyjam-templates' ) );
 		}
+
+		// ---- template.json ----
+		$json = [
+			'name'        => $name,
+			'type'        => $type,
+			'version'     => '1.0.0',
+			'description' => '',
+			'author'      => '',
+		];
+		file_put_contents( $dir . 'template.json', wp_json_encode( $json, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE ) );
+
+		// ---- hooks.php ----
+		$hooks = $this->generate_hooks_php( $name, $type );
+		file_put_contents( $dir . 'hooks.php', $hooks );
+
+		// ---- content.php ----
+		$content = $this->generate_content_php( $name, $type );
+		file_put_contents( $dir . 'content.php', $content );
+
+		// ---- functions.php ----
+		$functions = $this->generate_functions_php( $name, $slug );
+		file_put_contents( $dir . 'functions.php', $functions );
+
+		// ---- assets/style.css ----
+		file_put_contents( $dir . 'assets/style.css', $this->generate_style_css( $name, $slug ) );
+
+		// ---- assets/script.js ----
+		file_put_contents( $dir . 'assets/script.js', $this->generate_script_js( $name, $slug ) );
+
+		if ( $is_default ) {
+			$this->set_default( $slug, $type );
+		}
+
+		return $slug;
 	}
 
-	/**
-	 * Remove _rj_template_id from all products that reference the deleted template.
-	 */
-	private function detach_from_products( int $template_id ): void {
+	// =========================================================================
+	// File generators
+	// =========================================================================
+
+	private function generate_hooks_php( string $name, string $type ): string {
+		$out  = '<?php' . "\n";
+		$out .= '/**' . "\n";
+		$out .= ' * ' . $name . ' — WooCommerce hook overrides.' . "\n";
+		$out .= ' *' . "\n";
+		$out .= ' * This file is loaded on woocommerce_before_single_product (priority 1).' . "\n";
+		$out .= ' * Use remove_action() to strip default WC output, then add_action() to' . "\n";
+		$out .= ' * insert your own callbacks at the desired priority.' . "\n";
+		$out .= ' *' . "\n";
+		$out .= ' * Reference: https://woocommerce.com/document/conditional-tags/' . "\n";
+		$out .= ' * Hook list: https://woocommerce.com/document/hooks-and-filters/' . "\n";
+		$out .= ' */' . "\n\n";
+		$out .= "if ( ! defined( 'ABSPATH' ) ) {\n\texit;\n}\n\n";
+
+		if ( 'product' === $type ) {
+			$out .= '// -----------------------------------------------------------------------' . "\n";
+			$out .= '// Load this template\'s helper functions.' . "\n";
+			$out .= '// -----------------------------------------------------------------------' . "\n";
+			$out .= "require_once __DIR__ . '/functions.php';\n\n";
+
+			$out .= '// -----------------------------------------------------------------------' . "\n";
+			$out .= '// REMOVE default WooCommerce hooks (uncomment what you want to disable).' . "\n";
+			$out .= '// -----------------------------------------------------------------------' . "\n\n";
+			$out .= "// remove_action( 'woocommerce_single_product_summary', 'woocommerce_template_single_title',        5  );\n";
+			$out .= "// remove_action( 'woocommerce_single_product_summary', 'woocommerce_template_single_rating',       10 );\n";
+			$out .= "// remove_action( 'woocommerce_single_product_summary', 'woocommerce_template_single_price',        10 );\n";
+			$out .= "// remove_action( 'woocommerce_single_product_summary', 'woocommerce_template_single_excerpt',      20 );\n";
+			$out .= "// remove_action( 'woocommerce_single_product_summary', 'woocommerce_template_single_add_to_cart',  30 );\n";
+			$out .= "// remove_action( 'woocommerce_single_product_summary', 'woocommerce_template_single_meta',         40 );\n";
+			$out .= "// remove_action( 'woocommerce_single_product_summary', 'woocommerce_template_single_sharing',      50 );\n";
+			$out .= "// remove_action( 'woocommerce_before_single_product_summary', 'woocommerce_show_product_images',   20 );\n";
+			$out .= "// remove_action( 'woocommerce_after_single_product_summary',  'woocommerce_output_product_data_tabs', 10 );\n";
+			$out .= "// remove_action( 'woocommerce_after_single_product_summary',  'woocommerce_upsell_display',         15 );\n";
+			$out .= "// remove_action( 'woocommerce_after_single_product_summary',  'woocommerce_output_related_products', 20 );\n\n";
+
+			$out .= '// -----------------------------------------------------------------------' . "\n";
+			$out .= '// ADD / RE-PRIORITISE your own hooks.' . "\n";
+			$out .= '// -----------------------------------------------------------------------' . "\n\n";
+			$out .= "// add_action( 'woocommerce_single_product_summary', 'my_custom_callback', 15 );\n\n";
+
+			$out .= '// -----------------------------------------------------------------------' . "\n";
+			$out .= '// CHANGE WooCommerce filter output.' . "\n";
+			$out .= '// -----------------------------------------------------------------------' . "\n\n";
+			$out .= "// add_filter( 'woocommerce_product_tabs', function( \$tabs ) {\n";
+			$out .= "//     unset( \$tabs['reviews'] ); // hide reviews tab\n";
+			$out .= "//     return \$tabs;\n";
+			$out .= "// } );\n";
+		}
+
+		return $out;
+	}
+
+	private function generate_content_php( string $name, string $type ): string {
+		$out  = '<?php' . "\n";
+		$out .= '/**' . "\n";
+		$out .= ' * ' . $name . ' — product page markup.' . "\n";
+		$out .= ' *' . "\n";
+		$out .= ' * This file replaces woocommerce/templates/single-product/content.php.' . "\n";
+		$out .= ' * Variables available: $product (WC_Product)' . "\n";
+		$out .= ' */' . "\n\n";
+		$out .= "if ( ! defined( 'ABSPATH' ) ) {\n\texit;\n}\n\n";
+		$out .= "global \$product;\n\n";
+		$out .= "do_action( 'woocommerce_before_single_product' );\n\n";
+		$out .= "if ( post_password_required() ) {\n";
+		$out .= "\techo get_the_password_form(); // WPCS: XSS ok.\n";
+		$out .= "\treturn;\n}\n";
+		$out .= '?>' . "\n";
+		$out .= '<div id="product-<?php the_ID(); ?>" <?php wc_product_class( \'\', $product ); ?>>' . "\n\n";
+		$out .= "\t" . '<?php do_action( \'woocommerce_before_single_product_summary\' ); ?>' . "\n\n";
+		$out .= "\t" . '<div class="summary entry-summary">' . "\n";
+		$out .= "\t\t" . '<?php do_action( \'woocommerce_single_product_summary\' ); ?>' . "\n";
+		$out .= "\t" . '</div>' . "\n\n";
+		$out .= "\t" . '<?php do_action( \'woocommerce_after_single_product_summary\' ); ?>' . "\n\n";
+		$out .= '</div>' . "\n\n";
+		$out .= '<?php do_action( \'woocommerce_after_single_product\' ); ?>' . "\n";
+
+		return $out;
+	}
+
+	private function generate_functions_php( string $name, string $slug ): string {
+		$prefix = 'rjt_' . str_replace( '-', '_', $slug );
+		$out  = '<?php' . "\n";
+		$out .= '/**' . "\n";
+		$out .= ' * ' . $name . ' — helper functions.' . "\n";
+		$out .= ' *' . "\n";
+		$out .= ' * Loaded by hooks.php. Define template-specific helper functions here.' . "\n";
+		$out .= ' */' . "\n\n";
+		$out .= "if ( ! defined( 'ABSPATH' ) ) {\n\texit;\n}\n\n";
+		$out .= '/**' . "\n";
+		$out .= ' * Example helper for the ' . $name . ' template.' . "\n";
+		$out .= ' * Call it from hooks.php callbacks or from content.php.' . "\n";
+		$out .= ' *' . "\n";
+		$out .= ' * @param  \\WC_Product $product' . "\n";
+		$out .= ' * @return void' . "\n";
+		$out .= ' */' . "\n";
+		$out .= 'function ' . $prefix . '_render_badge( \\WC_Product $product ): void {' . "\n";
+		$out .= "\tif ( \$product->is_on_sale() ) {\n";
+		$out .= "\t\techo '<span class=\"rjt-badge rjt-badge--sale\">' . esc_html__( 'Sale', 'rockyjam-templates' ) . '</span>';\n";
+		$out .= "\t}\n";
+		$out .= "}\n";
+
+		return $out;
+	}
+
+	private function generate_style_css( string $name, string $slug ): string {
+		$out  = '/**' . "\n";
+		$out .= ' * ' . $name . ' — frontend styles.' . "\n";
+		$out .= ' */' . "\n\n";
+		$out .= '.woocommerce div.product {' . "\n";
+		$out .= "\t/* Add your product page styles here */" . "\n";
+		$out .= "}\n\n";
+		$out .= '.rjt-badge {' . "\n";
+		$out .= "\tdisplay: inline-block;\n";
+		$out .= "\tpadding: 2px 10px;\n";
+		$out .= "\tborder-radius: 3px;\n";
+		$out .= "\tfont-size: 12px;\n";
+		$out .= "\tfont-weight: 600;\n";
+		$out .= "}\n\n";
+		$out .= '.rjt-badge--sale {' . "\n";
+		$out .= "\tbackground: #e9143e;\n";
+		$out .= "\tcolor: #fff;\n";
+		$out .= "}\n";
+
+		return $out;
+	}
+
+	private function generate_script_js( string $name, string $slug ): string {
+		$out  = '/**' . "\n";
+		$out .= ' * ' . $name . ' — frontend scripts.' . "\n";
+		$out .= ' */' . "\n";
+		$out .= '( function ( $ ) {' . "\n";
+		$out .= "\t'use strict';\n\n";
+		$out .= "\t\$( document ).ready( function () {\n";
+		$out .= "\t\t// Add your product page scripts here.\n";
+		$out .= "\t} );\n";
+		$out .= '} )( jQuery );' . "\n";
+
+		return $out;
+	}
+
+	// =========================================================================
+	// Helpers
+	// =========================================================================
+
+	private function rmdir_recursive( string $dir ): void {
+		if ( ! is_dir( $dir ) ) {
+			return;
+		}
+		foreach ( array_diff( (array) scandir( $dir ), [ '.', '..' ] ) as $item ) {
+			$path = rtrim( $dir, '/' ) . '/' . $item;
+			is_dir( $path ) ? $this->rmdir_recursive( $path . '/' ) : wp_delete_file( $path );
+		}
+		rmdir( $dir );
+	}
+
+	private function detach_from_products( string $slug ): void {
 		global $wpdb;
 		$wpdb->delete(
 			$wpdb->postmeta,
-			[
-				'meta_key'   => '_rj_template_id',
-				'meta_value' => $template_id,
-			],
-			[ '%s', '%d' ]
+			[ 'meta_key' => '_rj_template_slug', 'meta_value' => $slug ],
+			[ '%s', '%s' ]
 		);
-	}
-
-	/**
-	 * Render template content to a temporary PHP file and return its path.
-	 * The temp file sets up $product in scope before echoing the content.
-	 *
-	 * @param  array       $tpl     Template data array.
-	 * @param  \WC_Product $product Current WooCommerce product.
-	 * @return string       Path to temp file.
-	 */
-	private function render_to_temp_file( array $tpl, \WC_Product $product ): string {
-		$upload_dir = wp_upload_dir();
-		$tmp_dir    = trailingslashit( $upload_dir['basedir'] ) . 'rjt-cache/';
-
-		if ( ! is_dir( $tmp_dir ) ) {
-			wp_mkdir_p( $tmp_dir );
-			// Protect the directory.
-			file_put_contents( $tmp_dir . 'index.php', '<?php // Silence' );
-		}
-
-		$file = $tmp_dir . 'tpl-' . $tpl['id'] . '.php';
-
-		// Regenerate if missing.
-		if ( ! file_exists( $file ) ) {
-			$php  = "<?php if ( ! defined( 'ABSPATH' ) ) { exit; } ?>\n";
-			$php .= do_shortcode( $tpl['content'] );
-			file_put_contents( $file, $php );
-		}
-
-		return $file;
-	}
-
-	/**
-	 * Default template HTML scaffold (shown in editor as starting point).
-	 */
-	private function get_default_template_content(): string {
-		return '<div class="rjt-product">' . "\n"
-			. "\t" . '<div class="rjt-product__gallery">' . "\n"
-			. "\t\t" . '[rjt_product_gallery]' . "\n"
-			. "\t" . '</div>' . "\n"
-			. "\t" . '<div class="rjt-product__summary">' . "\n"
-			. "\t\t" . '<h1 class="product_title">[rjt_product_title]</h1>' . "\n"
-			. "\t\t" . '[rjt_product_price]' . "\n"
-			. "\t\t" . '[rjt_product_description]' . "\n"
-			. "\t\t" . '[rjt_add_to_cart]' . "\n"
-			. "\t" . '</div>' . "\n"
-			. '</div>';
 	}
 }
