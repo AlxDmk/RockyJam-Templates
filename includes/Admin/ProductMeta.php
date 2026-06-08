@@ -11,7 +11,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Adds a "Template" metabox to the WooCommerce product editor.
  *
- * Supports both Classic Editor and the new Block Editor (Product Editor).
+ * Uses string type hints instead of \WC_Product where the parameter
+ * arrives as WP_Post (to avoid Fatal Error when WooCommerce is missing).
  *
  * @package RockyJamTemplates
  */
@@ -24,6 +25,11 @@ class ProductMeta {
 	}
 
 	public function register(): void {
+		// Only register hooks if WooCommerce is active.
+		if ( ! class_exists( 'WooCommerce' ) ) {
+			return;
+		}
+
 		add_action( 'add_meta_boxes', [ $this, 'add_metabox' ] );
 		add_action( 'save_post_product', [ $this, 'save_meta' ], 10, 2 );
 	}
@@ -43,6 +49,9 @@ class ProductMeta {
 		);
 	}
 
+	/**
+	 * @param \WP_Post $post  WordPress post object (product).
+	 */
 	public function render_metabox( \WP_Post $post ): void {
 		wp_nonce_field( 'rjt_product_meta', 'rjt_product_nonce' );
 
@@ -89,14 +98,16 @@ class ProductMeta {
 	// Save
 	// ------------------------------------------------------------------
 
+	/**
+	 * @param int      $post_id
+	 * @param \WP_Post $post
+	 */
 	public function save_meta( int $post_id, \WP_Post $post ): void {
-		// Verify nonce.
 		$nonce = sanitize_text_field( wp_unslash( $_POST['rjt_product_nonce'] ?? '' ) );
 		if ( ! wp_verify_nonce( $nonce, 'rjt_product_meta' ) ) {
 			return;
 		}
 
-		// Bail on autosave / revisions / no permission.
 		if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) {
 			return;
 		}
@@ -110,7 +121,6 @@ class ProductMeta {
 		$template_id = (int) ( $_POST['rjt_template_id'] ?? 0 );
 
 		if ( $template_id > 0 ) {
-			// Validate the template actually exists and is a product template.
 			$tpl = $this->manager->get_template_data( $template_id );
 			if ( ! $tpl || 'product' !== $tpl['type'] ) {
 				$template_id = 0;
