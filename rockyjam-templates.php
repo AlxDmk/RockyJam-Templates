@@ -32,6 +32,7 @@ require_once RJT_PATH . 'includes/Core/AddonsRegistry.php';
 require_once RJT_PATH . 'includes/Core/Plugin.php';
 require_once RJT_PATH . 'includes/Admin/AdminPage.php';
 require_once RJT_PATH . 'includes/Admin/HooksPage.php';
+require_once RJT_PATH . 'includes/Admin/OverridesPage.php';
 require_once RJT_PATH . 'includes/Admin/ProductMeta.php';
 
 /**
