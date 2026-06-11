@@ -73,8 +73,14 @@
 		isDirty     = false;
 		saveStatus.textContent = '';
 		editorTitle.textContent = label + '  (' + path + ')';
+
+		// Show wrapper FIRST so CodeMirror can measure its dimensions correctly.
 		editorWrap.style.display = '';
 
+		// Scroll wrapper into view.
+		editorWrap.scrollIntoView( { behavior: 'smooth', block: 'nearest' } );
+
+		// Init CM only after wrapper is visible (so it can compute height/width).
 		initCodeMirror();
 
 		// Load content via AJAX
@@ -101,9 +107,15 @@
 					saveStatus.className = 'rjt-overrides__save-status rjt-overrides__save-status--hint';
 				}
 
-				// Scroll to top
-				cmEditor.scrollTo( 0, 0 );
-				cmEditor.refresh();
+				// Refresh after browser has laid out the newly-visible editor.
+				// Double-RAF ensures layout is complete before CM measures itself.
+				requestAnimationFrame( () => {
+					requestAnimationFrame( () => {
+						cmEditor.refresh();
+						cmEditor.scrollTo( 0, 0 );
+						cmEditor.focus();
+					} );
+				} );
 			} );
 	}
 
@@ -333,6 +345,13 @@
 	}
 
 	// ── Utility ──────────────────────────────────────────────────────────────
+	// Re-measure CM on window resize (WP admin sidebar collapse also triggers this).
+	window.addEventListener( 'resize', () => {
+		if ( cmEditor && editorWrap.style.display !== 'none' ) {
+			cmEditor.refresh();
+		}
+	} );
+
 	function escHtml( str ) {
 		return String( str )
 			.replace( /&/g, '&amp;' )
