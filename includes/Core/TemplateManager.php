@@ -247,7 +247,8 @@ class TemplateManager {
 	// =========================================================================
 
 	public function register_hooks(): void {
-		add_filter( 'woocommerce_locate_template', [ $this, 'locate_template' ], 10, 3 );
+		add_filter( 'woocommerce_locate_template',  [ $this, 'locate_template' ],      10, 3 );
+		add_filter( 'wc_get_template_part',          [ $this, 'locate_template_part' ], 10, 3 );
 		add_action( 'woocommerce_before_single_product', [ $this, 'apply_product_hooks' ], 1 );
 		// Enqueue template assets.
 		add_action( 'wp_enqueue_scripts', [ $this, 'enqueue_template_assets' ] );
@@ -337,6 +338,39 @@ class TemplateManager {
 
 		// 2. Per-template WC overrides: templates/{slug}/overrides/woocommerce/{template_name}
 		$override = self::templates_dir() . $slug . '/overrides/woocommerce/' . $template_name;
+		if ( file_exists( $override ) ) {
+			return $override;
+		}
+
+		return $template;
+	}
+
+	/**
+	 * Filter: wc_get_template_part
+	 *
+	 * WooCommerce loads content-single-product.php via wc_get_template_part('content','single-product').
+	 * That bypasses woocommerce_locate_template, so we intercept it here.
+	 *
+	 * @param string $template  Full path found so far (empty string = not found yet).
+	 * @param string $slug      Template slug, e.g. 'content'.
+	 * @param string $name      Template name, e.g. 'single-product'.
+	 * @return string
+	 */
+	public function locate_template_part( string $template, string $slug, string $name ): string {
+		if ( ! is_product() ) {
+			return $template;
+		}
+
+		global $post;
+		$rjt_slug = $this->resolve_for_product( (int) ( $post->ID ?? 0 ) );
+		if ( ! $rjt_slug ) {
+			return $template;
+		}
+
+		// Reconstruct the WC template filename: e.g. content-single-product.php
+		$filename    = $name ? "{$slug}-{$name}.php" : "{$slug}.php";
+		$override    = self::overrides_dir( $rjt_slug ) . $filename;
+
 		if ( file_exists( $override ) ) {
 			return $override;
 		}
