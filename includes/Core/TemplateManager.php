@@ -316,19 +316,32 @@ class TemplateManager {
 	 * @return string
 	 */
 	public function locate_template( string $template, string $template_name, string $template_path ): string {
-		if ( 'single-product/content.php' !== $template_name ) {
-			return $template;
-		}
-
-		if ( ! is_product() ) {
+		if ( ! is_product() && ! is_product_category() ) {
 			return $template;
 		}
 
 		global $post;
-		$slug        = $this->resolve_for_product( (int) $post->ID );
-		$content_php = $slug ? $this->get_template_file( $slug, 'content.php' ) : null;
+		$slug = $this->resolve_for_product( (int) ( $post->ID ?? 0 ) );
 
-		return $content_php ?? $template;
+		if ( ! $slug ) {
+			return $template;
+		}
+
+		// 1. Legacy: content.php directly in template root.
+		if ( 'single-product/content.php' === $template_name ) {
+			$content_php = $this->get_template_file( $slug, 'content.php' );
+			if ( $content_php ) {
+				return $content_php;
+			}
+		}
+
+		// 2. Per-template WC overrides: templates/{slug}/overrides/woocommerce/{template_name}
+		$override = self::templates_dir() . $slug . '/overrides/woocommerce/' . $template_name;
+		if ( file_exists( $override ) ) {
+			return $override;
+		}
+
+		return $template;
 	}
 
 	// =========================================================================
@@ -629,6 +642,136 @@ class TemplateManager {
 		$out .= '} )( jQuery );' . "\n";
 
 		return $out;
+	}
+
+
+	// =========================================================================
+	// Overrides — per-template WC template overrides
+	// =========================================================================
+
+	/**
+	 * Return the directory for WC overrides of a given template slug.
+	 */
+	public static function overrides_dir( string $slug ): string {
+		return self::templates_dir() . $slug . '/overrides/woocommerce/';
+	}
+
+	/**
+	 * Load the WC templates registry.
+	 *
+	 * @return array[]  Each entry: {path, label, description, featured}
+	 */
+	public static function load_wc_templates_registry(): array {
+		$file = RJT_PATH . 'data/wc-templates-registry.json';
+		if ( ! file_exists( $file ) ) {
+			return [];
+		}
+		$data = json_decode( file_get_contents( $file ), true );
+		return $data['templates'] ?? [];
+	}
+
+	/**
+	 * List overrides active for a template slug.
+	 * Returns array of WC template paths (relative), e.g. ['single-product/price.php']
+	 *
+	 * @return string[]
+	 */
+	public function list_overrides( string $slug ): array {
+		$dir  = self::overrides_dir( $slug );
+		if ( ! is_dir( $dir ) ) {
+			return [];
+		}
+		$result = [];
+		$iter   = new \RecursiveIteratorIterator( new \RecursiveDirectoryIterator( $dir, \FilesystemIterator::SKIP_DOTS ) );
+		foreach ( $iter as $file ) {
+			if ( $file->isFile() && str_ends_with( $file->getFilename(), '.php' ) ) {
+				$rel = str_replace( '\\', '/', substr( $file->getPathname(), strlen( $dir ) ) );
+				$result[] = ltrim( $rel, '/' );
+			}
+		}
+		sort( $result );
+		return $result;
+	}
+
+	/**
+	 * Get the content of an override file, or the original WC template content as default.
+	 *
+	 * @param  string $slug          Template slug.
+	 * @param  string $wc_tpl_path   WC template relative path, e.g. 'single-product/price.php'
+	 * @return array{content:string, exists:bool}
+	 */
+	public function get_override_content( string $slug, string $wc_tpl_path ): array {
+		$override_file = self::overrides_dir( $slug ) . $wc_tpl_path;
+
+		if ( file_exists( $override_file ) ) {
+			return [ 'content' => file_get_contents( $override_file ), 'exists' => true ];
+		}
+
+		// Return WC default as starting point.
+		$wc_default = WC()->plugin_path() . '/templates/' . $wc_tpl_path;
+		$content    = file_exists( $wc_default )
+			? file_get_contents( $wc_default )
+			: "<?php\n// WC template: {$wc_tpl_path}\n// WooCommerce default not found — write your override here.\n";
+
+		return [ 'content' => $content, 'exists' => false ];
+	}
+
+	/**
+	 * Save (create or update) an override file.
+	 *
+	 * @param  string $slug
+	 * @param  string $wc_tpl_path   e.g. 'single-product/price.php'
+	 * @param  string $php_content   Raw PHP content (admin-only, manage_options required).
+	 * @return true|\WP_Error
+	 */
+	public function save_override( string $slug, string $wc_tpl_path, string $php_content ) {
+		// Validate path — only allow alphanumeric, hyphens, underscores, slashes, dots.
+		if ( ! preg_match( '#^[a-z0-9/_\-]+\.php$#', $wc_tpl_path ) ) {
+			return new \WP_Error( 'invalid_path', __( 'Invalid template path.', 'rockyjam-templates' ) );
+		}
+
+		$dir = self::overrides_dir( $slug );
+
+		if ( ! wp_mkdir_p( dirname( $dir . $wc_tpl_path ) ) ) {
+			return new \WP_Error( 'mkdir', __( 'Could not create override directory.', 'rockyjam-templates' ) );
+		}
+
+		if ( false === file_put_contents( $dir . $wc_tpl_path, $php_content ) ) {
+			return new \WP_Error( 'write', __( 'Could not write override file.', 'rockyjam-templates' ) );
+		}
+
+		return true;
+	}
+
+	/**
+	 * Delete an override file (revert to WC default).
+	 *
+	 * @param  string $slug
+	 * @param  string $wc_tpl_path
+	 * @return true|\WP_Error
+	 */
+	public function delete_override( string $slug, string $wc_tpl_path ) {
+		if ( ! preg_match( '#^[a-z0-9/_\-]+\.php$#', $wc_tpl_path ) ) {
+			return new \WP_Error( 'invalid_path', __( 'Invalid template path.', 'rockyjam-templates' ) );
+		}
+
+		$file = self::overrides_dir( $slug ) . $wc_tpl_path;
+
+		if ( ! file_exists( $file ) ) {
+			return new \WP_Error( 'not_found', __( 'Override not found.', 'rockyjam-templates' ) );
+		}
+
+		wp_delete_file( $file );
+
+		// Remove empty parent directories (up to overrides/woocommerce/).
+		$dir = dirname( $file );
+		$base = rtrim( self::overrides_dir( $slug ), '/' );
+		while ( $dir !== $base && is_dir( $dir ) && count( scandir( $dir ) ) === 2 ) {
+			rmdir( $dir );
+			$dir = dirname( $dir );
+		}
+
+		return true;
 	}
 
 	// =========================================================================

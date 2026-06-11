@@ -1,0 +1,301 @@
+/* ============================================================
+   RockyJam Templates — Overrides Editor
+   ============================================================ */
+
+/* ── Toolbar ─────────────────────────────────────────────── */
+.rjt-overrides__toolbar {
+	display: flex;
+	align-items: flex-start;
+	gap: 12px;
+	flex-wrap: wrap;
+	margin-bottom: 20px;
+}
+
+.rjt-overrides__toolbar h3 {
+	flex: 1 1 100%;
+	margin: 0 0 4px;
+	font-size: 14px;
+	font-weight: 600;
+}
+
+.rjt-overrides__desc {
+	flex: 1;
+	margin: 0;
+	color: #666;
+	font-size: 13px;
+}
+
+.rjt-overrides__add-btn {
+	flex-shrink: 0;
+}
+
+/* ── Override rows list ──────────────────────────────────── */
+.rjt-overrides__list {
+	border: 1px solid #ddd;
+	border-radius: 4px;
+	background: #fff;
+	margin-bottom: 20px;
+}
+
+.rjt-overrides__empty {
+	padding: 20px;
+	text-align: center;
+	color: #888;
+	margin: 0;
+}
+
+.rjt-override-row {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	padding: 10px 14px;
+	border-bottom: 1px solid #f0f0f0;
+	transition: background 0.1s;
+}
+
+.rjt-override-row:last-child {
+	border-bottom: none;
+}
+
+.rjt-override-row:hover {
+	background: #fafafa;
+}
+
+.rjt-override-row__icon {
+	color: #9c6b00;
+	font-size: 18px;
+	flex-shrink: 0;
+}
+
+.rjt-override-row__label {
+	font-weight: 500;
+	flex: 1;
+	min-width: 0;
+}
+
+.rjt-override-row__path {
+	font-size: 11px;
+	color: #888;
+	background: #f5f5f5;
+	padding: 2px 6px;
+	border-radius: 3px;
+	flex-shrink: 0;
+}
+
+.rjt-override-row__actions {
+	display: flex;
+	gap: 6px;
+	flex-shrink: 0;
+}
+
+/* ── CodeMirror editor panel ─────────────────────────────── */
+.rjt-overrides__editor-wrap {
+	border: 1px solid #ddd;
+	border-radius: 4px;
+	overflow: hidden;
+	margin-bottom: 20px;
+}
+
+.rjt-overrides__editor-header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 8px 14px;
+	background: #23282d;
+	color: #eee;
+	gap: 12px;
+}
+
+.rjt-overrides__editor-title {
+	font-size: 12px;
+	font-family: monospace;
+	color: #afd2e8;
+	flex: 1;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.rjt-overrides__editor-actions {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	flex-shrink: 0;
+}
+
+.rjt-overrides__save-status {
+	font-size: 12px;
+	color: #aaa;
+}
+
+.rjt-overrides__save-status--ok {
+	color: #5cb85c;
+}
+
+.rjt-overrides__save-status--error {
+	color: #d9534f;
+}
+
+.rjt-overrides__save-status--hint {
+	color: #f0ad4e;
+	font-style: italic;
+}
+
+/* CodeMirror host — full width, reasonable default height */
+#rjt-codemirror-host .CodeMirror {
+	height: 560px;
+	font-size: 13px;
+	font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+	line-height: 1.55;
+	border-radius: 0;
+}
+
+/* ── Add Override modal ──────────────────────────────────── */
+.rjt-modal {
+	position: fixed;
+	inset: 0;
+	z-index: 100000;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.rjt-modal__backdrop {
+	position: absolute;
+	inset: 0;
+	background: rgba( 0, 0, 0, .55 );
+}
+
+.rjt-modal__box {
+	position: relative;
+	z-index: 1;
+	background: #fff;
+	border-radius: 6px;
+	box-shadow: 0 8px 40px rgba(0,0,0,.28);
+	width: 580px;
+	max-width: calc( 100vw - 40px );
+	max-height: calc( 100vh - 60px );
+	display: flex;
+	flex-direction: column;
+}
+
+.rjt-modal__header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 16px 20px;
+	border-bottom: 1px solid #e5e5e5;
+}
+
+.rjt-modal__header h3 {
+	margin: 0;
+	font-size: 15px;
+}
+
+.rjt-modal__close {
+	background: none;
+	border: none;
+	cursor: pointer;
+	font-size: 18px;
+	color: #666;
+	padding: 0 4px;
+	line-height: 1;
+}
+
+.rjt-modal__body {
+	flex: 1;
+	overflow-y: auto;
+	padding: 16px 20px;
+}
+
+.rjt-modal__body > p {
+	margin: 0 0 12px;
+	color: #555;
+	font-size: 13px;
+}
+
+.rjt-modal__footer {
+	padding: 12px 20px;
+	border-top: 1px solid #e5e5e5;
+	display: flex;
+	gap: 8px;
+	justify-content: flex-end;
+}
+
+/* Search */
+.rjt-add-overrides__search-wrap {
+	margin-bottom: 14px;
+}
+
+.rjt-add-overrides__search-wrap input {
+	width: 100%;
+}
+
+/* Section title */
+.rjt-add-overrides__section {
+	margin-bottom: 18px;
+}
+
+.rjt-add-overrides__section-title {
+	font-size: 11px;
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: .06em;
+	color: #888;
+	margin-bottom: 6px;
+	padding-bottom: 4px;
+	border-bottom: 1px solid #f0f0f0;
+}
+
+/* Checkbox rows */
+.rjt-add-overrides__item {
+	display: flex;
+	align-items: baseline;
+	gap: 8px;
+	padding: 7px 6px;
+	border-radius: 3px;
+	cursor: pointer;
+	transition: background 0.1s;
+	flex-wrap: wrap;
+}
+
+.rjt-add-overrides__item:hover {
+	background: #f5f8ff;
+}
+
+.rjt-add-overrides__item input[type="checkbox"] {
+	flex-shrink: 0;
+	margin-top: 2px;
+}
+
+.rjt-add-overrides__label {
+	font-weight: 500;
+	font-size: 13px;
+	flex: 0 0 auto;
+}
+
+.rjt-add-overrides__path {
+	font-family: monospace;
+	font-size: 11px;
+	color: #888;
+	flex: 0 0 auto;
+}
+
+.rjt-add-overrides__desc {
+	font-size: 12px;
+	color: #999;
+	flex: 1 1 100%;
+	padding-left: 22px;
+}
+
+/* Danger button */
+.rjt-btn--danger,
+.rjt-btn--danger:focus {
+	color: #c62828 !important;
+	border-color: #e57373 !important;
+	background: #fff !important;
+}
+
+.rjt-btn--danger:hover {
+	background: #fdecea !important;
+}

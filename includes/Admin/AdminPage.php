@@ -5,6 +5,7 @@ namespace RockyJamTemplates\Admin;
 use RockyJamTemplates\Core\TemplateManager;
 use RockyJamTemplates\Core\HooksConfig;
 use RockyJamTemplates\Admin\HooksPage;
+use RockyJamTemplates\Admin\OverridesPage;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -129,6 +130,58 @@ class AdminPage {
 					'autodiscovered'  => __( 'auto', 'rockyjam-templates' ),
 				],
 			] );
+
+			// Overrides editor — CodeMirror with PHP mode.
+			wp_enqueue_style(
+				'codemirror-material-darker',
+				'https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/material-darker.min.css',
+				[], '5.65.16'
+			);
+			wp_enqueue_script(
+				'codemirror-core',
+				'https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js',
+				[], '5.65.16', true
+			);
+			wp_enqueue_script(
+				'codemirror-mode-xml',
+				'https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/xml/xml.min.js',
+				[ 'codemirror-core' ], '5.65.16', true
+			);
+			wp_enqueue_script(
+				'codemirror-mode-javascript',
+				'https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/javascript/javascript.min.js',
+				[ 'codemirror-core' ], '5.65.16', true
+			);
+			wp_enqueue_script(
+				'codemirror-mode-css',
+				'https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/css/css.min.js',
+				[ 'codemirror-core' ], '5.65.16', true
+			);
+			wp_enqueue_script(
+				'codemirror-mode-htmlmixed',
+				'https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/htmlmixed/htmlmixed.min.js',
+				[ 'codemirror-mode-xml', 'codemirror-mode-javascript', 'codemirror-mode-css' ], '5.65.16', true
+			);
+			wp_enqueue_script(
+				'codemirror-mode-php',
+				'https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/php/php.min.js',
+				[ 'codemirror-mode-htmlmixed' ], '5.65.16', true
+			);
+			wp_enqueue_script(
+				'codemirror-addon-matchbrackets',
+				'https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/edit/matchbrackets.min.js',
+				[ 'codemirror-core' ], '5.65.16', true
+			);
+			wp_enqueue_script(
+				'codemirror-addon-closebrackets',
+				'https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/edit/closebrackets.min.js',
+				[ 'codemirror-core' ], '5.65.16', true
+			);
+			wp_enqueue_style(  'rjt-overrides-editor', RJT_URL . 'assets/overrides-editor.css', [], RJT_VERSION );
+			wp_enqueue_script( 'rjt-overrides-editor', RJT_URL . 'assets/overrides-editor.js',
+				[ 'codemirror-mode-php', 'codemirror-addon-matchbrackets', 'codemirror-addon-closebrackets' ],
+				RJT_VERSION, true
+			);
 		}
 	}
 
@@ -456,14 +509,22 @@ class AdminPage {
 							<span class="dashicons dashicons-networking"></span>
 							<?php esc_html_e( 'Hooks', 'rockyjam-templates' ); ?>
 						</a>
+						<a href="<?php echo esc_url( admin_url( 'admin.php?page=rjt-templates&action=edit&slug=' . urlencode( $slug ) . '&tab=overrides' ) ); ?>"
+						   class="rjt-section-tab<?php echo 'overrides' === $active_tab ? ' rjt-section-tab--active' : ''; ?>">
+							<span class="dashicons dashicons-media-code"></span>
+							<?php esc_html_e( 'Overrides', 'rockyjam-templates' ); ?>
+						</a>
 					</div>
 
 					<?php if ( 'hooks' === $active_tab ) : ?>
 						<?php ( new HooksPage() )->render( $slug ); ?>
+					<?php elseif ( 'overrides' === $active_tab ) : ?>
+						<?php ( new OverridesPage() )->render( $slug ); ?>
 					<?php else : ?>
 
 					<!-- File editor tabs -->
-					<div class="rjt-tabs" id="rjt-tabs">
+					<div class="rjt-tabs" id="rjt-tabs"
+						style="<?php echo ( 'hooks' === $active_tab || 'overrides' === $active_tab ) ? 'display:none' : ''; ?>">
 						<div class="rjt-tabs__nav">
 							<?php foreach ( $files as $filename => $content ) :
 								$tab_id = 'tab-' . sanitize_title( $filename );

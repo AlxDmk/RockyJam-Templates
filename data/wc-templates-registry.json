@@ -1,0 +1,238 @@
+{
+  "templates": [
+    {
+      "path": "single-product/product-image.php",
+      "label": "Product Image / Gallery",
+      "description": "Main product gallery and thumbnails strip",
+      "featured": true
+    },
+    {
+      "path": "single-product/product-thumbnails.php",
+      "label": "Product Thumbnails Strip",
+      "description": "Thumbnail images shown below main gallery",
+      "featured": true
+    },
+    {
+      "path": "single-product/title.php",
+      "label": "Product Title",
+      "description": "H1 product title heading",
+      "featured": true
+    },
+    {
+      "path": "single-product/price.php",
+      "label": "Price",
+      "description": "Product price display (sale / regular)",
+      "featured": true
+    },
+    {
+      "path": "single-product/short-description.php",
+      "label": "Short Description",
+      "description": "Product excerpt / short description",
+      "featured": true
+    },
+    {
+      "path": "single-product/add-to-cart/simple.php",
+      "label": "Add to Cart — Simple",
+      "description": "Quantity input + Add to Cart button for simple products",
+      "featured": true
+    },
+    {
+      "path": "single-product/add-to-cart/variable.php",
+      "label": "Add to Cart — Variable",
+      "description": "Variation selector + Add to Cart button",
+      "featured": true
+    },
+    {
+      "path": "single-product/meta.php",
+      "label": "Product Meta",
+      "description": "SKU, categories, tags",
+      "featured": true
+    },
+    {
+      "path": "single-product/tabs/tabs.php",
+      "label": "Product Tabs",
+      "description": "Description / Additional Info / Reviews tabs",
+      "featured": true
+    },
+    {
+      "path": "single-product/related.php",
+      "label": "Related Products",
+      "description": "Related products grid below the product",
+      "featured": true
+    },
+    {
+      "path": "content-single-product.php",
+      "label": "Single Product Layout",
+      "description": "Outer wrapper: fires before/after summary hooks, overall product layout",
+      "featured": true
+    },
+    {
+      "path": "single-product/rating.php",
+      "label": "Star Rating",
+      "description": "Star rating display",
+      "featured": false
+    },
+    {
+      "path": "single-product/sale-flash.php",
+      "label": "Sale Flash Badge",
+      "description": "\"Sale!\" badge overlay on the product image",
+      "featured": false
+    },
+    {
+      "path": "single-product/add-to-cart/grouped.php",
+      "label": "Add to Cart — Grouped",
+      "description": "Add to Cart for grouped products",
+      "featured": false
+    },
+    {
+      "path": "single-product/add-to-cart/external.php",
+      "label": "Add to Cart — External",
+      "description": "External / affiliate product button",
+      "featured": false
+    },
+    {
+      "path": "single-product/up-sells.php",
+      "label": "Upsell Products",
+      "description": "Upsell products section inside summary",
+      "featured": false
+    },
+    {
+      "path": "single-product/tabs/description.php",
+      "label": "Tab: Description",
+      "description": "Full product description tab content",
+      "featured": false
+    },
+    {
+      "path": "single-product/tabs/additional-information.php",
+      "label": "Tab: Additional Information",
+      "description": "Attributes / dimensions tab content",
+      "featured": false
+    },
+    {
+      "path": "single-product/tabs/reviews.php",
+      "label": "Tab: Reviews",
+      "description": "Customer reviews tab content",
+      "featured": false
+    },
+    {
+      "path": "single-product/review.php",
+      "label": "Single Review",
+      "description": "Individual review item template",
+      "featured": false
+    },
+    {
+      "path": "single-product/review-rating.php",
+      "label": "Review Rating",
+      "description": "Star rating inside a review",
+      "featured": false
+    },
+    {
+      "path": "single-product/sharing.php",
+      "label": "Social Sharing",
+      "description": "Social sharing buttons",
+      "featured": false
+    },
+    {
+      "path": "loop/loop-start.php",
+      "label": "Loop: Start",
+      "description": "Opening <ul> tag for product loop grid",
+      "featured": false
+    },
+    {
+      "path": "loop/loop-end.php",
+      "label": "Loop: End",
+      "description": "Closing </ul> tag for product loop grid",
+      "featured": false
+    },
+    {
+      "path": "loop/product-thumbnail.php",
+      "label": "Loop: Product Thumbnail",
+      "description": "Thumbnail image in the product loop",
+      "featured": false
+    },
+    {
+      "path": "loop/price.php",
+      "label": "Loop: Price",
+      "description": "Price display in the product loop",
+      "featured": false
+    },
+    {
+      "path": "loop/sale-flash.php",
+      "label": "Loop: Sale Flash",
+      "description": "Sale badge in the product loop",
+      "featured": false
+    },
+    {
+      "path": "loop/add-to-cart.php",
+      "label": "Loop: Add to Cart",
+      "description": "Add to Cart button in the product loop",
+      "featured": false
+    },
+    {
+      "path": "loop/rating.php",
+      "label": "Loop: Rating",
+      "description": "Star rating in the product loop",
+      "featured": false
+    },
+    {
+      "path": "archive-product.php",
+      "label": "Archive / Category Page",
+      "description": "Main product category / shop archive page template",
+      "featured": false
+    },
+    {
+      "path": "content-product.php",
+      "label": "Product Card (Loop Item)",
+      "description": "Single product card inside the loop",
+      "featured": false
+    },
+    {
+      "path": "global/breadcrumb.php",
+      "label": "Breadcrumb",
+      "description": "Breadcrumb navigation",
+      "featured": false
+    },
+    {
+      "path": "global/wrapper-start.php",
+      "label": "Wrapper Start",
+      "description": "Opening WooCommerce content wrapper",
+      "featured": false
+    },
+    {
+      "path": "global/wrapper-end.php",
+      "label": "Wrapper End",
+      "description": "Closing WooCommerce content wrapper",
+      "featured": false
+    },
+    {
+      "path": "global/quantity-input.php",
+      "label": "Quantity Input",
+      "description": "Quantity +/- input field",
+      "featured": false
+    },
+    {
+      "path": "cart/cart.php",
+      "label": "Cart Page",
+      "description": "Full cart page template",
+      "featured": false
+    },
+    {
+      "path": "cart/mini-cart.php",
+      "label": "Mini Cart",
+      "description": "Mini cart dropdown widget content",
+      "featured": false
+    },
+    {
+      "path": "checkout/form-checkout.php",
+      "label": "Checkout Form",
+      "description": "Full checkout page form",
+      "featured": false
+    },
+    {
+      "path": "myaccount/my-account.php",
+      "label": "My Account Page",
+      "description": "Customer account page",
+      "featured": false
+    }
+  ]
+}

@@ -41,6 +41,7 @@ final class Plugin {
 			( new \RockyJamTemplates\Admin\AdminPage( $this->template_manager ) )->register();
 			( new \RockyJamTemplates\Admin\ProductMeta( $this->template_manager ) )->register();
 			( new \RockyJamTemplates\Admin\HooksPage() )->register();
+			( new \RockyJamTemplates\Admin\OverridesPage() )->register_hooks();
 		}
 	}
 
