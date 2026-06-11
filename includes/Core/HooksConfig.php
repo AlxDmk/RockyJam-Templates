@@ -253,6 +253,18 @@ class HooksConfig {
 	private function sanitize_config( array $config ): array {
 		$clean = [];
 
+		// Build a lookup: function_name => original WC priority from registry.
+		// This is the ONLY trusted source for original_priority — browser data cannot be trusted
+		// because drag-and-drop reprioritization may have overwritten it.
+		$registry_priority = [];
+		foreach ( self::load_registry() as $hook_def ) {
+			foreach ( $hook_def['callbacks'] ?? [] as $rcb ) {
+				if ( ! empty( $rcb['function'] ) ) {
+					$registry_priority[ $rcb['function'] ] = (int) $rcb['priority'];
+				}
+			}
+		}
+
 		foreach ( $config as $hook_entry ) {
 			if ( ! is_array( $hook_entry ) ) {
 				continue;
@@ -271,34 +283,42 @@ class HooksConfig {
 				if ( ! is_array( $cb ) ) {
 					continue;
 				}
-				$custom            = (bool) ( $cb['custom']   ?? false );
-				$func              = sanitize_key( $cb['function'] ?? '' );
-				$priority          = max( 1, min( 999, (int) ( $cb['priority'] ?? 10 ) ) );
-				// original_priority: the WC-registered priority — used in remove_action.
-				// For standard callbacks: preserve from incoming data (set on first save from registry).
-				// For custom callbacks: same as priority (no WC registration to remove).
-				$original_priority = $custom
-					? $priority
-					: max( 1, min( 999, (int) ( $cb['original_priority'] ?? $cb['priority'] ?? 10 ) ) );
-				$enabled           = (bool) ( $cb['enabled']  ?? true );
-				$label             = sanitize_text_field( $cb['label'] ?? $func );
-				$id                = sanitize_key( $cb['id'] ?? $func );
-				// Raw PHP code — keep as-is (admin-only, manage_options required).
-				$code = $cb['code'] ?? '';
+				$custom   = (bool) ( $cb['custom']  ?? false );
+				$func     = sanitize_key( $cb['function'] ?? '' );
+				$priority = max( 1, min( 999, (int) ( $cb['priority'] ?? 10 ) ) );
+				$enabled  = (bool) ( $cb['enabled'] ?? true );
+				$label    = sanitize_text_field( $cb['label'] ?? $func );
+				$id       = sanitize_key( $cb['id'] ?? $func );
+				$code     = $cb['code'] ?? '';
 
 				if ( ! $func ) {
 					continue;
 				}
 
+				// original_priority: always taken from registry for standard/addon callbacks.
+				// Custom functions have no WC registration, so original_priority == priority.
+				if ( $custom ) {
+					$original_priority = $priority;
+				} elseif ( isset( $registry_priority[ $func ] ) ) {
+					// Standard WC callback — use exact registry value, never trust browser.
+					$original_priority = $registry_priority[ $func ];
+				} else {
+					// Addon callback (not in WC registry) — addon registered it at priority
+					// stored in the id prefix; fall back to current priority as best-guess.
+					// The addon row sets original_priority == priority at first inject,
+					// which is correct because that IS what the addon registered.
+					$original_priority = max( 1, min( 999, (int) ( $cb['original_priority'] ?? $priority ) ) );
+				}
+
 				$entry['callbacks'][] = [
-					'id'               => $id,
-					'function'         => $func,
-					'priority'         => $priority,
+					'id'                => $id,
+					'function'          => $func,
+					'priority'          => $priority,
 					'original_priority' => $original_priority,
-					'enabled'          => $enabled,
-					'custom'           => $custom,
-					'label'            => $label,
-					'code'             => $code,
+					'enabled'           => $enabled,
+					'custom'            => $custom,
+					'label'             => $label,
+					'code'              => $code,
 				];
 			}
 

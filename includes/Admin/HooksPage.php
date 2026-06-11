@@ -62,14 +62,7 @@ class HooksPage {
 			wp_send_json_error( [ 'message' => $result->get_error_message() ] );
 		}
 
-		// DEBUG TEMP
-		$_dbg_php    = \RockyJamTemplates\Core\TemplateManager::templates_dir() . $slug . '/hooks.php';
-		$_dbg_cfg    = \RockyJamTemplates\Core\TemplateManager::templates_dir() . $slug . '/hooks-config.json';
-		wp_send_json_success( [
-			'message'            => __( 'Hooks saved.', 'rockyjam-templates' ),
-			'debug_hooks_php'    => file_exists( $_dbg_php ) ? file_get_contents( $_dbg_php ) : 'NOT FOUND: ' . $_dbg_php,
-			'debug_hooks_config' => file_exists( $_dbg_cfg ) ? json_decode( file_get_contents( $_dbg_cfg ), true ) : 'NOT FOUND',
-		] );
+		wp_send_json_success( [ 'message' => __( 'Hooks saved.', 'rockyjam-templates' ) ] );
 	}
 
 	// ------------------------------------------------------------------
