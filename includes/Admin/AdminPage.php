@@ -131,57 +131,9 @@ class AdminPage {
 				],
 			] );
 
-			// Overrides editor — CodeMirror with PHP mode.
-			wp_enqueue_style(
-				'codemirror-material-darker',
-				'https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/material-darker.min.css',
-				[], '5.65.16'
-			);
-			wp_enqueue_script(
-				'codemirror-core',
-				'https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js',
-				[], '5.65.16', true
-			);
-			wp_enqueue_script(
-				'codemirror-mode-xml',
-				'https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/xml/xml.min.js',
-				[ 'codemirror-core' ], '5.65.16', true
-			);
-			wp_enqueue_script(
-				'codemirror-mode-javascript',
-				'https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/javascript/javascript.min.js',
-				[ 'codemirror-core' ], '5.65.16', true
-			);
-			wp_enqueue_script(
-				'codemirror-mode-css',
-				'https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/css/css.min.js',
-				[ 'codemirror-core' ], '5.65.16', true
-			);
-			wp_enqueue_script(
-				'codemirror-mode-htmlmixed',
-				'https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/htmlmixed/htmlmixed.min.js',
-				[ 'codemirror-mode-xml', 'codemirror-mode-javascript', 'codemirror-mode-css' ], '5.65.16', true
-			);
-			wp_enqueue_script(
-				'codemirror-mode-php',
-				'https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/php/php.min.js',
-				[ 'codemirror-mode-htmlmixed' ], '5.65.16', true
-			);
-			wp_enqueue_script(
-				'codemirror-addon-matchbrackets',
-				'https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/edit/matchbrackets.min.js',
-				[ 'codemirror-core' ], '5.65.16', true
-			);
-			wp_enqueue_script(
-				'codemirror-addon-closebrackets',
-				'https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/edit/closebrackets.min.js',
-				[ 'codemirror-core' ], '5.65.16', true
-			);
+			// Overrides editor — textarea-based.
 			wp_enqueue_style(  'rjt-overrides-editor', RJT_URL . 'assets/overrides-editor.css', [], RJT_VERSION );
-			wp_enqueue_script( 'rjt-overrides-editor', RJT_URL . 'assets/overrides-editor.js',
-				[ 'codemirror-mode-php', 'codemirror-addon-matchbrackets', 'codemirror-addon-closebrackets' ],
-				RJT_VERSION, true
-			);
+			wp_enqueue_script( 'rjt-overrides-editor', RJT_URL . 'assets/overrides-editor.js', [], RJT_VERSION, true );
 		}
 	}
 

@@ -92,7 +92,7 @@
 .rjt-overrides__editor-wrap {
 	border: 1px solid #ddd;
 	border-radius: 4px;
-	overflow: visible; /* must NOT be hidden — CodeMirror needs its own scroll */
+	overflow: hidden;
 	margin-bottom: 20px;
 }
 
@@ -141,24 +141,35 @@
 	font-style: italic;
 }
 
-/* CodeMirror host — full width, reasonable default height */
+/* ── Textarea editor ─────────────────────────────────────── */
 #rjt-codemirror-host {
 	display: block;
 	width: 100%;
 }
 
-#rjt-codemirror-host .CodeMirror {
-	height: 560px;
+.rjt-override-textarea {
+	display: block;
 	width: 100%;
+	min-height: 400px;
+	box-sizing: border-box;
+	padding: 14px 16px;
+	font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', 'Courier New', monospace;
 	font-size: 13px;
-	font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
-	line-height: 1.55;
-	border-radius: 0;
+	line-height: 1.6;
+	color: #abb2bf;
+	background: #212121;
+	border: none;
+	outline: none;
+	resize: vertical;
+	tab-size: 4;
+	white-space: pre;
+	overflow-wrap: normal;
+	overflow-x: auto;
 }
 
-/* Ensure CM scrollbars render correctly inside WP admin */
-#rjt-codemirror-host .CodeMirror-scroll {
-	overflow: auto !important;
+.rjt-override-textarea:focus {
+	outline: 2px solid #528bff;
+	outline-offset: -2px;
 }
 
 /* ── Add Override modal ──────────────────────────────────── */

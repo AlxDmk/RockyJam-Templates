@@ -1,23 +1,21 @@
 /**
- * RockyJam Templates — Overrides Editor
- * Manages the WC template overrides tab: list, CodeMirror editor, add-modal.
+ * RockyJam Templates — Overrides Editor (textarea-based)
  */
 ( function () {
 	'use strict';
 
 	if ( typeof RjtOverrides === 'undefined' ) return;
 
-	const cfg      = RjtOverrides;
-	const ajaxUrl  = cfg.ajaxUrl;
-	const nonce    = cfg.nonce;
-	const slug     = cfg.slug;
-	const i18n     = cfg.i18n;
+	const cfg     = RjtOverrides;
+	const ajaxUrl = cfg.ajaxUrl;
+	const nonce   = cfg.nonce;
+	const slug    = cfg.slug;
+	const i18n    = cfg.i18n;
 
-	let cmEditor      = null; // CodeMirror instance
-	let currentPath   = null; // path open in editor
-	let isDirty       = false;
+	let currentPath = null;
+	let isDirty     = false;
 
-	// ── DOM refs ────────────────────────────────────────────────────────────
+	// ── DOM refs ─────────────────────────────────────────────────────────────
 	const wrap        = document.querySelector( '.rjt-overrides' );
 	if ( ! wrap ) return;
 
@@ -33,37 +31,44 @@
 	const addConfirm  = document.getElementById( 'rjt-add-overrides-confirm' );
 	const searchInput = document.getElementById( 'rjt-add-overrides-search' );
 
-	// ── Init CodeMirror ──────────────────────────────────────────────────────
-	function initCodeMirror() {
-		if ( cmEditor ) return;
+	// Create textarea dynamically and append to host
+	const host     = document.getElementById( 'rjt-codemirror-host' );
+	const textarea = document.createElement( 'textarea' );
+	textarea.id        = 'rjt-override-textarea';
+	textarea.className = 'rjt-override-textarea';
+	textarea.spellcheck = false;
+	host.appendChild( textarea );
 
-		const host = document.getElementById( 'rjt-codemirror-host' );
-		if ( ! host || typeof CodeMirror === 'undefined' ) return;
-
-		cmEditor = CodeMirror( host, {
-			mode:           'application/x-httpd-php',
-			theme:          'material-darker',
-			lineNumbers:    true,
-			matchBrackets:  true,
-			autoCloseBrackets: true,
-			indentUnit:     4,
-			tabSize:        4,
-			indentWithTabs: true,
-			lineWrapping:   false,
-			extraKeys: {
-				'Ctrl-S':     () => saveOverride(),
-				'Cmd-S':      () => saveOverride(),
-				'Ctrl-Space': 'autocomplete',
-			},
-		} );
-
-		cmEditor.on( 'change', () => {
-			isDirty = true;
-			saveStatus.textContent = '';
-		} );
+	// Auto-resize textarea as content changes
+	function autoResize() {
+		textarea.style.height = 'auto';
+		textarea.style.height = Math.max( 400, textarea.scrollHeight ) + 'px';
 	}
+	textarea.addEventListener( 'input', () => {
+		isDirty = true;
+		saveStatus.textContent = '';
+		autoResize();
+	} );
 
-	// ── Open editor ─────────────────────────────────────────────────────────
+	// Tab key inserts 4 spaces instead of moving focus
+	textarea.addEventListener( 'keydown', e => {
+		if ( e.key === 'Tab' ) {
+			e.preventDefault();
+			const start = textarea.selectionStart;
+			const end   = textarea.selectionEnd;
+			const val   = textarea.value;
+			textarea.value = val.slice( 0, start ) + '\t' + val.slice( end );
+			textarea.selectionStart = textarea.selectionEnd = start + 1;
+			autoResize();
+		}
+		// Ctrl/Cmd+S → save
+		if ( ( e.ctrlKey || e.metaKey ) && e.key === 's' ) {
+			e.preventDefault();
+			saveOverride();
+		}
+	} );
+
+	// ── Open editor ──────────────────────────────────────────────────────────
 	function openEditor( path, label ) {
 		if ( isDirty && currentPath && currentPath !== path ) {
 			if ( ! confirm( 'You have unsaved changes. Discard them?' ) ) return;
@@ -73,17 +78,12 @@
 		isDirty     = false;
 		saveStatus.textContent = '';
 		editorTitle.textContent = label + '  (' + path + ')';
-
-		// Show wrapper FIRST so CodeMirror can measure its dimensions correctly.
 		editorWrap.style.display = '';
+		textarea.value = '';
+		autoResize();
 
-		// Scroll wrapper into view.
-		editorWrap.scrollIntoView( { behavior: 'smooth', block: 'nearest' } );
+		editorWrap.scrollIntoView( { behavior: 'smooth', block: 'start' } );
 
-		// Init CM only after wrapper is visible (so it can compute height/width).
-		initCodeMirror();
-
-		// Load content via AJAX
 		const fd = new FormData();
 		fd.append( 'action',   'rjt_get_override_content' );
 		fd.append( '_nonce',   nonce );
@@ -97,29 +97,22 @@
 					alert( i18n.errorLoad );
 					return;
 				}
-				cmEditor.setValue( res.data.content );
-				cmEditor.clearHistory();
+				textarea.value = res.data.content;
 				isDirty = false;
+				autoResize();
 
-				// Show hint if this is the WC default (not yet saved as override)
 				if ( ! res.data.exists ) {
 					saveStatus.textContent = i18n.wcDefault;
 					saveStatus.className = 'rjt-overrides__save-status rjt-overrides__save-status--hint';
 				}
 
-				// Refresh after browser has laid out the newly-visible editor.
-				// Double-RAF ensures layout is complete before CM measures itself.
-				requestAnimationFrame( () => {
-					requestAnimationFrame( () => {
-						cmEditor.refresh();
-						cmEditor.scrollTo( 0, 0 );
-						cmEditor.focus();
-					} );
-				} );
+				textarea.focus();
+				textarea.setSelectionRange( 0, 0 );
+				textarea.scrollTop = 0;
 			} );
 	}
 
-	// ── Save ────────────────────────────────────────────────────────────────
+	// ── Save ─────────────────────────────────────────────────────────────────
 	function saveOverride() {
 		if ( ! currentPath ) return;
 
@@ -131,7 +124,7 @@
 		fd.append( '_nonce',   nonce );
 		fd.append( 'slug',     slug );
 		fd.append( 'tpl_path', currentPath );
-		fd.append( 'content',  cmEditor.getValue() );
+		fd.append( 'content',  textarea.value );
 
 		fetch( ajaxUrl, { method: 'POST', body: fd } )
 			.then( r => r.json() )
@@ -144,13 +137,11 @@
 				isDirty = false;
 				saveStatus.textContent = '✓ ' + i18n.saved;
 				saveStatus.className   = 'rjt-overrides__save-status rjt-overrides__save-status--ok';
-
-				// Ensure row appears in list (first save)
 				ensureRowInList( currentPath );
 			} );
 	}
 
-	// ── Delete ───────────────────────────────────────────────────────────────
+	// ── Delete (from editor) ─────────────────────────────────────────────────
 	function deleteOverride() {
 		if ( ! currentPath ) return;
 		if ( ! confirm( i18n.confirmDelete ) ) return;
@@ -164,26 +155,13 @@
 		fetch( ajaxUrl, { method: 'POST', body: fd } )
 			.then( r => r.json() )
 			.then( res => {
-				if ( ! res.success ) {
-					alert( res.data?.message || 'Error' );
-					return;
-				}
-				// Remove row from list
-				const row = list.querySelector( `.rjt-override-row[data-path="${ CSS.escape( currentPath ) }"]` );
-				if ( row ) row.remove();
-
-				// Close editor
+				if ( ! res.success ) { alert( res.data?.message || 'Error' ); return; }
+				removeRowFromList( currentPath );
 				closeEditor();
-
-				// Show empty state if no rows left
-				if ( ! list.querySelector( '.rjt-override-row' ) ) {
-					list.innerHTML = '<p class="rjt-overrides__empty">' +
-						'No overrides yet. Click &ldquo;Add Override&rdquo; to start.</p>';
-				}
 			} );
 	}
 
-	// ── Close editor ────────────────────────────────────────────────────────
+	// ── Close editor ─────────────────────────────────────────────────────────
 	function closeEditor() {
 		if ( isDirty ) {
 			if ( ! confirm( 'You have unsaved changes. Discard them?' ) ) return;
@@ -191,24 +169,28 @@
 		editorWrap.style.display = 'none';
 		currentPath = null;
 		isDirty     = false;
+		textarea.value = '';
 	}
 
-	// ── Ensure row exists in list ────────────────────────────────────────────
+	// ── List helpers ─────────────────────────────────────────────────────────
 	function ensureRowInList( path ) {
-		if ( list.querySelector( `.rjt-override-row[data-path="${ CSS.escape( path ) }"]` ) ) return;
-
-		// Remove empty state
+		if ( list.querySelector( '[data-path="' + CSS.escape( path ) + '"]' ) ) return;
 		const empty = list.querySelector( '.rjt-overrides__empty' );
 		if ( empty ) empty.remove();
-
-		const row = buildRow( path, path );
-		list.appendChild( row );
+		list.appendChild( buildRow( path, path ) );
 	}
 
-	// ── Build a row element ──────────────────────────────────────────────────
+	function removeRowFromList( path ) {
+		const row = list.querySelector( '.rjt-override-row[data-path="' + CSS.escape( path ) + '"]' );
+		if ( row ) row.remove();
+		if ( ! list.querySelector( '.rjt-override-row' ) ) {
+			list.innerHTML = '<p class="rjt-overrides__empty">No overrides yet. Click \u201cAdd Override\u201d to start.</p>';
+		}
+	}
+
 	function buildRow( path, label ) {
 		const div = document.createElement( 'div' );
-		div.className = 'rjt-override-row';
+		div.className   = 'rjt-override-row';
 		div.dataset.path = path;
 		div.innerHTML = `
 			<span class="rjt-override-row__icon dashicons dashicons-media-code"></span>
@@ -223,141 +205,100 @@
 		return div;
 	}
 
-	// ── Add-override modal ───────────────────────────────────────────────────
+	// ── Add-override modal ────────────────────────────────────────────────────
 	function openModal() {
 		modal.style.display = 'flex';
-		if ( searchInput ) searchInput.value = '';
-		filterModalItems( '' );
+		if ( searchInput ) { searchInput.value = ''; filterModalItems( '' ); }
 	}
 
-	function closeModal() {
-		modal.style.display = 'none';
-	}
+	function closeModal() { modal.style.display = 'none'; }
 
 	function filterModalItems( q ) {
-		const rows = modal.querySelectorAll( '.rjt-add-overrides__item' );
-		const lq   = q.toLowerCase();
-		rows.forEach( row => {
-			const text = row.textContent.toLowerCase();
-			row.style.display = ( ! lq || text.includes( lq ) ) ? '' : 'none';
+		const lq = q.toLowerCase();
+		modal.querySelectorAll( '.rjt-add-overrides__item' ).forEach( row => {
+			row.style.display = ( ! lq || row.textContent.toLowerCase().includes( lq ) ) ? '' : 'none';
 		} );
-
-		// Hide section titles if all items in the section are hidden
-		modal.querySelectorAll( '.rjt-add-overrides__section' ).forEach( section => {
-			const visible = section.querySelectorAll( '.rjt-add-overrides__item:not([style*="display: none"])' );
-			section.style.display = visible.length ? '' : 'none';
+		modal.querySelectorAll( '.rjt-add-overrides__section' ).forEach( sec => {
+			const vis = sec.querySelectorAll( '.rjt-add-overrides__item:not([style*="display: none"])' );
+			sec.style.display = vis.length ? '' : 'none';
 		} );
 	}
 
 	function confirmAddOverrides() {
-		const checked = Array.from( modal.querySelectorAll( 'input[name="rjt_override_paths[]"]:checked' ) );
-		const paths   = checked.map( cb => cb.value );
+		const paths = Array.from( modal.querySelectorAll( 'input[name="rjt_override_paths[]"]:checked' ) )
+			.map( cb => cb.value );
 
-		if ( ! paths.length ) {
-			alert( i18n.noneSelected );
-			return;
-		}
+		if ( ! paths.length ) { alert( i18n.noneSelected ); return; }
 
 		const fd = new FormData();
-		fd.append( 'action',  'rjt_add_overrides' );
-		fd.append( '_nonce',  nonce );
-		fd.append( 'slug',    slug );
+		fd.append( 'action', 'rjt_add_overrides' );
+		fd.append( '_nonce', nonce );
+		fd.append( 'slug',   slug );
 		paths.forEach( p => fd.append( 'paths[]', p ) );
 
 		fetch( ajaxUrl, { method: 'POST', body: fd } )
 			.then( r => r.json() )
 			.then( res => {
-				if ( ! res.success ) {
-					alert( res.data?.message || 'Error' );
-					return;
-				}
-				// Add rows to list and remove from modal checkboxes
-				const added = res.data.added || [];
+				if ( ! res.success ) { alert( res.data?.message || 'Error' ); return; }
+
 				const empty = list.querySelector( '.rjt-overrides__empty' );
-				if ( empty && added.length ) empty.remove();
-
-				added.forEach( path => {
-					// Find label from checkbox
-					const cb = modal.querySelector( `input[value="${ CSS.escape( path ) }"]` );
-					const label = cb ? cb.closest( '.rjt-add-overrides__item' )
-						?.querySelector( '.rjt-add-overrides__label' )?.textContent || path : path;
-
-					ensureRowInListWithLabel( path, label );
-
-					// Remove from modal
-					if ( cb ) cb.closest( '.rjt-add-overrides__item' ).remove();
+				( res.data.added || [] ).forEach( path => {
+					if ( empty ) empty.remove();
+					const cb    = modal.querySelector( `input[value="${ CSS.escape( path ) }"]` );
+					const label = cb?.closest( '.rjt-add-overrides__item' )
+						?.querySelector( '.rjt-add-overrides__label' )?.textContent || path;
+					if ( ! list.querySelector( '[data-path="' + CSS.escape( path ) + '"]' ) ) {
+						list.appendChild( buildRow( path, label ) );
+					}
+					cb?.closest( '.rjt-add-overrides__item' )?.remove();
 				} );
 
 				closeModal();
 			} );
 	}
 
-	function ensureRowInListWithLabel( path, label ) {
-		if ( list.querySelector( `.rjt-override-row[data-path="${ CSS.escape( path ) }"]` ) ) return;
-		const row = buildRow( path, label );
-		list.appendChild( row );
-	}
-
-	// ── Event delegation ─────────────────────────────────────────────────────
+	// ── Event delegation ──────────────────────────────────────────────────────
 	list.addEventListener( 'click', e => {
 		const editBtn   = e.target.closest( '.rjt-override-row__edit-btn' );
-		const deleteBtn = e.target.closest( '.rjt-override-row__delete-btn' );
+		const delBtn    = e.target.closest( '.rjt-override-row__delete-btn' );
 
 		if ( editBtn ) {
 			openEditor( editBtn.dataset.path, editBtn.dataset.label || editBtn.dataset.path );
 		}
-		if ( deleteBtn ) {
-			const row = deleteBtn.closest( '.rjt-override-row' );
-			const path = deleteBtn.dataset.path;
-			// Quick delete without opening editor
+		if ( delBtn ) {
+			const path = delBtn.dataset.path;
 			if ( ! confirm( i18n.confirmDelete ) ) return;
-
 			const fd = new FormData();
 			fd.append( 'action',   'rjt_delete_override' );
 			fd.append( '_nonce',   nonce );
 			fd.append( 'slug',     slug );
 			fd.append( 'tpl_path', path );
-
 			fetch( ajaxUrl, { method: 'POST', body: fd } )
 				.then( r => r.json() )
 				.then( res => {
 					if ( ! res.success ) { alert( res.data?.message || 'Error' ); return; }
-					if ( row ) row.remove();
+					removeRowFromList( path );
 					if ( currentPath === path ) closeEditor();
-					if ( ! list.querySelector( '.rjt-override-row' ) ) {
-						list.innerHTML = '<p class="rjt-overrides__empty">No overrides yet. Click &ldquo;Add Override&rdquo; to start.</p>';
-					}
 				} );
 		}
 	} );
 
-	saveBtn.addEventListener(   'click', saveOverride );
-	deleteBtn.addEventListener( 'click', deleteOverride );
-	closeBtn.addEventListener(  'click', closeEditor );
-	addBtn.addEventListener(    'click', openModal );
+	saveBtn.addEventListener(    'click', saveOverride );
+	deleteBtn.addEventListener(  'click', deleteOverride );
+	closeBtn.addEventListener(   'click', closeEditor );
+	addBtn.addEventListener(     'click', openModal );
 	addConfirm.addEventListener( 'click', confirmAddOverrides );
-
 	modal.querySelector( '.rjt-modal__backdrop' )?.addEventListener( 'click', closeModal );
 	modal.querySelectorAll( '.rjt-modal__close' ).forEach( b => b.addEventListener( 'click', closeModal ) );
-
 	if ( searchInput ) {
 		searchInput.addEventListener( 'input', () => filterModalItems( searchInput.value ) );
 	}
 
-	// ── Utility ──────────────────────────────────────────────────────────────
-	// Re-measure CM on window resize (WP admin sidebar collapse also triggers this).
-	window.addEventListener( 'resize', () => {
-		if ( cmEditor && editorWrap.style.display !== 'none' ) {
-			cmEditor.refresh();
-		}
-	} );
-
+	// ── Utility ───────────────────────────────────────────────────────────────
 	function escHtml( str ) {
 		return String( str )
-			.replace( /&/g, '&amp;' )
-			.replace( /</g, '&lt;' )
-			.replace( />/g, '&gt;' )
-			.replace( /"/g, '&quot;' );
+			.replace( /&/g, '&amp;' ).replace( /</g, '&lt;' )
+			.replace( />/g, '&gt;' ).replace( /"/g, '&quot;' );
 	}
 
 } )();
