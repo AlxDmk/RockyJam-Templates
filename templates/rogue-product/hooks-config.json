@@ -1,0 +1,177 @@
+{
+    "woocommerce_before_single_product": {
+        "callbacks": []
+    },
+    "woocommerce_before_single_product_summary": {
+        "callbacks": [
+            {
+                "id": "woocommerce_show_product_sale_flash",
+                "function": "woocommerce_show_product_sale_flash",
+                "priority": 10,
+                "enabled": true,
+                "custom": false,
+                "original_priority": 10
+            },
+            {
+                "id": "woocommerce_show_product_images",
+                "function": "woocommerce_show_product_images",
+                "priority": 20,
+                "enabled": true,
+                "custom": false,
+                "original_priority": 20
+            }
+        ]
+    },
+    "woocommerce_single_product_summary": {
+        "callbacks": [
+            {
+                "id": "rockyjam_shipping_badge_render",
+                "function": "rockyjam_shipping_badge_render",
+                "priority": 3,
+                "enabled": true,
+                "custom": false,
+                "addon": "shipping-badge",
+                "original_priority": 3
+            },
+            {
+                "id": "woocommerce_template_single_title",
+                "function": "woocommerce_template_single_title",
+                "priority": 5,
+                "enabled": true,
+                "custom": false,
+                "original_priority": 5
+            },
+            {
+                "id": "woocommerce_template_single_rating",
+                "function": "woocommerce_template_single_rating",
+                "priority": 10,
+                "enabled": true,
+                "custom": false,
+                "original_priority": 10
+            },
+            {
+                "id": "woocommerce_template_single_price",
+                "function": "woocommerce_template_single_price",
+                "priority": 10,
+                "enabled": true,
+                "custom": false,
+                "original_priority": 10
+            },
+            {
+                "id": "rockyjam_keyfeatures_render",
+                "function": "rockyjam_keyfeatures_render",
+                "priority": 15,
+                "enabled": true,
+                "custom": false,
+                "addon": "key-features",
+                "original_priority": 15
+            },
+            {
+                "id": "woocommerce_template_single_excerpt",
+                "function": "woocommerce_template_single_excerpt",
+                "priority": 20,
+                "enabled": true,
+                "custom": false,
+                "original_priority": 20
+            },
+            {
+                "id": "woocommerce_template_single_meta",
+                "function": "woocommerce_template_single_meta",
+                "priority": 40,
+                "enabled": true,
+                "custom": false,
+                "original_priority": 40
+            },
+            {
+                "id": "rockyjam_product_badges_render",
+                "function": "rockyjam_product_badges_render",
+                "priority": 45,
+                "enabled": true,
+                "custom": false,
+                "addon": "product-badges",
+                "original_priority": 45
+            },
+            {
+                "id": "woocommerce_template_single_add_to_cart",
+                "function": "woocommerce_template_single_add_to_cart",
+                "priority": 50,
+                "enabled": true,
+                "custom": false,
+                "original_priority": 30
+            },
+            {
+                "id": "woocommerce_template_single_sharing",
+                "function": "woocommerce_template_single_sharing",
+                "priority": 60,
+                "enabled": true,
+                "custom": false,
+                "original_priority": 50
+            }
+        ]
+    },
+    "woocommerce_after_single_product_summary": {
+        "callbacks": [
+            {
+                "id": "woocommerce_output_product_data_tabs",
+                "function": "woocommerce_output_product_data_tabs",
+                "priority": 10,
+                "enabled": true,
+                "custom": false,
+                "original_priority": 10
+            },
+            {
+                "id": "rockyjam_product_benefits_render",
+                "function": "rockyjam_product_benefits_render",
+                "priority": 18,
+                "enabled": true,
+                "custom": false,
+                "addon": "product-benefits",
+                "original_priority": 18
+            },
+            {
+                "id": "rockyjam_product_faq_render",
+                "function": "rockyjam_product_faq_render",
+                "priority": 25,
+                "enabled": true,
+                "custom": false,
+                "addon": "product-faq",
+                "original_priority": 25
+            },
+            {
+                "id": "woocommerce_output_related_products",
+                "function": "woocommerce_output_related_products",
+                "priority": 30,
+                "enabled": true,
+                "custom": false,
+                "original_priority": 20
+            }
+        ]
+    },
+    "woocommerce_after_single_product": {
+        "callbacks": []
+    },
+    "woocommerce_product_thumbnails": {
+        "callbacks": [
+            {
+                "id": "woocommerce_show_product_thumbnails",
+                "function": "woocommerce_show_product_thumbnails",
+                "priority": 20,
+                "enabled": true,
+                "custom": false,
+                "original_priority": 20
+            }
+        ]
+    },
+    "woocommerce_before_add_to_cart_form": {
+        "callbacks": []
+    },
+    "woocommerce_after_add_to_cart_form": {
+        "callbacks": []
+    },
+    "woocommerce_before_add_to_cart_button": {
+        "callbacks": []
+    },
+    "woocommerce_after_add_to_cart_button": {
+        "callbacks": []
+    }
+}
