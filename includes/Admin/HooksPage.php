@@ -186,6 +186,7 @@ class HooksPage {
 								$is_addon   = str_starts_with( $cb_id, 'addon_' );
 								$addon_name = '';
 								if ( $is_addon ) {
+									// 1. Try to resolve from live addon registry (addon is active).
 									foreach ( $addon_hooks_by_hook as $addon_cbs ) {
 										foreach ( $addon_cbs as $acb ) {
 											if ( ( $acb['function'] ?? '' ) === $func ) {
@@ -193,6 +194,10 @@ class HooksPage {
 												break 2;
 											}
 										}
+									}
+									// 2. Fallback: use the label saved in hooks-config.json.
+									if ( ! $addon_name ) {
+										$addon_name = $label;
 									}
 								}
 							?>
@@ -220,7 +225,7 @@ class HooksPage {
 									<?php if ( $custom ) : ?>
 									<span class="rjt-badge rjt-badge--custom"><?php esc_html_e( 'custom', 'rockyjam-templates' ); ?></span>
 									<?php endif; ?>
-									<?php if ( $is_addon && $addon_name ) : ?>
+									<?php if ( $is_addon ) : ?>
 									<span class="rjt-badge rjt-badge--addon-name"><?php echo esc_html( $addon_name ); ?></span>
 									<?php endif; ?>
 								</span>
