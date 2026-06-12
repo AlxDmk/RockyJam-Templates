@@ -187,14 +187,24 @@
 
 /* ========== PRODUCT TITLE ========== */
 
+/*
+ * Desktop (>780px): fluid size via clamp() + single line.
+ * clamp(18px, 1.8vw, 24px):
+ *   1280px → 23px, 1440px → 24px (capped), 1920px → 24px.
+ * white-space:nowrap forces one line; overflow:hidden + text-overflow:ellipsis
+ * guard against unexpectedly long titles.
+ */
 .rogue-product-page .product_title.entry-title {
-    font-size: 32px !important;
+    font-size: clamp(18px, 1.8vw, 24px) !important;
     font-weight: 700 !important;
     color: var(--rj-black) !important;
     margin-bottom: var(--sp-xs) !important;
     line-height: 1.2 !important;
     letter-spacing: 0.5px !important;
     font-family: 'Roboto', sans-serif !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
 }
 
 /* ========== STAR RATING — divider below ========== */
@@ -811,10 +821,19 @@
     .rj-thumbs { grid-template-columns: repeat(4, 1fr); }
 }
 
+/* On mobile sidebar becomes full-width — allow title to wrap naturally */
+@media (max-width: 780px) {
+    .rogue-product-page .product_title.entry-title {
+        font-size: 22px !important;
+        white-space: normal !important;
+        overflow: visible !important;
+        text-overflow: clip !important;
+    }
+}
+
 @media (max-width: 768px) {
     .rj-product-main { grid-template-columns: 1fr; gap: var(--sp-lg); }
     .rj-sidebar { position: relative; top: auto; }
-    .rogue-product-page .product_title.entry-title { font-size: 24px !important; }
     .rj-thumbs { grid-template-columns: repeat(4, 1fr); }
     .rogue-product-page .rj-trust-badges { grid-template-columns: 1fr; }
 }
