@@ -71,8 +71,11 @@ remove_action( 'woocommerce_single_product_summary', 'rockyjam_product_badges_re
 if ( function_exists( 'rockyjam_product_badges_render' ) ) {
 	add_action( 'woocommerce_single_product_summary', 'rockyjam_product_badges_render', 45 );
 }
+
+// TEST: completely disable the default Add to Cart button for rogue-product
 remove_action( 'woocommerce_single_product_summary', 'woocommerce_template_single_add_to_cart', 30 );
-add_action( 'woocommerce_single_product_summary', 'woocommerce_template_single_add_to_cart', 50 );
+remove_action( 'woocommerce_single_product_summary', 'woocommerce_template_single_add_to_cart', 50 );
+
 remove_action( 'woocommerce_single_product_summary', 'woocommerce_template_single_sharing', 50 );
 add_action( 'woocommerce_single_product_summary', 'woocommerce_template_single_sharing', 60 );
 
