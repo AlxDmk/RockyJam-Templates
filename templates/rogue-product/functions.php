@@ -24,9 +24,11 @@ add_action( 'wp_enqueue_scripts', function() {
 
 /**
  * Output stock badge right after price (priority 11, price is 10).
+ * Use wc_get_product( get_the_ID() ) — global $product may not be set
+ * inside an anonymous function hooked early in the summary.
  */
 add_action( 'woocommerce_single_product_summary', function() {
-    global $product;
+    $product = wc_get_product( get_the_ID() );
     if ( ! $product ) return;
     echo wc_get_stock_html( $product );
 }, 11 );

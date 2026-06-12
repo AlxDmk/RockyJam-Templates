@@ -1,6 +1,8 @@
 /*
  * Rogue Product Template — assets/style.css
- * Matches reference design exactly: Roboto font, sizes, gray dividers, stock badge.
+ * Exact reference design: Roboto font, correct sizes, gray dividers.
+ * Key-features: targets real addon classes (.product-key-features*).
+ * Note: font-family NOT applied to *, to preserve dashicons.
  */
 
 /* ========== CSS VARIABLES ========== */
@@ -25,18 +27,33 @@
     --sp-2xl: 48px;
     --radius: 4px;
     --transition: 0.3s ease;
-}
-
-/* Base font for entire product page */
-.rogue-product-page,
-.rogue-product-page * {
     font-family: 'Roboto', sans-serif;
+    line-height: 1.6;
+    color: #333;
     box-sizing: border-box;
 }
 
-.rogue-product-page {
-    line-height: 1.6;
-    color: #333;
+/*
+ * Apply Roboto only to text elements — NOT to * — so dashicons keep their font.
+ */
+.rogue-product-page p,
+.rogue-product-page span,
+.rogue-product-page div,
+.rogue-product-page h1,
+.rogue-product-page h2,
+.rogue-product-page h3,
+.rogue-product-page h4,
+.rogue-product-page h5,
+.rogue-product-page h6,
+.rogue-product-page a,
+.rogue-product-page li,
+.rogue-product-page label,
+.rogue-product-page button,
+.rogue-product-page input,
+.rogue-product-page select,
+.rogue-product-page textarea {
+    font-family: 'Roboto', sans-serif;
+    box-sizing: border-box;
 }
 
 /* ========== 60/40 GRID ========== */
@@ -57,9 +74,7 @@
 
 /* ========== CUSTOM GALLERY ========== */
 
-.rj-gallery-wrap {
-    width: 100%;
-}
+.rj-gallery-wrap { width: 100%; }
 
 .rj-main-image-wrap {
     width: 100%;
@@ -97,7 +112,7 @@
     color: var(--rj-white);
 }
 
-/* Thumbnails — 6 columns, square, exactly as reference */
+/* Thumbnails — 6 columns, square */
 .rj-thumbs {
     display: grid;
     grid-template-columns: repeat(6, 1fr);
@@ -137,7 +152,7 @@
     cursor: pointer;
 }
 
-/* Hide WC gallery if it leaks through */
+/* Hide WC gallery remnants */
 .rogue-product-page .woocommerce-product-gallery {
     display: none !important;
 }
@@ -150,8 +165,6 @@
     height: fit-content;
     min-width: 0;
 }
-
-/* ========== SHIPPING BADGE (top of sidebar, addon area) ========== */
 
 .rj-sidebar .rj-shipping-badge-wrap {
     margin-bottom: var(--sp-md);
@@ -167,14 +180,6 @@
     line-height: 1.2 !important;
     letter-spacing: 0.5px !important;
     font-family: 'Roboto', sans-serif !important;
-}
-
-/* ========== SHORT DESCRIPTION (subtitle) ========== */
-
-.rogue-product-page .woocommerce-product-details__short-description {
-    font-size: 16px;
-    color: var(--rj-text-sec);
-    margin-bottom: var(--sp-md);
 }
 
 /* ========== STAR RATING — divider below ========== */
@@ -199,14 +204,9 @@
     text-decoration: none;
 }
 
-/* ========== PRICE SECTION — divider below ========== */
+/* ========== PRICE — divider below ========== */
 
-.rogue-product-page .rj-price-section,
-.rogue-product-page .price {
-    display: block;
-}
-
-/* "PRICE" label above the number */
+/* "PRICE" label */
 .rogue-product-page .price-label-custom {
     font-size: 12px;
     color: var(--rj-text-sec);
@@ -216,9 +216,9 @@
     letter-spacing: 0.5px;
 }
 
-/* Price number */
-.rogue-product-page p.price,
-.rogue-product-page .woocommerce-Price-amount.amount {
+/* Price amount */
+.rogue-product-page p.price .woocommerce-Price-amount,
+.rogue-product-page span.price .woocommerce-Price-amount {
     font-size: 28px;
     font-weight: 700;
     color: var(--rj-black);
@@ -231,97 +231,111 @@
     font-weight: 400;
 }
 
-.rogue-product-page p.price ins {
-    text-decoration: none;
-}
+.rogue-product-page p.price ins { text-decoration: none; }
 
-/* The entire price wrapper — add bottom divider */
-.rogue-product-page .rj-price-wrapper {
-    margin-bottom: var(--sp-lg);
-    padding-bottom: var(--sp-md);
-    border-bottom: 1px solid var(--rj-mid-gray);
-}
-
-/* ========== STOCK BADGE — under price, small ========== */
-
-.rogue-product-page .stock.in-stock {
-    display: inline-block;
-    background: var(--rj-green);
-    color: var(--rj-white);
-    padding: 4px 8px;
-    border-radius: var(--radius);
-    font-size: 11px !important;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    margin-top: var(--sp-sm);
+/* Price block — bottom border (WC wraps price in p.price or span.price) */
+.rogue-product-page p.price,
+.rogue-product-page .woocommerce-Price-currencySymbol {
     margin-bottom: 0;
-    line-height: 1.4;
-    /* Sit right after the price, before the divider */
-    clear: both;
 }
 
-.rogue-product-page .stock.out-of-stock {
-    display: inline-block;
-    background: var(--rj-red);
-    color: var(--rj-white);
-    padding: 4px 8px;
+/* ========== STOCK BADGE — right after price, small ========== */
+
+.rogue-product-page p.stock {
+    display: inline-block !important;
     border-radius: var(--radius);
     font-size: 11px !important;
-    font-weight: 600;
-    text-transform: uppercase;
+    font-weight: 600 !important;
+    text-transform: uppercase !important;
     letter-spacing: 0.5px;
-    margin-top: var(--sp-sm);
+    padding: 4px 8px !important;
+    margin-top: var(--sp-sm) !important;
+    margin-bottom: var(--sp-lg) !important;
+    line-height: 1.4;
     clear: both;
 }
 
-/* Wrap price + stock together so divider appears after both */
+.rogue-product-page p.stock.in-stock {
+    background: var(--rj-green) !important;
+    color: var(--rj-white) !important;
+    border: none !important;
+}
+
+.rogue-product-page p.stock.out-of-stock {
+    background: var(--rj-red) !important;
+    color: var(--rj-white) !important;
+    border: none !important;
+}
+
+/* Price + stock badge together = one section with divider */
 .rogue-product-page .rj-price-section {
     margin-bottom: var(--sp-lg);
     padding-bottom: var(--sp-md);
     border-bottom: 1px solid var(--rj-mid-gray);
 }
 
-/* ========== KEY FEATURES — divider below ========== */
-
-.rogue-product-page .rj-key-features {
-    margin-bottom: var(--sp-lg);
-    padding-bottom: var(--sp-md);
-    border-bottom: 1px solid var(--rj-mid-gray);
+/* Divider after price when no .rj-price-section wrapper —
+   use adjacent sibling: after p.price comes p.stock, then comes .product-key-features */
+.rogue-product-page p.stock + * {
+    border-top: 1px solid var(--rj-mid-gray);
+    padding-top: var(--sp-md);
+    margin-top: 0;
 }
 
-.rogue-product-page .rj-key-features h3 {
+/* ========== KEY FEATURES ADDON — real classes from plugin ========== */
+
+.rogue-product-page .product-key-features {
+    margin-bottom: var(--sp-lg) !important;
+    padding: 0 !important;
+    padding-bottom: var(--sp-md) !important;
+    border-bottom: 1px solid var(--rj-mid-gray) !important;
+    background: transparent !important;
+    border-top: none !important;
+    border-left: none !important;
+    border-right: none !important;
+    border-radius: 0 !important;
+}
+
+.rogue-product-page .product-key-features__title {
     font-size: 14px !important;
-    font-weight: 700;
-    margin-bottom: var(--sp-sm);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    color: var(--rj-text-dark);
+    font-weight: 700 !important;
+    margin-bottom: var(--sp-sm) !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.5px !important;
+    color: var(--rj-text-dark) !important;
     font-family: 'Roboto', sans-serif !important;
 }
 
-.rogue-product-page .rj-features-list {
-    list-style: none;
-    padding: 0;
-    margin: 0;
+.rogue-product-page .product-key-features__list {
+    list-style: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
 }
 
-.rogue-product-page .rj-features-list li {
-    font-size: 13px;
-    color: var(--rj-text-sec);
-    padding: 4px 0 4px 20px;
-    position: relative;
+.rogue-product-page .product-key-features__item {
+    font-size: 13px !important;
+    color: var(--rj-text-sec) !important;
+    padding: 4px 0 !important;
+    border-bottom: none !important;
+    gap: 8px;
+    display: flex;
+    align-items: flex-start;
+    line-height: 1.5;
 }
 
-.rogue-product-page .rj-features-list li::before {
-    content: "\2713";
-    position: absolute;
-    left: 0;
-    color: var(--rj-red);
-    font-weight: 700;
+/* Dashicon checkmark — red color, correct size */
+.rogue-product-page .product-key-features__item .dashicons {
+    color: var(--rj-red) !important;
+    font-size: 16px !important;
+    width: 16px !important;
+    height: 16px !important;
+    flex-shrink: 0;
+    margin-top: 2px;
+    /* Dashicons MUST keep their own font — do not override with Roboto */
+    font-family: dashicons !important;
 }
 
-/* ========== SHORT DESCRIPTION (wc) — divider below ========== */
+/* ========== SHORT DESCRIPTION — divider below ========== */
 
 .rogue-product-page .woocommerce-product-details__short-description {
     font-size: 13px;
@@ -353,13 +367,9 @@
     text-decoration: none;
 }
 
-.rogue-product-page .product_meta a:hover {
-    color: var(--rj-red);
-}
+.rogue-product-page .product_meta a:hover { color: var(--rj-red); }
 
-.rogue-product-page .product_meta strong {
-    color: var(--rj-text-dark);
-}
+.rogue-product-page .product_meta strong { color: var(--rj-text-dark); }
 
 /* ========== TRUST BADGES (2-col grid) — divider below ========== */
 
@@ -395,9 +405,7 @@
 
 /* ========== QTY + ADD TO CART ========== */
 
-.rogue-product-page .rj-cart-form {
-    margin-bottom: 0;
-}
+.rogue-product-page .rj-cart-form { margin-bottom: 0; }
 
 .rogue-product-page .rj-qty-section {
     display: flex;
@@ -438,9 +446,7 @@
 }
 
 .rogue-product-page .rj-qty-minus:hover,
-.rogue-product-page .rj-qty-plus:hover {
-    background: var(--rj-mid-gray);
-}
+.rogue-product-page .rj-qty-plus:hover { background: var(--rj-mid-gray); }
 
 .rogue-product-page .rj-qty-value,
 .rogue-product-page input.qty {
@@ -485,14 +491,10 @@
 }
 
 .rogue-product-page .rj-add-to-cart:hover,
-.rogue-product-page .single_add_to_cart_button:hover {
-    background: var(--rj-dark-gray) !important;
-}
+.rogue-product-page .single_add_to_cart_button:hover { background: var(--rj-dark-gray) !important; }
 
 .rogue-product-page .rj-add-to-cart.added,
-.rogue-product-page .single_add_to_cart_button.added {
-    background: var(--rj-green) !important;
-}
+.rogue-product-page .single_add_to_cart_button.added { background: var(--rj-green) !important; }
 
 /* ========== SOCIAL SHARING ========== */
 
@@ -532,10 +534,7 @@
 
 /* ========== CUSTOM TABS ========== */
 
-.rj-product-tabs {
-    margin: 3rem 0;
-    clear: both;
-}
+.rj-product-tabs { margin: 3rem 0; clear: both; }
 
 .rj-tabs-nav {
     display: flex;
@@ -565,11 +564,7 @@
     font-weight: 700;
 }
 
-.rj-tab-content {
-    display: none;
-    padding: 2rem 0;
-}
-
+.rj-tab-content { display: none; padding: 2rem 0; }
 .rj-tab-content.active { display: block; }
 
 .rj-tab-content h2 {
@@ -579,10 +574,7 @@
     margin: 2rem 0 1rem;
 }
 
-.rj-tab-content h3 {
-    font-size: 1.5rem;
-    margin: 1.5rem 0 1rem;
-}
+.rj-tab-content h3 { font-size: 1.5rem; margin: 1.5rem 0 1rem; }
 
 .rj-tab-content table {
     width: 100%;
@@ -605,23 +597,9 @@
 
 .rj-tab-content table tr:nth-child(even) { background: #f9f9f9; }
 
-.rj-tab-content .rj-big-rating {
-    font-size: 3rem;
-    font-weight: 700;
-    color: #1a2a1a;
-}
-
-.rj-tab-content .review-item,
-.rj-tab-content .woocommerce-Reviews .comment {
-    border-bottom: 1px solid #eee;
-    padding: 1.5rem 0;
-}
-
 /* ========== BENEFITS ========== */
 
-.rj-benefits-section {
-    padding: var(--sp-2xl) 0;
-}
+.rj-benefits-section { padding: var(--sp-2xl) 0; }
 
 .rj-benefit-grid {
     display: grid;
@@ -639,12 +617,10 @@
 
 .rj-benefit-number {
     position: absolute;
-    top: -10px;
-    left: -10px;
+    top: -10px; left: -10px;
     background: #b8860b;
     color: white;
-    width: 30px;
-    height: 30px;
+    width: 30px; height: 30px;
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -653,17 +629,8 @@
     font-size: 14px;
 }
 
-.rj-benefit-item h3 {
-    font-size: 1rem;
-    font-weight: 700;
-    margin: 0 0 0.5rem;
-}
-
-.rj-benefit-item p {
-    font-size: 0.875rem;
-    color: var(--rj-text-sec);
-    margin: 0;
-}
+.rj-benefit-item h3 { font-size: 1rem; font-weight: 700; margin: 0 0 0.5rem; }
+.rj-benefit-item p { font-size: 0.875rem; color: var(--rj-text-sec); margin: 0; }
 
 /* ========== FAQ ========== */
 
@@ -679,11 +646,7 @@
     color: var(--rj-text-dark);
 }
 
-.rj-faq-items {
-    display: flex;
-    flex-direction: column;
-    gap: var(--sp-md);
-}
+.rj-faq-items { display: flex; flex-direction: column; gap: var(--sp-md); }
 
 .rj-faq-item {
     border: 1px solid var(--rj-mid-gray);
@@ -833,43 +796,20 @@
 /* ========== RESPONSIVE ========== */
 
 @media (max-width: 1024px) {
-    .rj-product-main {
-        grid-template-columns: 1fr 1fr;
-        gap: var(--sp-lg);
-    }
-    .rj-thumbs {
-        grid-template-columns: repeat(4, 1fr);
-    }
+    .rj-product-main { grid-template-columns: 1fr 1fr; gap: var(--sp-lg); }
+    .rj-thumbs { grid-template-columns: repeat(4, 1fr); }
 }
 
 @media (max-width: 768px) {
-    .rj-product-main {
-        grid-template-columns: 1fr;
-        gap: var(--sp-lg);
-    }
-    .rj-sidebar {
-        position: relative;
-        top: auto;
-    }
-    .rogue-product-page .product_title.entry-title {
-        font-size: 24px !important;
-    }
-    .rj-thumbs {
-        grid-template-columns: repeat(4, 1fr);
-    }
-    .rogue-product-page .rj-trust-badges {
-        grid-template-columns: 1fr;
-    }
+    .rj-product-main { grid-template-columns: 1fr; gap: var(--sp-lg); }
+    .rj-sidebar { position: relative; top: auto; }
+    .rogue-product-page .product_title.entry-title { font-size: 24px !important; }
+    .rj-thumbs { grid-template-columns: repeat(4, 1fr); }
+    .rogue-product-page .rj-trust-badges { grid-template-columns: 1fr; }
 }
 
 @media (max-width: 480px) {
-    .rogue-product-page .product_title.entry-title {
-        font-size: 20px !important;
-    }
-    .rj-thumbs {
-        grid-template-columns: repeat(3, 1fr);
-    }
-    .rj-section-title {
-        font-size: 18px;
-    }
+    .rogue-product-page .product_title.entry-title { font-size: 20px !important; }
+    .rj-thumbs { grid-template-columns: repeat(3, 1fr); }
+    .rj-section-title { font-size: 18px; }
 }
