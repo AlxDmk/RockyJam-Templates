@@ -9,7 +9,6 @@
  */
 
 /* ========== SCOPED LAYOUT VARIABLES ========== */
-/* Только нецветовые локальные токены. Цвета — через --rj-* из темы. */
 
 .rogue-product-page {
     --sp-xs:  8px;
@@ -25,9 +24,6 @@
     box-sizing: border-box;
 }
 
-/*
- * Apply font to text elements only — NOT to * — so icon fonts keep their font.
- */
 .rogue-product-page p,
 .rogue-product-page span,
 .rogue-product-page div,
@@ -48,9 +44,7 @@
     box-sizing: border-box;
 }
 
-/*
- * ICON FONT PROTECTION — Font Awesome and Dashicons must keep their own font-family.
- */
+/* ICON FONT PROTECTION */
 .fas, .fa, .far, .fab, .fal, .fad,
 .fas::before, .fa::before, .far::before, .fab::before, .fal::before,
 [class^="fa-"]::before, [class*=" fa-"]::before {
@@ -77,8 +71,6 @@
     position: relative;
     min-width: 0;
 }
-
-/* ========== CUSTOM GALLERY ========== */
 
 .rj-gallery-wrap { width: 100%; }
 
@@ -118,7 +110,7 @@
     color: #fff;
 }
 
-/* Thumbnails — 6 columns, square */
+/* Thumbnails — 6 columns */
 .rj-thumbs {
     display: grid;
     grid-template-columns: repeat(6, 1fr);
@@ -158,7 +150,6 @@
     cursor: pointer;
 }
 
-/* Hide WC gallery remnants */
 .rogue-product-page .woocommerce-product-gallery {
     display: none !important;
 }
@@ -198,7 +189,7 @@
     line-height: 1.4;
 }
 
-/* ========== STAR RATING — divider below ========== */
+/* ========== STAR RATING ========== */
 
 .rogue-product-page .woocommerce-product-rating {
     display: flex;
@@ -220,7 +211,7 @@
     text-decoration: none;
 }
 
-/* ========== PRICE — divider below ========== */
+/* ========== PRICE ========== */
 
 .rogue-product-page .price-label-custom {
     font-size: 12px;
@@ -381,36 +372,33 @@
 
 /* ========== QUANTITY ========== */
 /*
- * Структура как в примере-шаблоне:
- * .quantity (flex, gap, align-items:center)
- *   label.qty-label
- *   .qty-controls (border + border-radius + overflow:hidden)
- *     button.qty-minus
- *     input[type=number].qty-value
- *     button.qty-plus
+ * HTML (из simple.php):
+ * .rj-qty-section
+ *   label.rj-qty-label
+ *   .rj-qty-controls
+ *     button.rj-qty-minus
+ *     input.qty.rj-qty-value
+ *     button.rj-qty-plus
  */
 
-.rogue-product-page .quantity {
+.rogue-product-page .rj-qty-section {
     display: flex;
     align-items: center;
     gap: var(--sp-sm);
     margin-bottom: var(--sp-lg);
 }
 
-/* Лейбл «Quantity:» */
-.rogue-product-page .quantity label {
+.rogue-product-page .rj-qty-label {
     font-size: 13px;
     font-weight: 600;
     color: var(--rj-text, #1a1a1a);
     white-space: nowrap;
-    margin-bottom: 0;
 }
 
 /*
- * Единый контейнер для кнопок и поля — бордер только снаружи,
- * overflow:hidden обрезает внутренние элементы по border-radius.
+ * Единый контейнер: бордер снаружи, overflow:hidden обрезает углы.
  */
-.rogue-product-page .quantity .qty-controls {
+.rogue-product-page .rj-qty-controls {
     display: flex;
     align-items: center;
     border: 1px solid var(--rj-border, #ddd);
@@ -419,7 +407,8 @@
 }
 
 /* Кнопки − и + */
-.rogue-product-page .quantity .qty-controls button {
+.rogue-product-page .rj-qty-controls .rj-qty-minus,
+.rogue-product-page .rj-qty-controls .rj-qty-plus {
     background: var(--rj-surface, #f5f5f5);
     border: none;
     width: 40px;
@@ -433,28 +422,29 @@
     line-height: 1;
 }
 
-.rogue-product-page .quantity .qty-controls button:hover {
+.rogue-product-page .rj-qty-controls .rj-qty-minus:hover,
+.rogue-product-page .rj-qty-controls .rj-qty-plus:hover {
     background: var(--rj-border, #ddd);
 }
 
 /* Поле ввода числа */
-.rogue-product-page .quantity .qty-controls input[type="number"] {
+.rogue-product-page .rj-qty-controls input[type="number"] {
     width: 60px;
     height: 40px;
     border: none;
+    border-left: 1px solid var(--rj-border, #ddd);
+    border-right: 1px solid var(--rj-border, #ddd);
     text-align: center;
     font-size: 14px;
     color: var(--rj-text, #1a1a1a);
     background: var(--rj-surface-2, #fff);
-    border-left: 1px solid var(--rj-border, #ddd);
-    border-right: 1px solid var(--rj-border, #ddd);
     -moz-appearance: textfield;
     padding: 0;
     outline: none;
 }
 
-.rogue-product-page .quantity .qty-controls input[type="number"]::-webkit-outer-spin-button,
-.rogue-product-page .quantity .qty-controls input[type="number"]::-webkit-inner-spin-button {
+.rogue-product-page .rj-qty-controls input[type="number"]::-webkit-outer-spin-button,
+.rogue-product-page .rj-qty-controls input[type="number"]::-webkit-inner-spin-button {
     -webkit-appearance: none;
     margin: 0;
 }
