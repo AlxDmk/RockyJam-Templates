@@ -190,15 +190,6 @@
 }
 
 /* ========== STAR RATING ========== */
-/*
- * WooCommerce рендерит:
- * .woocommerce-product-rating
- *   .star-rating  (span со span.rating)
- *   a.woocommerce-review-link  "(124 оценки)"
- *
- * Когда отзывов нет — WC не выводит блок вообще.
- * Мы добавляем fallback .rj-empty-rating через hooks.php.
- */
 
 .rogue-product-page .woocommerce-product-rating {
     display: flex !important;
@@ -244,13 +235,10 @@
 .rogue-product-page .rj-empty-rating .rj-empty-count {
     font-size: 13px;
     color: var(--rj-text-muted, #666);
+    text-decoration: none;
 }
 
 /* ========== PRICE ========== */
-/*
- * Разделительные черты сверху и снизу — !important чтобы
- * не перебивались темой или WooCommerce.
- */
 
 .rogue-product-page .rj-price-section {
     margin-bottom: var(--sp-lg) !important;
@@ -260,7 +248,6 @@
     border-bottom: 1px solid var(--rj-border, #ddd) !important;
 }
 
-/* Метка "ЦЕНА" над числом */
 .rogue-product-page .rj-price-section::before {
     content: "ЦЕНА";
     display: block;
@@ -391,13 +378,6 @@
 }
 
 /* ========== PRODUCT META ========== */
-/*
- * WooCommerce рендерит:
- * .product_meta
- *   span.sku_wrapper   → <strong>Артикул:</strong> <span class="sku">...</span>
- *   span.posted_in     → <strong>Категория:</strong> <a>...</a>
- *   span.tagged_as     → <strong>Тег:</strong> <a>...</a>
- */
 
 .rogue-product-page .product_meta {
     font-size: 12px;
@@ -407,7 +387,6 @@
     border-bottom: 1px solid var(--rj-border, #ddd);
 }
 
-/* Каждая строка — блок */
 .rogue-product-page .product_meta .sku_wrapper,
 .rogue-product-page .product_meta .posted_in,
 .rogue-product-page .product_meta .tagged_as,
@@ -417,10 +396,6 @@
     line-height: 1.5;
 }
 
-/*
- * Название (Артикул, Категория, Бренд) — жирное, тёмное, инлайн
- * !important перебивает WooCommerce и тему
- */
 .rogue-product-page .product_meta strong,
 .rogue-product-page .product_meta .sku_wrapper strong,
 .rogue-product-page .product_meta .posted_in strong,
@@ -433,7 +408,6 @@
     font-family: var(--rj-font-body, 'Roboto', sans-serif) !important;
 }
 
-/* Значения — инлайн, серые */
 .rogue-product-page .product_meta .sku,
 .rogue-product-page .product_meta a {
     display: inline !important;
@@ -544,6 +518,7 @@
     display: none !important;
 }
 
+/* NAV */
 .rogue-product-page .rj-tabs-nav {
     display: flex;
     gap: 0;
@@ -554,6 +529,7 @@
     background: transparent;
 }
 
+/* Обычная активная вкладка */
 .rogue-product-page .rj-tab-link {
     display: inline-block;
     padding: 0.75rem 1.5rem;
@@ -588,6 +564,30 @@
     border-bottom-color: var(--rj-tabs-active-color, #4a6b3c);
     font-weight: 700;
     background: none;
+}
+
+/*
+ * Деактивированная вкладка (отзывов нет).
+ * span — не является button, поэтому не получит focus.
+ * pointer-events:none — перестраховка на мышь.
+ * cursor:default — не показываем pointer.
+ * opacity:0.4 — визуально показываем, что вкладка есть, но недоступна.
+ */
+.rogue-product-page .rj-tab-disabled {
+    display: inline-block;
+    padding: 0.75rem 1.5rem;
+    font-size: 1.1rem;
+    font-weight: 400;
+    color: var(--rj-text-faint, #bbb);
+    cursor: default;
+    pointer-events: none;
+    user-select: none;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -2px;
+    white-space: nowrap;
+    font-family: var(--rj-font-body, 'Roboto', sans-serif);
+    opacity: 0.5;
+    line-height: 1.4;
 }
 
 .rogue-product-page .rj-tabs-content {
