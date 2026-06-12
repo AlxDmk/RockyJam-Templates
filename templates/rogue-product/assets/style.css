@@ -380,89 +380,83 @@
 }
 
 /* ========== QUANTITY ========== */
+/*
+ * Структура как в примере-шаблоне:
+ * .quantity (flex, gap, align-items:center)
+ *   label.qty-label
+ *   .qty-controls (border + border-radius + overflow:hidden)
+ *     button.qty-minus
+ *     input[type=number].qty-value
+ *     button.qty-plus
+ */
 
 .rogue-product-page .quantity {
     display: flex;
     align-items: center;
-    gap: 0;
-    margin-bottom: var(--sp-md);
+    gap: var(--sp-sm);
+    margin-bottom: var(--sp-lg);
 }
 
 /* Лейбл «Quantity:» */
 .rogue-product-page .quantity label {
-    font-size: 12px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    color: var(--rj-text-muted, #666);
-    margin-right: var(--sp-sm);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--rj-text, #1a1a1a);
     white-space: nowrap;
     margin-bottom: 0;
 }
 
-/* Поле ввода числа */
-.rogue-product-page .quantity input[type="number"] {
-    width: 52px;
-    height: 40px;
-    text-align: center;
-    font-size: 14px;
-    font-weight: 600;
+/*
+ * Единый контейнер для кнопок и поля — бордер только снаружи,
+ * overflow:hidden обрезает внутренние элементы по border-radius.
+ */
+.rogue-product-page .quantity .qty-controls {
+    display: flex;
+    align-items: center;
     border: 1px solid var(--rj-border, #ddd);
-    border-radius: 0;
-    background: var(--rj-surface-2, #fff);
-    color: var(--rj-text, #1a1a1a);
-    -moz-appearance: textfield;
-    padding: 0;
-    outline: none;
-    transition: border-color var(--rj-transition, 0.3s ease);
-}
-
-.rogue-product-page .quantity input[type="number"]::-webkit-outer-spin-button,
-.rogue-product-page .quantity input[type="number"]::-webkit-inner-spin-button {
-    -webkit-appearance: none;
-    margin: 0;
-}
-
-.rogue-product-page .quantity input[type="number"]:focus {
-    border-color: var(--rj-accent, #c41e2e);
-    outline: none;
+    border-radius: var(--rj-radius, 4px);
+    overflow: hidden;
 }
 
 /* Кнопки − и + */
-.rogue-product-page .quantity .qty-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
+.rogue-product-page .quantity .qty-controls button {
+    background: var(--rj-surface, #f5f5f5);
+    border: none;
     width: 40px;
     height: 40px;
-    background: var(--rj-surface, #f5f5f5);
-    border: 1px solid var(--rj-border, #ddd);
-    color: var(--rj-text, #1a1a1a);
-    font-size: 18px;
-    font-weight: 400;
-    line-height: 1;
     cursor: pointer;
-    user-select: none;
-    transition: background var(--rj-transition, 0.3s ease),
-                color var(--rj-transition, 0.3s ease);
+    font-size: 16px;
+    color: var(--rj-text, #1a1a1a);
+    transition: background var(--rj-transition, 0.3s ease);
     padding: 0;
     flex-shrink: 0;
+    line-height: 1;
 }
 
-.rogue-product-page .quantity .qty-btn:hover {
-    background: var(--rj-btn-bg, #000);
-    color: var(--rj-btn-color, #fff);
-    border-color: var(--rj-btn-bg, #000);
+.rogue-product-page .quantity .qty-controls button:hover {
+    background: var(--rj-border, #ddd);
 }
 
-.rogue-product-page .quantity .qty-btn.qty-minus {
-    border-right: none;
-    border-radius: var(--rj-radius, 4px) 0 0 var(--rj-radius, 4px);
+/* Поле ввода числа */
+.rogue-product-page .quantity .qty-controls input[type="number"] {
+    width: 60px;
+    height: 40px;
+    border: none;
+    text-align: center;
+    font-size: 14px;
+    color: var(--rj-text, #1a1a1a);
+    background: var(--rj-surface-2, #fff);
+    border-left: 1px solid var(--rj-border, #ddd);
+    border-right: 1px solid var(--rj-border, #ddd);
+    -moz-appearance: textfield;
+    padding: 0;
+    outline: none;
 }
 
-.rogue-product-page .quantity .qty-btn.qty-plus {
-    border-left: none;
-    border-radius: 0 var(--rj-radius, 4px) var(--rj-radius, 4px) 0;
+.rogue-product-page .quantity .qty-controls input[type="number"]::-webkit-outer-spin-button,
+.rogue-product-page .quantity .qty-controls input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
 }
 
 /* ========== ADD TO CART BUTTON ========== */
