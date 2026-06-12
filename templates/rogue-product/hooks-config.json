@@ -73,6 +73,16 @@
                 "code": ""
             },
             {
+                "id": "woocommerce_template_single_availability",
+                "function": "woocommerce_template_single_availability",
+                "priority": 12,
+                "original_priority": 30,
+                "enabled": true,
+                "custom": false,
+                "label": "Stock Availability Badge",
+                "code": ""
+            },
+            {
                 "id": "addon_rockyjam_keyfeatures_render",
                 "function": "rockyjam_keyfeatures_render",
                 "priority": 15,

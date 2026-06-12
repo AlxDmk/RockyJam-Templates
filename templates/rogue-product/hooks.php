@@ -23,6 +23,9 @@ remove_action( 'woocommerce_single_product_summary', 'woocommerce_template_singl
 add_action( 'woocommerce_single_product_summary', 'woocommerce_template_single_rating', 10 );
 remove_action( 'woocommerce_single_product_summary', 'woocommerce_template_single_price', 10 );
 add_action( 'woocommerce_single_product_summary', 'woocommerce_template_single_price', 10 );
+// Stock availability badge — WC default priority is 30, placed here between price and key-features
+remove_action( 'woocommerce_single_product_summary', 'woocommerce_template_single_availability', 30 );
+add_action( 'woocommerce_single_product_summary', 'woocommerce_template_single_availability', 12 );
 remove_action( 'woocommerce_single_product_summary', 'rockyjam_keyfeatures_render', 15 );
 if ( function_exists( 'rockyjam_keyfeatures_render' ) ) {
 	add_action( 'woocommerce_single_product_summary', 'rockyjam_keyfeatures_render', 15 );
