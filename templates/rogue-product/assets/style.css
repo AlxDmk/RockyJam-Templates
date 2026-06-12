@@ -967,3 +967,119 @@
         font-size: 1.5rem;
     }
 }
+
+/* ========== RESPONSIVE — MAIN LAYOUT ========== */
+
+/* --- 1024px: планшет --- */
+@media (max-width: 1024px) {
+    .rogue-product-page .rj-product-main {
+        grid-template-columns: 1fr 1fr;
+        gap: var(--sp-lg);
+    }
+
+    .rogue-product-page .rj-thumbs {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+/* --- 768px: мобильный (основной breakpoint) --- */
+@media (max-width: 768px) {
+
+    /* Основная сетка → одна колонка */
+    .rogue-product-page .rj-product-main {
+        grid-template-columns: 1fr;
+        gap: var(--sp-lg);
+    }
+
+    /* Галерея — убираем sticky, становится обычным блоком */
+    .rogue-product-page .rj-gallery-column {
+        position: relative;
+    }
+
+    /* Сайдбар — убираем sticky */
+    .rogue-product-page .rj-sidebar {
+        position: relative;
+        top: auto;
+    }
+
+    /* Заголовок товара */
+    .rogue-product-page .product_title.entry-title {
+        font-size: 24px !important;
+        white-space: normal !important;
+    }
+
+    /* Цена */
+    .rogue-product-page p.price .woocommerce-Price-amount,
+    .rogue-product-page span.price .woocommerce-Price-amount {
+        font-size: 22px;
+    }
+
+    /* Миниатюры — 4 колонки */
+    .rogue-product-page .rj-thumbs {
+        grid-template-columns: repeat(4, 1fr);
+    }
+
+    /* Бейджи (Made USA / Warranty etc.) → одна колонка */
+    .rogue-product-page .rj-badges-grid {
+        grid-template-columns: 1fr !important;
+    }
+
+    /* Вкладки — горизонтальный скролл если не влезают */
+    .rogue-product-page .rj-tabs-nav {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+        flex-wrap: nowrap;
+    }
+
+    .rogue-product-page .rj-tabs-nav::-webkit-scrollbar {
+        display: none;
+    }
+
+    /* Вкладки — уменьшаем padding */
+    .rogue-product-page .rj-tab-link,
+    .rogue-product-page .rj-tab-disabled {
+        padding: 0.6rem 1rem;
+        font-size: 0.95rem;
+    }
+
+    /* Секция qty + кнопка */
+    .rogue-product-page .rj-qty-section {
+        gap: var(--sp-xs);
+    }
+}
+
+/* --- 480px: маленький экран --- */
+@media (max-width: 480px) {
+
+    /* Заголовок */
+    .rogue-product-page .product_title.entry-title {
+        font-size: 20px !important;
+    }
+
+    /* Цена */
+    .rogue-product-page p.price .woocommerce-Price-amount,
+    .rogue-product-page span.price .woocommerce-Price-amount {
+        font-size: 18px;
+    }
+
+    /* Миниатюры → 3 колонки */
+    .rogue-product-page .rj-thumbs {
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+    /* Вкладки */
+    .rogue-product-page .rj-tab-link,
+    .rogue-product-page .rj-tab-disabled {
+        padding: 0.5rem 0.75rem;
+        font-size: 0.875rem;
+    }
+
+    /* Таблица Filler Bag — горизонтальный скролл */
+    .rogue-product-page .rj-tab-content table {
+        display: block;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        font-size: 12px;
+    }
+}
