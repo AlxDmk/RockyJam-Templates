@@ -56,6 +56,17 @@
     font-family: dashicons !important;
 }
 
+/*
+ * WooCommerce star rating использует иконочный шрифт "WooCommerce"
+ * через псевдоэлементы ::before на span внутри .star-rating.
+ * Глобальный сброс font-family на .rogue-product-page * перебивает его,
+ * поэтому явно восстанавливаем шрифт здесь.
+ */
+.star-rating::before,
+.star-rating span::before {
+    font-family: "WooCommerce" !important;
+}
+
 /* ========== 60/40 GRID ========== */
 
 .rj-product-main {
