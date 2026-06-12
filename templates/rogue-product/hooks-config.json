@@ -11,7 +11,7 @@
                 "function": "woocommerce_show_product_sale_flash",
                 "priority": 10,
                 "original_priority": 10,
-                "enabled": true,
+                "enabled": false,
                 "custom": false,
                 "label": "Sale Flash Badge",
                 "code": ""
