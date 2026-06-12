@@ -53,6 +53,17 @@
                 "code": ""
             },
             {
+                "id": "addon_rockyjam_product_subtitle_render",
+                "function": "rockyjam_product_subtitle_render",
+                "priority": 6,
+                "original_priority": 6,
+                "enabled": true,
+                "custom": false,
+                "label": "Product Subtitle",
+                "code": "",
+                "addon": "product-subtitle"
+            },
+            {
                 "id": "woocommerce_template_single_rating",
                 "function": "woocommerce_template_single_rating",
                 "priority": 10,

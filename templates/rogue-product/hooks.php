@@ -19,6 +19,11 @@ if ( function_exists( 'rockyjam_shipping_badge_render' ) ) {
 }
 remove_action( 'woocommerce_single_product_summary', 'woocommerce_template_single_title', 5 );
 add_action( 'woocommerce_single_product_summary', 'woocommerce_template_single_title', 5 );
+// Product Subtitle — addon: product-subtitle, priority 6 (right after title)
+remove_action( 'woocommerce_single_product_summary', 'rockyjam_product_subtitle_render', 6 );
+if ( function_exists( 'rockyjam_product_subtitle_render' ) ) {
+	add_action( 'woocommerce_single_product_summary', 'rockyjam_product_subtitle_render', 6 );
+}
 remove_action( 'woocommerce_single_product_summary', 'woocommerce_template_single_rating', 10 );
 add_action( 'woocommerce_single_product_summary', 'woocommerce_template_single_rating', 10 );
 remove_action( 'woocommerce_single_product_summary', 'woocommerce_template_single_price', 10 );
