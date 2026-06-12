@@ -190,6 +190,12 @@
 }
 
 /* ========== STAR RATING ========== */
+/*
+ * WooCommerce рендерит:
+ * .woocommerce-product-rating
+ *   .star-rating  (span со span.rating)
+ *   a.woocommerce-review-link  "(124 оценки)"
+ */
 
 .rogue-product-page .woocommerce-product-rating {
     display: flex;
@@ -203,6 +209,7 @@
 .rogue-product-page .star-rating {
     color: var(--rj-gold, #d4af37);
     font-size: 16px;
+    /* WC использует ::before с звёздочками */
 }
 
 .rogue-product-page .woocommerce-review-link {
@@ -211,15 +218,37 @@
     text-decoration: none;
 }
 
-/* ========== PRICE ========== */
+.rogue-product-page .woocommerce-review-link:hover {
+    color: var(--rj-accent, #c41e2e);
+}
 
-.rogue-product-page .price-label-custom {
+/* ========== PRICE ========== */
+/*
+ * WC рендерит: .summary > p.price или span.price
+ * Мы добавляем pseudo-элемент ::before с меткой "Цена"
+ * через обёрточный элемент .rj-price-section.
+ * Разделительные черты: сверху и снизу.
+ */
+
+.rogue-product-page .rj-price-section {
+    margin-bottom: var(--sp-lg);
+    padding-top: var(--sp-md);
+    padding-bottom: var(--sp-md);
+    border-top: 1px solid var(--rj-border, #ddd);
+    border-bottom: 1px solid var(--rj-border, #ddd);
+}
+
+/* Метка "ЦЕНА" над числом */
+.rogue-product-page .rj-price-section::before {
+    content: "ЦЕНА";
+    display: block;
     font-size: 12px;
+    font-weight: 400;
     color: var(--rj-text-muted, #666);
     text-transform: uppercase;
-    margin-bottom: var(--sp-xs);
-    display: block;
     letter-spacing: 0.5px;
+    margin-bottom: var(--sp-xs);
+    font-family: var(--rj-font-body, 'Roboto', sans-serif);
 }
 
 .rogue-product-page p.price .woocommerce-Price-amount,
@@ -244,6 +273,11 @@
 }
 
 /* ========== STOCK BADGE ========== */
+/*
+ * Бейдж стоит после .rj-price-section.
+ * Поскольку разделитель снизу у .rj-price-section уже есть,
+ * сверху у stock больше не нужен — убран border-top.
+ */
 
 .rogue-product-page p.stock {
     display: inline-block !important;
@@ -271,15 +305,10 @@
     border: none !important;
 }
 
-.rogue-product-page .rj-price-section {
-    margin-bottom: var(--sp-lg);
-    padding-bottom: var(--sp-md);
-    border-bottom: 1px solid var(--rj-border, #ddd);
-}
-
+/* Обертка: разделитель после stock-бейджа — убираем старый селектор */
 .rogue-product-page p.stock + * {
-    border-top: 1px solid var(--rj-border, #ddd);
-    padding-top: var(--sp-md);
+    border-top: none;
+    padding-top: 0;
     margin-top: 0;
 }
 
@@ -346,6 +375,16 @@
 }
 
 /* ========== PRODUCT META ========== */
+/*
+ * WooCommerce рендерит:
+ * .product_meta
+ *   span.sku_wrapper   → <strong>Артикул:</strong> <span class="sku">...</span>
+ *   span.posted_in     → <strong>Категория:</strong> <a>...</a>
+ *   span.tagged_as     → <strong>Тег:</strong> <a>...</a>
+ *
+ * Все элементы WC выводит как inline — нам нужно
+ * сделать каждый span блочным, а внутри — снова inline.
+ */
 
 .rogue-product-page .product_meta {
     font-size: 12px;
@@ -355,15 +394,29 @@
     border-bottom: 1px solid var(--rj-border, #ddd);
 }
 
-.rogue-product-page .product_meta span,
+/* Каждая строка (Артикул, Категория, Тег) — блок, отдельная строка */
+.rogue-product-page .product_meta .sku_wrapper,
+.rogue-product-page .product_meta .posted_in,
+.rogue-product-page .product_meta .tagged_as,
 .rogue-product-page .product_meta > span {
     display: block;
     margin-bottom: var(--sp-xs);
+    line-height: 1.5;
 }
 
+/* Название (жирное) — инлайн, в одну строку со значением */
+.rogue-product-page .product_meta strong {
+    display: inline;
+    font-weight: 700;
+    color: var(--rj-text, #1a1a1a);
+    margin-right: 4px;
+}
+
+/* Ссылки и значения — инлайн */
 .rogue-product-page .product_meta a {
     color: var(--rj-text-muted, #666);
     text-decoration: none;
+    display: inline;
 }
 
 .rogue-product-page .product_meta a:hover {
@@ -481,15 +534,14 @@
 
 .rogue-product-page .rj-product-tabs {
     margin: var(--sp-2xl) 0;
-    /* Сбрасываем стили вкладок WooCommerce по умолчанию */
 }
 
-/* Скрываем стандартные WooCommerce-табы, если они вдруг остались */
+/* Скрываем стандартные WooCommerce-табы */
 .rogue-product-page .woocommerce-tabs.wc-tabs-wrapper {
     display: none !important;
 }
 
-/* NAV — горизонтальная полоса с нижней линией */
+/* NAV */
 .rogue-product-page .rj-tabs-nav {
     display: flex;
     gap: 0;
@@ -500,14 +552,13 @@
     background: transparent;
 }
 
-/* Каждая кнопка-вкладка */
 .rogue-product-page .rj-tab-link {
     display: inline-block;
     padding: 0.75rem 1.5rem;
     background: none;
     border: none;
     border-bottom: 2px solid transparent;
-    margin-bottom: -2px;   /* перекрываем нижнюю линию nav */
+    margin-bottom: -2px;
     font-size: 1.1rem;
     font-weight: 400;
     color: var(--rj-text-muted, #666);
@@ -516,7 +567,7 @@
     line-height: 1.4;
     transition: color var(--rj-transition, 0.3s ease),
                 border-color var(--rj-transition, 0.3s ease),
-                font-weight 0s; /* font-weight без анимации — избегаем layout shift */
+                font-weight 0s;
     white-space: nowrap;
     font-family: var(--rj-font-body, 'Roboto', sans-serif);
     letter-spacing: normal;
@@ -530,7 +581,6 @@
     background: none;
 }
 
-/* Активная вкладка */
 .rogue-product-page .rj-tab-link.active {
     color: var(--rj-tabs-active-color, #4a6b3c);
     border-bottom-color: var(--rj-tabs-active-color, #4a6b3c);
@@ -538,7 +588,6 @@
     background: none;
 }
 
-/* CONTENT — область под табами */
 .rogue-product-page .rj-tabs-content {
     padding: 0;
 }
@@ -552,7 +601,6 @@
     display: block;
 }
 
-/* Типографика внутри вкладок — Description */
 .rogue-product-page .rj-tab-content h2 {
     font-size: 1.5rem;
     font-weight: 700;
