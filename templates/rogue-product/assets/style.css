@@ -2,7 +2,7 @@
  * Rogue Product Template — assets/style.css
  * Exact reference design: Roboto font, correct sizes, gray dividers.
  * Key-features: targets real addon classes (.product-key-features*).
- * Note: font-family NOT applied to *, to preserve dashicons.
+ * Font Awesome icons (.fas, .fa, .far, .fab) are explicitly protected.
  */
 
 /* ========== CSS VARIABLES ========== */
@@ -34,7 +34,7 @@
 }
 
 /*
- * Apply Roboto only to text elements — NOT to * — so dashicons keep their font.
+ * Apply Roboto to text elements only — NOT to * — so icon fonts keep their font.
  */
 .rogue-product-page p,
 .rogue-product-page span,
@@ -54,6 +54,21 @@
 .rogue-product-page textarea {
     font-family: 'Roboto', sans-serif;
     box-sizing: border-box;
+}
+
+/*
+ * ICON FONT PROTECTION — Font Awesome and Dashicons must keep their own font-family.
+ * These rules are global (no .rogue-product-page scope) to also cover the site header.
+ */
+.fas, .fa, .far, .fab, .fal, .fad,
+.fas::before, .fa::before, .far::before, .fab::before, .fal::before,
+[class^="fa-"]::before, [class*=" fa-"]::before {
+    font-family: "Font Awesome 6 Free", "Font Awesome 6 Brands", "Font Awesome 5 Free", "Font Awesome 5 Brands", FontAwesome !important;
+}
+
+.dashicons,
+.dashicons-before::before {
+    font-family: dashicons !important;
 }
 
 /* ========== 60/40 GRID ========== */
@@ -233,7 +248,7 @@
 
 .rogue-product-page p.price ins { text-decoration: none; }
 
-/* Price block — bottom border (WC wraps price in p.price or span.price) */
+/* Price block — bottom border */
 .rogue-product-page p.price,
 .rogue-product-page .woocommerce-Price-currencySymbol {
     margin-bottom: 0;
@@ -267,15 +282,12 @@
     border: none !important;
 }
 
-/* Price + stock badge together = one section with divider */
 .rogue-product-page .rj-price-section {
     margin-bottom: var(--sp-lg);
     padding-bottom: var(--sp-md);
     border-bottom: 1px solid var(--rj-mid-gray);
 }
 
-/* Divider after price when no .rj-price-section wrapper —
-   use adjacent sibling: after p.price comes p.stock, then comes .product-key-features */
 .rogue-product-page p.stock + * {
     border-top: 1px solid var(--rj-mid-gray);
     padding-top: var(--sp-md);
@@ -323,7 +335,7 @@
     line-height: 1.5;
 }
 
-/* Dashicon checkmark — red color, correct size */
+/* Dashicon checkmark — red, correct size, font preserved */
 .rogue-product-page .product-key-features__item .dashicons {
     color: var(--rj-red) !important;
     font-size: 16px !important;
@@ -331,7 +343,6 @@
     height: 16px !important;
     flex-shrink: 0;
     margin-top: 2px;
-    /* Dashicons MUST keep their own font — do not override with Roboto */
     font-family: dashicons !important;
 }
 
