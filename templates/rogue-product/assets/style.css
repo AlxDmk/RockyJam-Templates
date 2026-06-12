@@ -472,3 +472,108 @@
 .rogue-product-page button.single_add_to_cart_button:hover {
     background: var(--rj-btn-bg-hover, #3a3a3a) !important;
 }
+
+/* ========== PRODUCT TABS ========== */
+/*
+ * Переменная --rj-tabs-active-color берётся из Plugin Contract темы.
+ * Fallback: #4a6b3c (тёмно-зелёный, как в эталонном дизайне).
+ */
+
+.rogue-product-page .rj-product-tabs {
+    margin: var(--sp-2xl) 0;
+    /* Сбрасываем стили вкладок WooCommerce по умолчанию */
+}
+
+/* Скрываем стандартные WooCommerce-табы, если они вдруг остались */
+.rogue-product-page .woocommerce-tabs.wc-tabs-wrapper {
+    display: none !important;
+}
+
+/* NAV — горизонтальная полоса с нижней линией */
+.rogue-product-page .rj-tabs-nav {
+    display: flex;
+    gap: 0;
+    border-bottom: 2px solid var(--rj-border, #ddd);
+    margin-bottom: 0;
+    padding: 0;
+    list-style: none;
+    background: transparent;
+}
+
+/* Каждая кнопка-вкладка */
+.rogue-product-page .rj-tab-link {
+    display: inline-block;
+    padding: 0.75rem 1.5rem;
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -2px;   /* перекрываем нижнюю линию nav */
+    font-size: 1.1rem;
+    font-weight: 400;
+    color: var(--rj-text-muted, #666);
+    cursor: pointer;
+    text-decoration: none;
+    line-height: 1.4;
+    transition: color var(--rj-transition, 0.3s ease),
+                border-color var(--rj-transition, 0.3s ease),
+                font-weight 0s; /* font-weight без анимации — избегаем layout shift */
+    white-space: nowrap;
+    font-family: var(--rj-font-body, 'Roboto', sans-serif);
+    letter-spacing: normal;
+    text-transform: none;
+    border-radius: 0;
+    outline: none;
+}
+
+.rogue-product-page .rj-tab-link:hover {
+    color: var(--rj-tabs-active-color, #4a6b3c);
+    background: none;
+}
+
+/* Активная вкладка */
+.rogue-product-page .rj-tab-link.active {
+    color: var(--rj-tabs-active-color, #4a6b3c);
+    border-bottom-color: var(--rj-tabs-active-color, #4a6b3c);
+    font-weight: 700;
+    background: none;
+}
+
+/* CONTENT — область под табами */
+.rogue-product-page .rj-tabs-content {
+    padding: 0;
+}
+
+.rogue-product-page .rj-tab-content {
+    display: none;
+    padding: 2rem 0;
+}
+
+.rogue-product-page .rj-tab-content.active {
+    display: block;
+}
+
+/* Типографика внутри вкладок — Description */
+.rogue-product-page .rj-tab-content h2 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--rj-text, #1a1a1a);
+    border-bottom: 2px solid var(--rj-tabs-active-color, #4a6b3c);
+    padding-bottom: 0.5rem;
+    margin: 0 0 1rem;
+    letter-spacing: normal;
+    font-family: var(--rj-font-body, 'Roboto', sans-serif);
+}
+
+.rogue-product-page .rj-tab-content p {
+    font-size: 14px;
+    line-height: 1.7;
+    color: var(--rj-text, #333);
+    margin-bottom: 1rem;
+    max-width: none;
+}
+
+.rogue-product-page .rj-tab-content p strong,
+.rogue-product-page .rj-tab-content strong {
+    font-weight: 700;
+    color: var(--rj-text, #1a1a1a);
+}
