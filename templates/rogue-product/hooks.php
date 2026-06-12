@@ -8,7 +8,7 @@ if ( ! defined( 'ABSPATH' ) ) { exit; }
 
 // Hook: woocommerce_before_single_product_summary
 remove_action( 'woocommerce_before_single_product_summary', 'woocommerce_show_product_sale_flash', 10 );
-add_action( 'woocommerce_before_single_product_summary', 'woocommerce_show_product_sale_flash', 10 );
+// Sale Flash Badge is disabled for rogue-product template via Hook Manager.
 remove_action( 'woocommerce_before_single_product_summary', 'woocommerce_show_product_images', 20 );
 add_action( 'woocommerce_before_single_product_summary', 'woocommerce_show_product_images', 20 );
 
