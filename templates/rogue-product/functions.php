@@ -24,22 +24,11 @@ add_action( 'wp_enqueue_scripts', function() {
 
 /**
  * Output stock badge right after price (priority 11, price is 10).
- *
- * wc_get_stock_html() returns empty string when manage_stock=false and
- * stock_status='instock' — WooCommerce considers the badge optional in
- * that case. We render our own badge unconditionally based on stock_status.
+ * Use wc_get_product( get_the_ID() ) — global $product may not be set
+ * inside an anonymous function hooked early in the summary.
  */
 add_action( 'woocommerce_single_product_summary', function() {
     $product = wc_get_product( get_the_ID() );
     if ( ! $product ) return;
-
-    $status = $product->get_stock_status(); // 'instock' | 'outofstock' | 'onbackorder'
-
-    if ( 'instock' === $status ) {
-        echo '<p class="stock in-stock">' . esc_html__( 'В наличии', 'woocommerce' ) . '</p>';
-    } elseif ( 'outofstock' === $status ) {
-        echo '<p class="stock out-of-stock">' . esc_html__( 'Нет в наличии', 'woocommerce' ) . '</p>';
-    } elseif ( 'onbackorder' === $status ) {
-        echo '<p class="stock available-on-backorder">' . esc_html__( 'Под заказ', 'woocommerce' ) . '</p>';
-    }
+    echo wc_get_stock_html( $product );
 }, 11 );
