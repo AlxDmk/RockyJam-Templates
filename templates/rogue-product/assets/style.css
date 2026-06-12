@@ -187,13 +187,6 @@
 
 /* ========== PRODUCT TITLE ========== */
 
-/*
- * Desktop (>780px): fluid size via clamp() + single line.
- * clamp(18px, 1.8vw, 24px):
- *   1280px → 23px, 1440px → 24px (capped), 1920px → 24px.
- * white-space:nowrap forces one line; overflow:hidden + text-overflow:ellipsis
- * guard against unexpectedly long titles.
- */
 .rogue-product-page .product_title.entry-title {
     font-size: clamp(18px, 1.8vw, 24px) !important;
     font-weight: 700 !important;
@@ -207,7 +200,6 @@
     text-overflow: ellipsis !important;
 }
 
-/* Product subtitle directly under the main title */
 .rogue-product-page .rj-product-subtitle {
     font-size: 14px;
     color: #666;
@@ -239,7 +231,6 @@
 
 /* ========== PRICE — divider below ========== */
 
-/* "PRICE" label */
 .rogue-product-page .price-label-custom {
     font-size: 12px;
     color: var(--rj-text-sec);
@@ -249,7 +240,6 @@
     letter-spacing: 0.5px;
 }
 
-/* Price amount */
 .rogue-product-page p.price .woocommerce-Price-amount,
 .rogue-product-page span.price .woocommerce-Price-amount {
     font-size: 28px;
@@ -266,13 +256,12 @@
 
 .rogue-product-page p.price ins { text-decoration: none; }
 
-/* Price block — bottom border */
 .rogue-product-page p.price,
 .rogue-product-page .woocommerce-Price-currencySymbol {
     margin-bottom: 0;
 }
 
-/* ========== STOCK BADGE — right after price, small ========== */
+/* ========== STOCK BADGE ========== */
 
 .rogue-product-page p.stock {
     display: inline-block !important;
@@ -312,7 +301,7 @@
     margin-top: 0;
 }
 
-/* ========== KEY FEATURES ADDON — real classes from plugin ========== */
+/* ========== KEY FEATURES ADDON ========== */
 
 .rogue-product-page .product-key-features {
     margin-bottom: var(--sp-lg) !important;
@@ -353,7 +342,6 @@
     line-height: 1.5;
 }
 
-/* Dashicon checkmark — red, correct size, font preserved */
 .rogue-product-page .product-key-features__item .dashicons {
     color: var(--rj-red) !important;
     font-size: 16px !important;
@@ -364,7 +352,7 @@
     font-family: dashicons !important;
 }
 
-/* ========== SHORT DESCRIPTION — divider below ========== */
+/* ========== SHORT DESCRIPTION ========== */
 
 .rogue-product-page .woocommerce-product-details__short-description {
     font-size: 13px;
@@ -375,7 +363,7 @@
     border-bottom: 1px solid var(--rj-mid-gray);
 }
 
-/* ========== PRODUCT META — divider below ========== */
+/* ========== PRODUCT META ========== */
 
 .rogue-product-page .product_meta {
     font-size: 12px;
@@ -397,10 +385,9 @@
 }
 
 .rogue-product-page .product_meta a:hover { color: var(--rj-red); }
-
 .rogue-product-page .product_meta strong { color: var(--rj-text-dark); }
 
-/* ========== TRUST BADGES (2-col grid) — divider below ========== */
+/* ========== TRUST BADGES (2-col grid) ========== */
 
 .rogue-product-page .rj-trust-badges {
     display: grid;
@@ -729,7 +716,7 @@
     color: var(--rj-text-sec);
 }
 
-/* ========== RELATED PRODUCTS ========== */
+/* ========== OLD RELATED PRODUCTS (kept for fallback) ========== */
 
 .rogue-product-page .related.products {
     padding: var(--sp-2xl) 0;
@@ -746,7 +733,6 @@
     padding-bottom: 0;
 }
 
-/* Grid — auto-fill columns, min 220px each */
 .rogue-product-page .related.products ul.products {
     display: grid !important;
     grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)) !important;
@@ -756,91 +742,209 @@
     margin: 0 !important;
 }
 
-/* Card — flex column so button sticks to bottom */
 .rogue-product-page .related.products ul.products li.product {
     border: 1px solid var(--rj-mid-gray) !important;
     border-radius: var(--radius) !important;
     overflow: hidden !important;
-    transition: all var(--transition) !important;
     padding: 0 !important;
     float: none !important;
     margin: 0 !important;
-    position: relative !important;
+    width: auto !important;
     display: flex !important;
     flex-direction: column !important;
 }
 
-.rogue-product-page .related.products ul.products li.product:hover {
-    border-color: var(--rj-black) !important;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.08) !important;
-}
-
-/* Image link wrapper */
-.rogue-product-page .related.products ul.products li.product a.woocommerce-loop-product__link {
-    display: block !important;
-    overflow: hidden !important;
-    flex-shrink: 0 !important;
-}
-
-/* Image — fixed 200px height, cover crop */
 .rogue-product-page .related.products ul.products li.product img {
     width: 100% !important;
     height: 200px !important;
     object-fit: cover !important;
-    object-position: center center !important;
     display: block !important;
 }
 
-/* Hide WooCommerce sale flash badge inside related cards */
-.rogue-product-page .related.products ul.products li.product .onsale {
-    display: none !important;
-}
-
-/* Title */
-.rogue-product-page .related.products ul.products li.product .woocommerce-loop-product__title {
-    font-size: 13px !important;
-    font-weight: 600 !important;
-    color: var(--rj-text-dark) !important;
-    line-height: 1.4 !important;
-    min-height: 32px !important;
-    padding: var(--sp-md) var(--sp-md) 0 !important;
-    margin: 0 !important;
-}
-
-/* Price */
-.rogue-product-page .related.products ul.products li.product .price {
-    font-size: 14px !important;
-    font-weight: 700 !important;
-    color: var(--rj-black) !important;
-    padding: var(--sp-sm) var(--sp-md) var(--sp-md) !important;
-    display: block !important;
-    margin: 0 !important;
-}
-
-/* Button — full width, flush to card bottom */
 .rogue-product-page .related.products ul.products li.product .button {
     display: block !important;
     width: 100% !important;
-    box-sizing: border-box !important;
-    padding: 10px var(--sp-md) !important;
+    padding: 10px 16px !important;
     margin: auto 0 0 !important;
-    background: var(--rj-black) !important;
-    color: var(--rj-white) !important;
+    background: #000 !important;
+    color: #fff !important;
     border: none !important;
     border-radius: 0 !important;
     font-size: 12px !important;
     font-weight: 600 !important;
-    font-family: 'Roboto', sans-serif !important;
-    cursor: pointer !important;
     text-transform: uppercase !important;
     text-align: center !important;
     text-decoration: none !important;
-    letter-spacing: 0.5px !important;
-    transition: background var(--transition) !important;
 }
 
-.rogue-product-page .related.products ul.products li.product .button:hover {
-    background: var(--rj-dark-gray) !important;
+/* ========== RELATED PRODUCTS — NEW CUSTOM OVERRIDE (.rj-related__*) ========== */
+/*
+ * These classes are output by overrides/woocommerce/single-product/related.php.
+ * Completely independent of WooCommerce/theme float layout.
+ * CSS variables defined on :root so they work outside .rogue-product-page.
+ */
+
+:root {
+    --rj-black:      #000;
+    --rj-white:      #fff;
+    --rj-light-gray: #f5f5f5;
+    --rj-mid-gray:   #ddd;
+    --rj-dark-gray:  #3a3a3a;
+    --rj-text-dark:  #1a1a1a;
+    --rj-text-sec:   #666;
+    --rj-red:        #c41e2e;
+    --sp-md:         16px;
+    --sp-lg:         24px;
+    --sp-xl:         32px;
+    --sp-2xl:        48px;
+    --radius:        4px;
+    --transition:    0.3s ease;
+}
+
+.rj-related {
+    padding: var(--sp-2xl) 0;
+    border-top: 1px solid var(--rj-mid-gray);
+    font-family: 'Roboto', sans-serif;
+}
+
+.rj-related__title {
+    font-size: 22px;
+    font-weight: 700;
+    margin-bottom: var(--sp-xl);
+    color: var(--rj-text-dark);
+    font-family: 'Roboto', sans-serif;
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+/* 4-column grid, min card width 200px */
+.rj-related__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: var(--sp-lg);
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+/* Card — flex column: image → body → button */
+.rj-related__card {
+    display: flex;
+    flex-direction: column;
+    border: 1px solid var(--rj-mid-gray);
+    border-radius: var(--radius);
+    overflow: hidden;
+    transition: border-color var(--transition), box-shadow var(--transition);
+    background: #fff;
+    margin: 0;
+    padding: 0;
+    float: none;
+    width: auto;
+}
+
+.rj-related__card:hover {
+    border-color: #000;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+/* Image block — square crop */
+.rj-related__card-link {
+    display: block;
+    flex-shrink: 0;
+    text-decoration: none;
+}
+
+.rj-related__img-wrap {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    overflow: hidden;
+    background: var(--rj-light-gray);
+}
+
+.rj-related__img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    display: block;
+    transition: transform 0.3s ease;
+}
+
+.rj-related__card:hover .rj-related__img {
+    transform: scale(1.03);
+}
+
+/* Body — name + price, grows to fill remaining space */
+.rj-related__body {
+    padding: var(--sp-md) var(--sp-md) 8px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.rj-related__name {
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1.4;
+    color: var(--rj-text-dark);
+    margin: 0;
+    font-family: 'Roboto', sans-serif;
+}
+
+.rj-related__name a {
+    color: inherit;
+    text-decoration: none;
+}
+
+.rj-related__name a:hover { color: var(--rj-red); }
+
+.rj-related__price {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--rj-black);
+    line-height: 1.3;
+    margin-top: auto;
+}
+
+.rj-related__price del {
+    font-size: 12px;
+    font-weight: 400;
+    color: var(--rj-text-sec);
+    margin-right: 4px;
+}
+
+.rj-related__price ins {
+    text-decoration: none;
+}
+
+/* Button — full width, flush to bottom */
+.rj-related__btn {
+    display: block;
+    width: 100%;
+    padding: 10px var(--sp-md);
+    background: var(--rj-black);
+    color: var(--rj-white);
+    border: none;
+    border-radius: 0;
+    font-size: 12px;
+    font-weight: 700;
+    font-family: 'Roboto', sans-serif;
+    text-transform: uppercase;
+    text-align: center;
+    text-decoration: none;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    transition: background var(--transition);
+    margin-top: auto;
+    flex-shrink: 0;
+    box-sizing: border-box;
+}
+
+.rj-related__btn:hover {
+    background: var(--rj-dark-gray);
+    color: var(--rj-white);
+    text-decoration: none;
 }
 
 /* ========== SECTION TITLE ========== */
@@ -858,9 +962,9 @@
 @media (max-width: 1024px) {
     .rj-product-main { grid-template-columns: 1fr 1fr; gap: var(--sp-lg); }
     .rj-thumbs { grid-template-columns: repeat(4, 1fr); }
+    .rj-related__grid { grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); }
 }
 
-/* On mobile sidebar becomes full-width — allow title to wrap naturally */
 @media (max-width: 780px) {
     .rogue-product-page .product_title.entry-title {
         font-size: 22px !important;
@@ -875,10 +979,12 @@
     .rj-sidebar { position: relative; top: auto; }
     .rj-thumbs { grid-template-columns: repeat(4, 1fr); }
     .rogue-product-page .rj-trust-badges { grid-template-columns: 1fr; }
+    .rj-related__grid { grid-template-columns: repeat(2, 1fr); }
 }
 
 @media (max-width: 480px) {
     .rogue-product-page .product_title.entry-title { font-size: 20px !important; }
     .rj-thumbs { grid-template-columns: repeat(3, 1fr); }
     .rj-section-title { font-size: 18px; }
+    .rj-related__grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
 }
