@@ -529,7 +529,7 @@
     background: transparent;
 }
 
-/* Обычная активная вкладка */
+/* Обычная кликабельная вкладка */
 .rogue-product-page .rj-tab-link {
     display: inline-block;
     padding: 0.75rem 1.5rem;
@@ -568,10 +568,9 @@
 
 /*
  * Деактивированная вкладка (отзывов нет).
- * span — не является button, поэтому не получит focus.
- * pointer-events:none — перестраховка на мышь.
- * cursor:default — не показываем pointer.
- * opacity:0.4 — визуально показываем, что вкладка есть, но недоступна.
+ * Рендерится как <span>, не получает focus/click.
+ * pointer-events:none — страховка от мыши.
+ * opacity:0.4 — визуально показываем что вкладка есть, но недоступна.
  */
 .rogue-product-page .rj-tab-disabled {
     display: inline-block;
@@ -586,7 +585,7 @@
     margin-bottom: -2px;
     white-space: nowrap;
     font-family: var(--rj-font-body, 'Roboto', sans-serif);
-    opacity: 0.5;
+    opacity: 0.4;
     line-height: 1.4;
 }
 
@@ -601,6 +600,14 @@
 
 .rogue-product-page .rj-tab-content.active {
     display: block;
+}
+
+/* Заглушка «Отзывов пока нет» */
+.rogue-product-page .rj-no-reviews {
+    font-size: 14px;
+    color: var(--rj-text-muted, #666);
+    font-style: italic;
+    margin: 0;
 }
 
 .rogue-product-page .rj-tab-content h2 {
