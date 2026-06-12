@@ -50,61 +50,40 @@
 
 .rj-gallery-column {
     position: relative;
-    min-width: 0; /* prevent grid blowout */
+    min-width: 0;
 }
 
-/* WooCommerce wraps images in .woocommerce-product-gallery.
-   WooCommerce JS may inject inline width — override with !important. */
-.rogue-product-page .woocommerce-product-gallery {
-    position: sticky;
-    top: var(--rj-spacing-lg);
-    width: 100% !important;
-    max-width: 100% !important;
-    box-sizing: border-box;
+/* ========== CUSTOM GALLERY (replaces WC Flexslider) ========== */
+
+.rj-gallery-wrap {
+    width: 100%;
 }
 
-/* Flexslider root wrapper — square crop */
-.rogue-product-page .woocommerce-product-gallery__wrapper {
-    width: 100% !important;
-    max-width: 100% !important;
-    box-sizing: border-box;
+/* Main image block — square */
+.rj-main-image-wrap {
+    width: 100%;
     aspect-ratio: 1 / 1;
     overflow: hidden;
     background-color: var(--rj-light-gray);
     border-radius: var(--rj-radius);
     border: 1px solid var(--rj-medium-gray);
     margin-bottom: var(--rj-spacing-lg);
-    display: block;
     position: relative;
+    box-sizing: border-box;
 }
 
-/* Each slide item inside flexslider */
-.rogue-product-page .woocommerce-product-gallery__wrapper .woocommerce-product-gallery__image {
-    width: 100% !important;
-    height: 100% !important;
-    display: block !important;
-    position: absolute !important;
-    top: 0;
-    left: 0;
+.rj-main-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center center;
+    display: block;
+    transition: opacity 0.18s ease;
 }
 
-/* The actual <img> inside the slide fills the square */
-.rogue-product-page .woocommerce-product-gallery__wrapper .woocommerce-product-gallery__image img,
-.rogue-product-page .woocommerce-product-gallery__wrapper .woocommerce-product-gallery__image a img {
-    width: 100% !important;
-    height: 100% !important;
-    object-fit: cover !important;
-    object-position: center center !important;
-    display: block !important;
-}
-
-/* Flexslider sets display:none on non-active slides, override for the active one */
-.rogue-product-page .woocommerce-product-gallery__wrapper .woocommerce-product-gallery__image.flex-active-slide {
-    display: block !important;
-}
-
-/* Sale flash badge repositioned */
-.rogue-product-page .onsale {
+/* Sale flash */
+.rj-main-image-wrap .onsale {
+    position: absolute;
     top: 8px;
     left: 8px;
     background: var(--rj-red);
@@ -114,13 +93,13 @@
     padding: 4px 8px;
     min-height: unset;
     line-height: 1;
-    position: absolute;
     z-index: 10;
+    color: var(--rj-white);
 }
 
 /* Thumbnails strip */
-.rogue-product-page .flex-control-thumbs {
-    display: grid !important;
+.rj-thumbs {
+    display: grid;
     grid-template-columns: repeat(6, 1fr);
     gap: var(--rj-spacing-sm);
     list-style: none;
@@ -128,29 +107,39 @@
     margin: 0 0 var(--rj-spacing-lg);
 }
 
-.rogue-product-page .flex-control-thumbs li {
+.rj-thumb-item {
     margin: 0;
-}
-
-.rogue-product-page .flex-control-thumbs li img {
-    width: 100%;
     aspect-ratio: 1 / 1;
-    object-fit: cover;
-    border: 2px solid var(--rj-medium-gray);
+    overflow: hidden;
     border-radius: var(--rj-radius);
+    border: 2px solid var(--rj-medium-gray);
     cursor: pointer;
-    transition: all var(--rj-transition);
-    display: block;
+    transition: border-color var(--rj-transition), box-shadow var(--rj-transition);
+    box-sizing: border-box;
 }
 
-.rogue-product-page .flex-control-thumbs li img:hover {
+.rj-thumb-item:hover {
     border-color: var(--rj-red);
-    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
 }
 
-.rogue-product-page .flex-control-thumbs li img.flex-active {
+.rj-thumb-item.active {
     border-color: var(--rj-black);
-    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
+}
+
+.rj-thumb {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center center;
+    display: block;
+    cursor: pointer;
+}
+
+/* Hide WC Flexslider remnants if they appear */
+.rogue-product-page .woocommerce-product-gallery {
+    display: none !important;
 }
 
 /* ========== SIDEBAR (40%) ========== */
@@ -234,7 +223,6 @@
     text-decoration: none;
 }
 
-/* Price section wrapper added by override */
 .rogue-product-page .rj-price-section {
     margin-bottom: var(--rj-spacing-lg);
     padding-bottom: var(--rj-spacing-md);
@@ -297,14 +285,14 @@
 }
 
 .rogue-product-page .rj-features-list li::before {
-    content: "✓";
+    content: "\2713";
     position: absolute;
     left: 0;
     color: var(--rj-red);
     font-weight: 700;
 }
 
-/* ========== PRODUCT META (SKU / Brand / Availability) ========== */
+/* ========== PRODUCT META ========== */
 
 .rogue-product-page .product_meta {
     font-size: 12px;
@@ -337,7 +325,7 @@
     color: var(--rj-red);
 }
 
-/* ========== TRUST BADGES (addon: product-badges) ========== */
+/* ========== TRUST BADGES ========== */
 
 .rogue-product-page .rj-trust-badges {
     display: grid;
@@ -551,7 +539,6 @@
     display: block;
 }
 
-/* Tab content typography */
 .rj-tab-content h2 {
     font-size: 2rem;
     border-bottom: 2px solid var(--rj-green-tab);
@@ -564,7 +551,6 @@
     margin: 1.5rem 0 1rem;
 }
 
-/* Specs list */
 .rj-tab-content .specs-list,
 .rj-tab-content ul.woocommerce-product-attributes {
     list-style: none;
@@ -578,7 +564,6 @@
     font-size: 0.9rem;
 }
 
-/* Size table */
 .rj-tab-content table {
     width: 100%;
     border-collapse: collapse;
@@ -602,7 +587,6 @@
     background: #f9f9f9;
 }
 
-/* Reviews */
 .rj-tab-content .woocommerce-Reviews .reviews-summary,
 .rj-tab-content .rj-reviews-summary {
     display: flex;
@@ -623,7 +607,7 @@
     padding: 1.5rem 0;
 }
 
-/* ========== FILLER COMPARISON (section below tabs) ========== */
+/* ========== FILLER COMPARISON ========== */
 
 .rj-filler-comparison {
     padding: var(--rj-spacing-2xl) 0;
@@ -637,7 +621,7 @@
     margin: 0 0 1rem;
 }
 
-/* ========== BENEFITS GRID (addon) ========== */
+/* ========== BENEFITS GRID ========== */
 
 .rj-benefits-section {
     padding: var(--rj-spacing-2xl) 0;
@@ -685,7 +669,7 @@
     margin: 0;
 }
 
-/* ========== FAQ SECTION (addon) ========== */
+/* ========== FAQ SECTION ========== */
 
 .rj-faq-section {
     padding: var(--rj-spacing-2xl) 0;
@@ -746,7 +730,7 @@
 }
 
 .rj-faq-item.active .rj-faq-question::after {
-    content: "−";
+    content: "\2212";
 }
 
 .rj-faq-answer {
@@ -851,7 +835,7 @@
     background: var(--rj-dark-gray) !important;
 }
 
-/* ========== SECTION TITLE (shared) ========== */
+/* ========== SECTION TITLE ========== */
 
 .rj-section-title {
     font-size: 22px;
@@ -869,8 +853,8 @@
         gap: var(--rj-spacing-lg);
     }
 
-    .rogue-product-page .flex-control-thumbs {
-        grid-template-columns: repeat(4, 1fr) !important;
+    .rj-thumbs {
+        grid-template-columns: repeat(4, 1fr);
     }
 
     .rogue-product-page .related.products ul.products {
@@ -882,11 +866,6 @@
     .rj-product-main {
         grid-template-columns: 1fr;
         gap: var(--rj-spacing-lg);
-    }
-
-    .rogue-product-page .woocommerce-product-gallery {
-        position: relative;
-        top: auto;
     }
 
     .rj-sidebar {
@@ -906,8 +885,8 @@
         grid-template-columns: 1fr;
     }
 
-    .rogue-product-page .flex-control-thumbs {
-        grid-template-columns: repeat(4, 1fr) !important;
+    .rj-thumbs {
+        grid-template-columns: repeat(4, 1fr);
     }
 
     .rj-tabs-nav {
@@ -920,8 +899,8 @@
         font-size: 20px !important;
     }
 
-    .rogue-product-page .flex-control-thumbs {
-        grid-template-columns: repeat(3, 1fr) !important;
+    .rj-thumbs {
+        grid-template-columns: repeat(3, 1fr);
     }
 
     .rj-section-title {
