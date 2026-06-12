@@ -50,18 +50,24 @@
 
 .rj-gallery-column {
     position: relative;
+    min-width: 0; /* prevent grid blowout */
 }
 
-/* WooCommerce wraps images in .woocommerce-product-gallery */
+/* WooCommerce wraps images in .woocommerce-product-gallery.
+   WooCommerce JS may inject inline width — override with !important. */
 .rogue-product-page .woocommerce-product-gallery {
     position: sticky;
     top: var(--rj-spacing-lg);
-    width: 100%;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box;
 }
 
 /* Flexslider root wrapper — square crop */
 .rogue-product-page .woocommerce-product-gallery__wrapper {
-    width: 100%;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box;
     aspect-ratio: 1 / 1;
     overflow: hidden;
     background-color: var(--rj-light-gray);
@@ -153,6 +159,7 @@
     position: sticky;
     top: 150px;
     height: fit-content;
+    min-width: 0;
 }
 
 /* ========== SHIPPING BADGE TOP (addon hook area) ========== */
