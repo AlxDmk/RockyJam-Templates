@@ -742,70 +742,101 @@
     font-weight: 700;
     margin-bottom: var(--sp-xl);
     color: var(--rj-text-dark);
+    border-bottom: none;
+    padding-bottom: 0;
 }
 
+/* Grid — auto-fill columns, min 220px each */
 .rogue-product-page .related.products ul.products {
     display: grid !important;
-    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-    gap: var(--sp-lg);
-    list-style: none;
-    padding: 0;
-    margin: 0;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)) !important;
+    gap: var(--sp-lg) !important;
+    list-style: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
 }
 
+/* Card — flex column so button sticks to bottom */
 .rogue-product-page .related.products ul.products li.product {
-    border: 1px solid var(--rj-mid-gray);
-    border-radius: var(--radius);
-    overflow: hidden;
-    transition: all var(--transition);
-    padding: 0;
-    float: none;
-    margin: 0;
+    border: 1px solid var(--rj-mid-gray) !important;
+    border-radius: var(--radius) !important;
+    overflow: hidden !important;
+    transition: all var(--transition) !important;
+    padding: 0 !important;
+    float: none !important;
+    margin: 0 !important;
+    position: relative !important;
+    display: flex !important;
+    flex-direction: column !important;
 }
 
 .rogue-product-page .related.products ul.products li.product:hover {
-    border-color: var(--rj-black);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    border-color: var(--rj-black) !important;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08) !important;
 }
 
+/* Image link wrapper */
+.rogue-product-page .related.products ul.products li.product a.woocommerce-loop-product__link {
+    display: block !important;
+    overflow: hidden !important;
+    flex-shrink: 0 !important;
+}
+
+/* Image — fixed 200px height, cover crop */
 .rogue-product-page .related.products ul.products li.product img {
-    width: 100%;
-    height: 200px;
-    object-fit: cover;
+    width: 100% !important;
+    height: 200px !important;
+    object-fit: cover !important;
+    object-position: center center !important;
+    display: block !important;
 }
 
+/* Hide WooCommerce sale flash badge inside related cards */
+.rogue-product-page .related.products ul.products li.product .onsale {
+    display: none !important;
+}
+
+/* Title */
 .rogue-product-page .related.products ul.products li.product .woocommerce-loop-product__title {
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--rj-text-dark);
-    line-height: 1.4;
-    padding: var(--sp-md) var(--sp-md) 0;
-    margin: 0;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    color: var(--rj-text-dark) !important;
+    line-height: 1.4 !important;
+    min-height: 32px !important;
+    padding: var(--sp-md) var(--sp-md) 0 !important;
+    margin: 0 !important;
 }
 
+/* Price */
 .rogue-product-page .related.products ul.products li.product .price {
-    font-size: 14px;
-    font-weight: 700;
-    color: var(--rj-black);
-    padding: var(--sp-sm) var(--sp-md);
-    display: block;
+    font-size: 14px !important;
+    font-weight: 700 !important;
+    color: var(--rj-black) !important;
+    padding: var(--sp-sm) var(--sp-md) var(--sp-md) !important;
+    display: block !important;
+    margin: 0 !important;
 }
 
+/* Button — full width, flush to card bottom */
 .rogue-product-page .related.products ul.products li.product .button {
     display: block !important;
-    width: calc(100% - 2 * var(--sp-md));
-    margin: 0 var(--sp-md) var(--sp-md) !important;
-    padding: 10px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    padding: 10px var(--sp-md) !important;
+    margin: auto 0 0 !important;
     background: var(--rj-black) !important;
     color: var(--rj-white) !important;
     border: none !important;
-    border-radius: var(--radius) !important;
+    border-radius: 0 !important;
     font-size: 12px !important;
     font-weight: 600 !important;
-    cursor: pointer;
+    font-family: 'Roboto', sans-serif !important;
+    cursor: pointer !important;
     text-transform: uppercase !important;
     text-align: center !important;
     text-decoration: none !important;
+    letter-spacing: 0.5px !important;
+    transition: background var(--transition) !important;
 }
 
 .rogue-product-page .related.products ul.products li.product .button:hover {
