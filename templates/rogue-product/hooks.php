@@ -25,21 +25,33 @@ remove_action( 'woocommerce_single_product_summary', 'woocommerce_template_singl
 add_action( 'woocommerce_single_product_summary', 'woocommerce_template_single_price', 10 );
 
 /**
- * Stock availability badge — between price (10) and key-features (15).
- * woocommerce_template_single_availability() was removed in WC 8.x.
- * We render the availability <p> directly via wc_get_template().
+ * Stock availability badge — priority 12 (between price and key-features).
+ *
+ * WC's get_availability_text() returns '' when manage_stock=false and item is in stock.
+ * In that case we fall back to is_in_stock() to still show the badge.
  */
 add_action( 'woocommerce_single_product_summary', function() {
 	global $product;
 	if ( ! $product instanceof WC_Product ) {
 		return;
 	}
+
 	$availability = $product->get_availability();
-	if ( empty( $availability['availability'] ) ) {
-		return;
+	$text         = ! empty( $availability['availability'] ) ? $availability['availability'] : '';
+	$class        = ! empty( $availability['class'] ) ? $availability['class'] : '';
+
+	// Fallback: manage_stock=false — WC returns empty text but stock status is set
+	if ( '' === $text ) {
+		if ( $product->is_in_stock() ) {
+			$text  = __( 'In stock', 'woocommerce' );
+			$class = 'in-stock';
+		} else {
+			$text  = __( 'Out of stock', 'woocommerce' );
+			$class = 'out-of-stock';
+		}
 	}
-	$class = ! empty( $availability['class'] ) ? $availability['class'] : 'in-stock';
-	echo '<p class="stock ' . esc_attr( $class ) . '">' . esc_html( $availability['availability'] ) . '</p>';
+
+	echo '<p class="stock ' . esc_attr( $class ) . '">' . esc_html( $text ) . '</p>';
 }, 12 );
 
 remove_action( 'woocommerce_single_product_summary', 'rockyjam_keyfeatures_render', 15 );
