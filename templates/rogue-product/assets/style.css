@@ -1,40 +1,32 @@
 /*
  * Rogue Product Template — assets/style.css
- * Exact reference design: Roboto font, correct sizes, gray dividers.
- * Key-features: targets real addon classes (.product-key-features*).
- * Font Awesome icons (.fas, .fa, .far, .fab) are explicitly protected.
+ * Цвета и шрифты задаются темой через Plugin Contract (--rj-*).
+ * Хардкодных цветов в этом файле НЕТ — только fallback-значения
+ * в var() для работы без RockyJam-Theme.
+ *
+ * Структурные стили (grid, flex, позиционирование) остаются в плагине.
+ * Font Awesome и Dashicons защищены от переопределения font-family.
  */
 
-/* ========== CSS VARIABLES ========== */
+/* ========== SCOPED LAYOUT VARIABLES ========== */
+/* Только нецветовые локальные токены. Цвета — через --rj-* из темы. */
 
 .rogue-product-page {
-    --rj-black:       #000;
-    --rj-white:       #fff;
-    --rj-light-gray:  #f5f5f5;
-    --rj-mid-gray:    #ddd;
-    --rj-dark-gray:   #3a3a3a;
-    --rj-text-dark:   #1a1a1a;
-    --rj-text-sec:    #666;
-    --rj-red:         #c41e2e;
-    --rj-gold:        #d4af37;
-    --rj-green:       #28a745;
-    --rj-green-tab:   #4a6b3c;
     --sp-xs:  8px;
     --sp-sm:  12px;
     --sp-md:  16px;
     --sp-lg:  24px;
     --sp-xl:  32px;
     --sp-2xl: 48px;
-    --radius: 4px;
-    --transition: 0.3s ease;
-    font-family: 'Roboto', sans-serif;
+
+    font-family: var(--rj-font-body, 'Roboto', sans-serif);
     line-height: 1.6;
-    color: #333;
+    color: var(--rj-text, #333);
     box-sizing: border-box;
 }
 
 /*
- * Apply Roboto to text elements only — NOT to * — so icon fonts keep their font.
+ * Apply font to text elements only — NOT to * — so icon fonts keep their font.
  */
 .rogue-product-page p,
 .rogue-product-page span,
@@ -52,13 +44,12 @@
 .rogue-product-page input,
 .rogue-product-page select,
 .rogue-product-page textarea {
-    font-family: 'Roboto', sans-serif;
+    font-family: var(--rj-font-body, 'Roboto', sans-serif);
     box-sizing: border-box;
 }
 
 /*
  * ICON FONT PROTECTION — Font Awesome and Dashicons must keep their own font-family.
- * These rules are global (no .rogue-product-page scope) to also cover the site header.
  */
 .fas, .fa, .far, .fab, .fal, .fad,
 .fas::before, .fa::before, .far::before, .fab::before, .fal::before,
@@ -95,9 +86,9 @@
     width: 100%;
     aspect-ratio: 1 / 1;
     overflow: hidden;
-    background-color: var(--rj-light-gray);
-    border-radius: var(--radius);
-    border: 1px solid var(--rj-mid-gray);
+    background-color: var(--rj-surface, #f5f5f5);
+    border-radius: var(--rj-radius, 4px);
+    border: 1px solid var(--rj-border, #ddd);
     margin-bottom: var(--sp-lg);
     position: relative;
     box-sizing: border-box;
@@ -116,15 +107,15 @@
     position: absolute;
     top: 8px;
     left: 8px;
-    background: var(--rj-red);
-    border-radius: var(--radius);
+    background: var(--rj-accent, #c41e2e);
+    border-radius: var(--rj-radius, 4px);
     font-size: 11px;
     font-weight: 700;
     padding: 4px 8px;
     min-height: unset;
     line-height: 1;
     z-index: 10;
-    color: var(--rj-white);
+    color: #fff;
 }
 
 /* Thumbnails — 6 columns, square */
@@ -141,20 +132,20 @@
     margin: 0;
     aspect-ratio: 1 / 1;
     overflow: hidden;
-    border-radius: var(--radius);
-    border: 2px solid var(--rj-mid-gray);
+    border-radius: var(--rj-radius, 4px);
+    border: 2px solid var(--rj-border, #ddd);
     cursor: pointer;
-    transition: border-color var(--transition), box-shadow var(--transition);
+    transition: border-color var(--rj-transition, 0.3s ease), box-shadow var(--rj-transition, 0.3s ease);
     box-sizing: border-box;
 }
 
 .rj-thumb-item:hover {
-    border-color: var(--rj-red);
+    border-color: var(--rj-accent, #c41e2e);
     box-shadow: 0 2px 6px rgba(0,0,0,0.12);
 }
 
 .rj-thumb-item.active {
-    border-color: var(--rj-black);
+    border-color: var(--rj-text, #1a1a1a);
     box-shadow: 0 2px 8px rgba(0,0,0,0.18);
 }
 
@@ -190,11 +181,11 @@
 .rogue-product-page .product_title.entry-title {
     font-size: clamp(18px, 1.8vw, 24px) !important;
     font-weight: 700 !important;
-    color: var(--rj-black) !important;
+    color: var(--rj-text, #1a1a1a) !important;
     margin-bottom: var(--sp-xs) !important;
     line-height: 1.2 !important;
     letter-spacing: 0.5px !important;
-    font-family: 'Roboto', sans-serif !important;
+    font-family: var(--rj-font-body, 'Roboto', sans-serif) !important;
     white-space: nowrap !important;
     overflow: hidden !important;
     text-overflow: ellipsis !important;
@@ -202,7 +193,7 @@
 
 .rogue-product-page .rj-product-subtitle {
     font-size: 14px;
-    color: #666;
+    color: var(--rj-text-muted, #666);
     margin-bottom: 8px;
     line-height: 1.4;
 }
@@ -215,17 +206,17 @@
     gap: var(--sp-sm);
     margin-bottom: var(--sp-md);
     padding-bottom: var(--sp-md);
-    border-bottom: 1px solid var(--rj-mid-gray);
+    border-bottom: 1px solid var(--rj-border, #ddd);
 }
 
 .rogue-product-page .star-rating {
-    color: var(--rj-gold);
+    color: var(--rj-gold, #d4af37);
     font-size: 16px;
 }
 
 .rogue-product-page .woocommerce-review-link {
     font-size: 13px;
-    color: var(--rj-text-sec);
+    color: var(--rj-text-muted, #666);
     text-decoration: none;
 }
 
@@ -233,7 +224,7 @@
 
 .rogue-product-page .price-label-custom {
     font-size: 12px;
-    color: var(--rj-text-sec);
+    color: var(--rj-text-muted, #666);
     text-transform: uppercase;
     margin-bottom: var(--sp-xs);
     display: block;
@@ -244,13 +235,13 @@
 .rogue-product-page span.price .woocommerce-Price-amount {
     font-size: 28px;
     font-weight: 700;
-    color: var(--rj-black);
+    color: var(--rj-text, #1a1a1a);
     line-height: 1.2;
 }
 
 .rogue-product-page p.price del .woocommerce-Price-amount {
     font-size: 18px;
-    color: var(--rj-text-sec);
+    color: var(--rj-text-muted, #666);
     font-weight: 400;
 }
 
@@ -265,7 +256,7 @@
 
 .rogue-product-page p.stock {
     display: inline-block !important;
-    border-radius: var(--radius);
+    border-radius: var(--rj-radius, 4px);
     font-size: 11px !important;
     font-weight: 600 !important;
     text-transform: uppercase !important;
@@ -278,25 +269,25 @@
 }
 
 .rogue-product-page p.stock.in-stock {
-    background: var(--rj-green) !important;
-    color: var(--rj-white) !important;
+    background: var(--rj-success, #28a745) !important;
+    color: #fff !important;
     border: none !important;
 }
 
 .rogue-product-page p.stock.out-of-stock {
-    background: var(--rj-red) !important;
-    color: var(--rj-white) !important;
+    background: var(--rj-accent, #c41e2e) !important;
+    color: #fff !important;
     border: none !important;
 }
 
 .rogue-product-page .rj-price-section {
     margin-bottom: var(--sp-lg);
     padding-bottom: var(--sp-md);
-    border-bottom: 1px solid var(--rj-mid-gray);
+    border-bottom: 1px solid var(--rj-border, #ddd);
 }
 
 .rogue-product-page p.stock + * {
-    border-top: 1px solid var(--rj-mid-gray);
+    border-top: 1px solid var(--rj-border, #ddd);
     padding-top: var(--sp-md);
     margin-top: 0;
 }
@@ -307,7 +298,7 @@
     margin-bottom: var(--sp-lg) !important;
     padding: 0 !important;
     padding-bottom: var(--sp-md) !important;
-    border-bottom: 1px solid var(--rj-mid-gray) !important;
+    border-bottom: 1px solid var(--rj-border, #ddd) !important;
     background: transparent !important;
     border-top: none !important;
     border-left: none !important;
@@ -321,8 +312,8 @@
     margin-bottom: var(--sp-sm) !important;
     text-transform: uppercase !important;
     letter-spacing: 0.5px !important;
-    color: var(--rj-text-dark) !important;
-    font-family: 'Roboto', sans-serif !important;
+    color: var(--rj-text, #1a1a1a) !important;
+    font-family: var(--rj-font-body, 'Roboto', sans-serif) !important;
 }
 
 .rogue-product-page .product-key-features__list {
@@ -333,7 +324,7 @@
 
 .rogue-product-page .product-key-features__item {
     font-size: 13px !important;
-    color: var(--rj-text-sec) !important;
+    color: var(--rj-text-muted, #666) !important;
     padding: 4px 0 !important;
     border-bottom: none !important;
     gap: 8px;
@@ -343,7 +334,7 @@
 }
 
 .rogue-product-page .product-key-features__item .dashicons {
-    color: var(--rj-red) !important;
+    color: var(--rj-accent, #c41e2e) !important;
     font-size: 16px !important;
     width: 16px !important;
     height: 16px !important;
@@ -357,20 +348,20 @@
 .rogue-product-page .woocommerce-product-details__short-description {
     font-size: 13px;
     line-height: 1.7;
-    color: var(--rj-text-sec);
+    color: var(--rj-text-muted, #666);
     margin-bottom: var(--sp-lg);
     padding-bottom: var(--sp-md);
-    border-bottom: 1px solid var(--rj-mid-gray);
+    border-bottom: 1px solid var(--rj-border, #ddd);
 }
 
 /* ========== PRODUCT META ========== */
 
 .rogue-product-page .product_meta {
     font-size: 12px;
-    color: var(--rj-text-sec);
+    color: var(--rj-text-muted, #666);
     margin-bottom: var(--sp-lg);
     padding-bottom: var(--sp-md);
-    border-bottom: 1px solid var(--rj-mid-gray);
+    border-bottom: 1px solid var(--rj-border, #ddd);
 }
 
 .rogue-product-page .product_meta span,
@@ -380,611 +371,34 @@
 }
 
 .rogue-product-page .product_meta a {
-    color: var(--rj-text-sec);
+    color: var(--rj-text-muted, #666);
     text-decoration: none;
 }
 
-.rogue-product-page .product_meta a:hover { color: var(--rj-red); }
-.rogue-product-page .product_meta strong { color: var(--rj-text-dark); }
-
-/* ========== TRUST BADGES (2-col grid) ========== */
-
-.rogue-product-page .rj-trust-badges {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: var(--sp-md);
-    margin-bottom: var(--sp-lg);
-    padding-bottom: var(--sp-md);
-    border-bottom: 1px solid var(--rj-mid-gray);
+.rogue-product-page .product_meta a:hover {
+    color: var(--rj-accent, #c41e2e);
 }
 
-.rogue-product-page .rj-trust-badge {
-    background: var(--rj-light-gray);
-    border: 1px solid var(--rj-mid-gray);
-    border-radius: var(--radius);
-    padding: var(--sp-md);
-    text-align: center;
-}
+/* ========== ADD TO CART BUTTON ========== */
 
-.rogue-product-page .rj-trust-badge-title {
-    font-size: 12px;
-    font-weight: 700;
-    margin-bottom: var(--sp-xs);
-    text-transform: uppercase;
-    color: var(--rj-text-dark);
-}
-
-.rogue-product-page .rj-trust-badge-text {
-    font-size: 12px;
-    color: var(--rj-text-sec);
-}
-
-/* ========== QTY + ADD TO CART ========== */
-
-.rogue-product-page .rj-cart-form { margin-bottom: 0; }
-
-.rogue-product-page .rj-qty-section {
-    display: flex;
-    align-items: center;
-    gap: var(--sp-sm);
-    margin-bottom: var(--sp-lg);
-}
-
-.rogue-product-page .rj-qty-label {
-    font-size: 13px;
-    font-weight: 600;
-    white-space: nowrap;
-    color: var(--rj-text-dark);
-}
-
-.rogue-product-page .rj-qty-controls {
-    display: flex;
-    align-items: center;
-    border: 1px solid var(--rj-mid-gray);
-    border-radius: var(--radius);
-    overflow: hidden;
-}
-
-.rogue-product-page .rj-qty-minus,
-.rogue-product-page .rj-qty-plus {
-    background: var(--rj-light-gray);
-    border: none;
-    width: 40px;
-    height: 40px;
-    cursor: pointer;
-    font-size: 18px;
-    line-height: 1;
-    transition: background var(--transition);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0;
-}
-
-.rogue-product-page .rj-qty-minus:hover,
-.rogue-product-page .rj-qty-plus:hover { background: var(--rj-mid-gray); }
-
-.rogue-product-page .rj-qty-value,
-.rogue-product-page input.qty {
-    width: 60px;
-    height: 40px;
-    border: none;
-    border-left: 1px solid var(--rj-mid-gray);
-    border-right: 1px solid var(--rj-mid-gray);
-    text-align: center;
-    font-size: 14px;
-    outline: none;
-    -moz-appearance: textfield;
-}
-
-.rogue-product-page .rj-qty-value::-webkit-outer-spin-button,
-.rogue-product-page .rj-qty-value::-webkit-inner-spin-button,
-.rogue-product-page input.qty::-webkit-outer-spin-button,
-.rogue-product-page input.qty::-webkit-inner-spin-button {
-    -webkit-appearance: none;
-    margin: 0;
-}
-
-.rogue-product-page .rj-add-to-cart,
-.rogue-product-page .single_add_to_cart_button {
-    width: 100% !important;
-    padding: 14px !important;
-    background: var(--rj-black) !important;
-    color: var(--rj-white) !important;
+.rogue-product-page .single_add_to_cart_button,
+.rogue-product-page button.single_add_to_cart_button {
+    background: var(--rj-btn-bg, #000) !important;
+    color: var(--rj-btn-color, #fff) !important;
     border: none !important;
-    border-radius: var(--radius) !important;
-    font-size: 14px !important;
+    border-radius: var(--rj-radius, 4px) !important;
+    font-family: var(--rj-font-body, 'Roboto', sans-serif) !important;
     font-weight: 700 !important;
-    font-family: 'Roboto', sans-serif !important;
-    cursor: pointer;
-    transition: all var(--transition) !important;
     text-transform: uppercase !important;
     letter-spacing: 0.5px !important;
-    margin-bottom: var(--sp-lg) !important;
-    display: block !important;
-    text-align: center !important;
-    text-decoration: none !important;
-}
-
-.rogue-product-page .rj-add-to-cart:hover,
-.rogue-product-page .single_add_to_cart_button:hover { background: var(--rj-dark-gray) !important; }
-
-.rogue-product-page .rj-add-to-cart.added,
-.rogue-product-page .single_add_to_cart_button.added { background: var(--rj-green) !important; }
-
-/* ========== SOCIAL SHARING ========== */
-
-.rogue-product-page .rj-social-sharing,
-.rogue-product-page .sharedaddy {
-    display: flex;
-    align-items: center;
-    gap: var(--sp-sm);
-    padding-top: var(--sp-md);
-}
-
-.rogue-product-page .rj-social-sharing .rj-share-label {
-    font-weight: 600;
-    font-size: 13px;
-}
-
-.rogue-product-page .rj-social-sharing a {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 36px;
-    height: 36px;
-    background: var(--rj-light-gray);
-    border: 1px solid var(--rj-mid-gray);
-    border-radius: 50%;
-    color: var(--rj-text-dark);
-    text-decoration: none;
-    font-size: 14px;
-    transition: all var(--transition);
-}
-
-.rogue-product-page .rj-social-sharing a:hover {
-    background: var(--rj-black);
-    color: var(--rj-white);
-    border-color: var(--rj-black);
-}
-
-/* ========== CUSTOM TABS ========== */
-
-.rj-product-tabs { margin: 3rem 0; clear: both; }
-
-.rj-tabs-nav {
-    display: flex;
-    gap: 0.5rem;
-    border-bottom: 2px solid var(--rj-mid-gray);
-    flex-wrap: wrap;
-}
-
-.rj-tab-link {
-    padding: 0.75rem 1.5rem;
-    background: none;
-    border: none;
-    font-size: 1.1rem;
-    cursor: pointer;
-    color: #666;
-    border-bottom: 3px solid transparent;
-    margin-bottom: -2px;
-    transition: all var(--transition);
-    font-family: 'Roboto', sans-serif;
-}
-
-.rj-tab-link:hover { color: var(--rj-green-tab); }
-
-.rj-tab-link.active {
-    color: var(--rj-green-tab);
-    border-bottom-color: var(--rj-green-tab);
-    font-weight: 700;
-}
-
-.rj-tab-content { display: none; padding: 2rem 0; }
-.rj-tab-content.active { display: block; }
-
-.rj-tab-content h2 {
-    font-size: 2rem;
-    border-bottom: 2px solid var(--rj-green-tab);
-    padding-bottom: 0.5rem;
-    margin: 2rem 0 1rem;
-}
-
-.rj-tab-content h3 { font-size: 1.5rem; margin: 1.5rem 0 1rem; }
-
-.rj-tab-content table {
-    width: 100%;
-    border-collapse: collapse;
-    margin: 2rem 0;
-    font-size: 0.9rem;
-}
-
-.rj-tab-content table th {
-    background: var(--rj-green-tab);
-    color: white;
-    padding: 0.75rem;
-    text-align: left;
-}
-
-.rj-tab-content table td {
-    border: 1px solid var(--rj-mid-gray);
-    padding: 0.75rem;
-}
-
-.rj-tab-content table tr:nth-child(even) { background: #f9f9f9; }
-
-/* ========== BENEFITS ========== */
-
-.rj-benefits-section { padding: var(--sp-2xl) 0; }
-
-.rj-benefit-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 2rem;
-    margin: 2rem 0;
-}
-
-.rj-benefit-item {
-    background: var(--rj-light-gray);
-    padding: 1.5rem;
-    border-radius: 8px;
-    position: relative;
-}
-
-.rj-benefit-number {
-    position: absolute;
-    top: -10px; left: -10px;
-    background: #b8860b;
-    color: white;
-    width: 30px; height: 30px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 700;
-    font-size: 14px;
-}
-
-.rj-benefit-item h3 { font-size: 1rem; font-weight: 700; margin: 0 0 0.5rem; }
-.rj-benefit-item p { font-size: 0.875rem; color: var(--rj-text-sec); margin: 0; }
-
-/* ========== FAQ ========== */
-
-.rj-faq-section {
-    padding: var(--sp-2xl) 0;
-    border-top: 1px solid var(--rj-mid-gray);
-}
-
-.rj-faq-section .rj-section-title {
-    font-size: 22px;
-    font-weight: 700;
-    margin-bottom: var(--sp-xl);
-    color: var(--rj-text-dark);
-}
-
-.rj-faq-items { display: flex; flex-direction: column; gap: var(--sp-md); }
-
-.rj-faq-item {
-    border: 1px solid var(--rj-mid-gray);
-    border-radius: var(--radius);
-    overflow: hidden;
-    transition: all var(--transition);
-}
-
-.rj-faq-item.active { border-color: var(--rj-red); }
-
-.rj-faq-question {
-    background: var(--rj-light-gray);
-    padding: var(--sp-md) var(--sp-lg);
-    cursor: pointer;
-    font-size: 13px;
-    font-weight: 700;
-    color: var(--rj-text-dark);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    transition: background var(--transition);
-    user-select: none;
-    margin: 0;
-    list-style: none;
-}
-
-.rj-faq-question:hover { background: var(--rj-mid-gray); }
-
-.rj-faq-question::after {
-    content: "+";
-    font-size: 18px;
-    font-weight: 700;
-    color: var(--rj-red);
-    flex-shrink: 0;
-    margin-left: 12px;
-}
-
-.rj-faq-item.active .rj-faq-question::after { content: "\2212"; }
-
-.rj-faq-answer {
-    background: var(--rj-white);
-    overflow: hidden;
-    max-height: 0;
-    transition: max-height 0.3s ease;
-}
-
-.rj-faq-answer-content {
-    padding: var(--sp-lg);
-    font-size: 13px;
-    line-height: 1.7;
-    color: var(--rj-text-sec);
-}
-
-/* ========== OLD RELATED PRODUCTS (kept for fallback) ========== */
-
-.rogue-product-page .related.products {
-    padding: var(--sp-2xl) 0;
-    border-top: 1px solid var(--rj-mid-gray);
-    clear: both;
-}
-
-.rogue-product-page .related.products > h2 {
-    font-size: 22px;
-    font-weight: 700;
-    margin-bottom: var(--sp-xl);
-    color: var(--rj-text-dark);
-    border-bottom: none;
-    padding-bottom: 0;
-}
-
-.rogue-product-page .related.products ul.products {
-    display: grid !important;
-    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)) !important;
-    gap: var(--sp-lg) !important;
-    list-style: none !important;
-    padding: 0 !important;
-    margin: 0 !important;
-}
-
-.rogue-product-page .related.products ul.products li.product {
-    border: 1px solid var(--rj-mid-gray) !important;
-    border-radius: var(--radius) !important;
-    overflow: hidden !important;
-    padding: 0 !important;
-    float: none !important;
-    margin: 0 !important;
-    width: auto !important;
-    display: flex !important;
-    flex-direction: column !important;
-}
-
-.rogue-product-page .related.products ul.products li.product img {
+    padding: 14px 24px !important;
     width: 100% !important;
-    height: 200px !important;
-    object-fit: cover !important;
-    display: block !important;
+    font-size: 14px !important;
+    cursor: pointer !important;
+    transition: background var(--rj-transition, 0.3s ease) !important;
 }
 
-.rogue-product-page .related.products ul.products li.product .button {
-    display: block !important;
-    width: 100% !important;
-    padding: 10px 16px !important;
-    margin: auto 0 0 !important;
-    background: #000 !important;
-    color: #fff !important;
-    border: none !important;
-    border-radius: 0 !important;
-    font-size: 12px !important;
-    font-weight: 600 !important;
-    text-transform: uppercase !important;
-    text-align: center !important;
-    text-decoration: none !important;
-}
-
-/* ========== RELATED PRODUCTS — NEW CUSTOM OVERRIDE (.rj-related__*) ========== */
-/*
- * These classes are output by overrides/woocommerce/single-product/related.php.
- * Completely independent of WooCommerce/theme float layout.
- * CSS variables defined on :root so they work outside .rogue-product-page.
- */
-
-:root {
-    --rj-black:      #000;
-    --rj-white:      #fff;
-    --rj-light-gray: #f5f5f5;
-    --rj-mid-gray:   #ddd;
-    --rj-dark-gray:  #3a3a3a;
-    --rj-text-dark:  #1a1a1a;
-    --rj-text-sec:   #666;
-    --rj-red:        #c41e2e;
-    --sp-md:         16px;
-    --sp-lg:         24px;
-    --sp-xl:         32px;
-    --sp-2xl:        48px;
-    --radius:        4px;
-    --transition:    0.3s ease;
-}
-
-.rj-related {
-    padding: var(--sp-2xl) 0;
-    border-top: 1px solid var(--rj-mid-gray);
-    font-family: 'Roboto', sans-serif;
-}
-
-.rj-related__title {
-    font-size: 22px;
-    font-weight: 700;
-    margin-bottom: var(--sp-xl);
-    color: var(--rj-text-dark);
-    font-family: 'Roboto', sans-serif;
-    border-bottom: none;
-    padding-bottom: 0;
-}
-
-/* 4-column grid, min card width 200px */
-.rj-related__grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: var(--sp-lg);
-    list-style: none;
-    padding: 0;
-    margin: 0;
-}
-
-/* Card — flex column: image → body → button */
-.rj-related__card {
-    display: flex;
-    flex-direction: column;
-    border: 1px solid var(--rj-mid-gray);
-    border-radius: var(--radius);
-    overflow: hidden;
-    transition: border-color var(--transition), box-shadow var(--transition);
-    background: #fff;
-    margin: 0;
-    padding: 0;
-    float: none;
-    width: auto;
-}
-
-.rj-related__card:hover {
-    border-color: #000;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-}
-
-/* Image block — square crop */
-.rj-related__card-link {
-    display: block;
-    flex-shrink: 0;
-    text-decoration: none;
-}
-
-.rj-related__img-wrap {
-    width: 100%;
-    aspect-ratio: 1 / 1;
-    overflow: hidden;
-    background: var(--rj-light-gray);
-}
-
-.rj-related__img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    object-position: center;
-    display: block;
-    transition: transform 0.3s ease;
-}
-
-.rj-related__card:hover .rj-related__img {
-    transform: scale(1.03);
-}
-
-/* Body — name + price, grows to fill remaining space */
-.rj-related__body {
-    padding: var(--sp-md) var(--sp-md) 8px;
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-}
-
-.rj-related__name {
-    font-size: 13px;
-    font-weight: 600;
-    line-height: 1.4;
-    color: var(--rj-text-dark);
-    margin: 0;
-    font-family: 'Roboto', sans-serif;
-}
-
-.rj-related__name a {
-    color: inherit;
-    text-decoration: none;
-}
-
-.rj-related__name a:hover { color: var(--rj-red); }
-
-.rj-related__price {
-    font-size: 14px;
-    font-weight: 700;
-    color: var(--rj-black);
-    line-height: 1.3;
-    margin-top: auto;
-}
-
-.rj-related__price del {
-    font-size: 12px;
-    font-weight: 400;
-    color: var(--rj-text-sec);
-    margin-right: 4px;
-}
-
-.rj-related__price ins {
-    text-decoration: none;
-}
-
-/* Button — full width, flush to bottom */
-.rj-related__btn {
-    display: block;
-    width: 100%;
-    padding: 10px var(--sp-md);
-    background: var(--rj-black);
-    color: var(--rj-white);
-    border: none;
-    border-radius: 0;
-    font-size: 12px;
-    font-weight: 700;
-    font-family: 'Roboto', sans-serif;
-    text-transform: uppercase;
-    text-align: center;
-    text-decoration: none;
-    letter-spacing: 0.5px;
-    cursor: pointer;
-    transition: background var(--transition);
-    margin-top: auto;
-    flex-shrink: 0;
-    box-sizing: border-box;
-}
-
-.rj-related__btn:hover {
-    background: var(--rj-dark-gray);
-    color: var(--rj-white);
-    text-decoration: none;
-}
-
-/* ========== SECTION TITLE ========== */
-
-.rj-section-title {
-    font-size: 22px;
-    font-weight: 700;
-    margin-bottom: var(--sp-xl);
-    color: var(--rj-text-dark);
-    letter-spacing: 0.5px;
-}
-
-/* ========== RESPONSIVE ========== */
-
-@media (max-width: 1024px) {
-    .rj-product-main { grid-template-columns: 1fr 1fr; gap: var(--sp-lg); }
-    .rj-thumbs { grid-template-columns: repeat(4, 1fr); }
-    .rj-related__grid { grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); }
-}
-
-@media (max-width: 780px) {
-    .rogue-product-page .product_title.entry-title {
-        font-size: 22px !important;
-        white-space: normal !important;
-        overflow: visible !important;
-        text-overflow: clip !important;
-    }
-}
-
-@media (max-width: 768px) {
-    .rj-product-main { grid-template-columns: 1fr; gap: var(--sp-lg); }
-    .rj-sidebar { position: relative; top: auto; }
-    .rj-thumbs { grid-template-columns: repeat(4, 1fr); }
-    .rogue-product-page .rj-trust-badges { grid-template-columns: 1fr; }
-    .rj-related__grid { grid-template-columns: repeat(2, 1fr); }
-}
-
-@media (max-width: 480px) {
-    .rogue-product-page .product_title.entry-title { font-size: 20px !important; }
-    .rj-thumbs { grid-template-columns: repeat(3, 1fr); }
-    .rj-section-title { font-size: 18px; }
-    .rj-related__grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+.rogue-product-page .single_add_to_cart_button:hover,
+.rogue-product-page button.single_add_to_cart_button:hover {
+    background: var(--rj-btn-bg-hover, #3a3a3a) !important;
 }
