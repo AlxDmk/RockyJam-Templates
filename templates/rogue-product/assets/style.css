@@ -195,21 +195,23 @@
  * .woocommerce-product-rating
  *   .star-rating  (span со span.rating)
  *   a.woocommerce-review-link  "(124 оценки)"
+ *
+ * Когда отзывов нет — WC не выводит блок вообще.
+ * Мы добавляем fallback .rj-empty-rating через hooks.php.
  */
 
 .rogue-product-page .woocommerce-product-rating {
-    display: flex;
-    align-items: center;
-    gap: var(--sp-sm);
-    margin-bottom: var(--sp-md);
-    padding-bottom: var(--sp-md);
-    border-bottom: 1px solid var(--rj-border, #ddd);
+    display: flex !important;
+    align-items: center !important;
+    gap: var(--sp-sm) !important;
+    margin-bottom: var(--sp-md) !important;
+    padding-bottom: var(--sp-md) !important;
+    border-bottom: 1px solid var(--rj-border, #ddd) !important;
 }
 
 .rogue-product-page .star-rating {
     color: var(--rj-gold, #d4af37);
     font-size: 16px;
-    /* WC использует ::before с звёздочками */
 }
 
 .rogue-product-page .woocommerce-review-link {
@@ -222,20 +224,40 @@
     color: var(--rj-accent, #c41e2e);
 }
 
+/* Fallback: пустые звёзды когда отзывов нет */
+.rogue-product-page .rj-empty-rating {
+    display: flex !important;
+    align-items: center !important;
+    gap: var(--sp-sm) !important;
+    margin-bottom: var(--sp-md) !important;
+    padding-bottom: var(--sp-md) !important;
+    border-bottom: 1px solid var(--rj-border, #ddd) !important;
+}
+
+.rogue-product-page .rj-empty-rating .rj-empty-stars {
+    font-size: 16px;
+    color: var(--rj-border, #ddd);
+    letter-spacing: 2px;
+    line-height: 1;
+}
+
+.rogue-product-page .rj-empty-rating .rj-empty-count {
+    font-size: 13px;
+    color: var(--rj-text-muted, #666);
+}
+
 /* ========== PRICE ========== */
 /*
- * WC рендерит: .summary > p.price или span.price
- * Мы добавляем pseudo-элемент ::before с меткой "Цена"
- * через обёрточный элемент .rj-price-section.
- * Разделительные черты: сверху и снизу.
+ * Разделительные черты сверху и снизу — !important чтобы
+ * не перебивались темой или WooCommerce.
  */
 
 .rogue-product-page .rj-price-section {
-    margin-bottom: var(--sp-lg);
-    padding-top: var(--sp-md);
-    padding-bottom: var(--sp-md);
-    border-top: 1px solid var(--rj-border, #ddd);
-    border-bottom: 1px solid var(--rj-border, #ddd);
+    margin-bottom: var(--sp-lg) !important;
+    padding-top: var(--sp-md) !important;
+    padding-bottom: var(--sp-md) !important;
+    border-top: 1px solid var(--rj-border, #ddd) !important;
+    border-bottom: 1px solid var(--rj-border, #ddd) !important;
 }
 
 /* Метка "ЦЕНА" над числом */
@@ -273,11 +295,6 @@
 }
 
 /* ========== STOCK BADGE ========== */
-/*
- * Бейдж стоит после .rj-price-section.
- * Поскольку разделитель снизу у .rj-price-section уже есть,
- * сверху у stock больше не нужен — убран border-top.
- */
 
 .rogue-product-page p.stock {
     display: inline-block !important;
@@ -305,7 +322,6 @@
     border: none !important;
 }
 
-/* Обертка: разделитель после stock-бейджа — убираем старый селектор */
 .rogue-product-page p.stock + * {
     border-top: none;
     padding-top: 0;
@@ -381,9 +397,6 @@
  *   span.sku_wrapper   → <strong>Артикул:</strong> <span class="sku">...</span>
  *   span.posted_in     → <strong>Категория:</strong> <a>...</a>
  *   span.tagged_as     → <strong>Тег:</strong> <a>...</a>
- *
- * Все элементы WC выводит как inline — нам нужно
- * сделать каждый span блочным, а внутри — снова inline.
  */
 
 .rogue-product-page .product_meta {
@@ -394,29 +407,38 @@
     border-bottom: 1px solid var(--rj-border, #ddd);
 }
 
-/* Каждая строка (Артикул, Категория, Тег) — блок, отдельная строка */
+/* Каждая строка — блок */
 .rogue-product-page .product_meta .sku_wrapper,
 .rogue-product-page .product_meta .posted_in,
 .rogue-product-page .product_meta .tagged_as,
 .rogue-product-page .product_meta > span {
-    display: block;
+    display: block !important;
     margin-bottom: var(--sp-xs);
     line-height: 1.5;
 }
 
-/* Название (жирное) — инлайн, в одну строку со значением */
-.rogue-product-page .product_meta strong {
-    display: inline;
-    font-weight: 700;
-    color: var(--rj-text, #1a1a1a);
+/*
+ * Название (Артикул, Категория, Бренд) — жирное, тёмное, инлайн
+ * !important перебивает WooCommerce и тему
+ */
+.rogue-product-page .product_meta strong,
+.rogue-product-page .product_meta .sku_wrapper strong,
+.rogue-product-page .product_meta .posted_in strong,
+.rogue-product-page .product_meta .tagged_as strong {
+    display: inline !important;
+    font-weight: 700 !important;
+    color: var(--rj-text, #1a1a1a) !important;
+    font-size: 12px !important;
     margin-right: 4px;
+    font-family: var(--rj-font-body, 'Roboto', sans-serif) !important;
 }
 
-/* Ссылки и значения — инлайн */
+/* Значения — инлайн, серые */
+.rogue-product-page .product_meta .sku,
 .rogue-product-page .product_meta a {
-    color: var(--rj-text-muted, #666);
+    display: inline !important;
+    color: var(--rj-text-muted, #666) !important;
     text-decoration: none;
-    display: inline;
 }
 
 .rogue-product-page .product_meta a:hover {
@@ -424,15 +446,6 @@
 }
 
 /* ========== QUANTITY ========== */
-/*
- * HTML (из simple.php):
- * .rj-qty-section
- *   label.rj-qty-label
- *   .rj-qty-controls
- *     button.rj-qty-minus
- *     input.qty.rj-qty-value
- *     button.rj-qty-plus
- */
 
 .rogue-product-page .rj-qty-section {
     display: flex;
@@ -448,9 +461,6 @@
     white-space: nowrap;
 }
 
-/*
- * Единый контейнер: бордер снаружи, overflow:hidden обрезает углы.
- */
 .rogue-product-page .rj-qty-controls {
     display: flex;
     align-items: center;
@@ -459,7 +469,6 @@
     overflow: hidden;
 }
 
-/* Кнопки − и + */
 .rogue-product-page .rj-qty-controls .rj-qty-minus,
 .rogue-product-page .rj-qty-controls .rj-qty-plus {
     background: var(--rj-surface, #f5f5f5);
@@ -480,7 +489,6 @@
     background: var(--rj-border, #ddd);
 }
 
-/* Поле ввода числа */
 .rogue-product-page .rj-qty-controls input[type="number"] {
     width: 60px;
     height: 40px;
@@ -527,21 +535,15 @@
 }
 
 /* ========== PRODUCT TABS ========== */
-/*
- * Переменная --rj-tabs-active-color берётся из Plugin Contract темы.
- * Fallback: #4a6b3c (тёмно-зелёный, как в эталонном дизайне).
- */
 
 .rogue-product-page .rj-product-tabs {
     margin: var(--sp-2xl) 0;
 }
 
-/* Скрываем стандартные WooCommerce-табы */
 .rogue-product-page .woocommerce-tabs.wc-tabs-wrapper {
     display: none !important;
 }
 
-/* NAV */
 .rogue-product-page .rj-tabs-nav {
     display: flex;
     gap: 0;

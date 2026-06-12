@@ -24,16 +24,55 @@ remove_action( 'woocommerce_single_product_summary', 'rockyjam_product_subtitle_
 if ( function_exists( 'rockyjam_product_subtitle_render' ) ) {
 	add_action( 'woocommerce_single_product_summary', 'rockyjam_product_subtitle_render', 6 );
 }
+
+/**
+ * Rating block с fallback для товаров без отзывов.
+ *
+ * WooCommerce (woocommerce_template_single_rating) не выводит блок
+ * вообще если отзывов нет. Мы заменяем стандартный колбэк своим:
+ * — если отзывы есть → стандартный рендер WC
+ * — если отзывов нет → 5 пустых звёзд + "(0 отзывов)"
+ */
 remove_action( 'woocommerce_single_product_summary', 'woocommerce_template_single_rating', 10 );
-add_action( 'woocommerce_single_product_summary', 'woocommerce_template_single_rating', 10 );
+add_action( 'woocommerce_single_product_summary', 'rj_rogue_template_single_rating', 10 );
+
+if ( ! function_exists( 'rj_rogue_template_single_rating' ) ) {
+	function rj_rogue_template_single_rating() {
+		global $product;
+
+		if ( ! $product instanceof WC_Product ) {
+			return;
+		}
+
+		// Проверяем включены ли отзывы глобально
+		if ( 'no' === get_option( 'woocommerce_enable_reviews' ) ) {
+			return;
+		}
+
+		$rating_count = $product->get_rating_count();
+		$review_count = $product->get_review_count();
+
+		if ( $rating_count > 0 ) {
+			// Есть отзывы — стандартный рендер WooCommerce
+			woocommerce_template_single_rating();
+		} else {
+			// Нет отзывов — пустые звёзды
+			$reviews_url = get_permalink() . '#reviews';
+			echo '<div class="rj-empty-rating">';
+			echo '<span class="rj-empty-stars" aria-hidden="true">&#9733;&#9733;&#9733;&#9733;&#9733;</span>';
+			echo '<a href="' . esc_url( $reviews_url ) . '" class="rj-empty-count">';
+			echo esc_html__( '(0 отзывов)', 'woocommerce' );
+			echo '</a>';
+			echo '</div>';
+		}
+	}
+}
+
 remove_action( 'woocommerce_single_product_summary', 'woocommerce_template_single_price', 10 );
 add_action( 'woocommerce_single_product_summary', 'woocommerce_template_single_price', 10 );
 
 /**
  * Stock availability badge — priority 12 (between price and key-features).
- *
- * WC's get_availability_text() returns '' when manage_stock=false and item is in stock.
- * In that case we fall back to is_in_stock() to still show the badge.
  */
 add_action( 'woocommerce_single_product_summary', function() {
 	global $product;
@@ -45,7 +84,6 @@ add_action( 'woocommerce_single_product_summary', function() {
 	$text         = ! empty( $availability['availability'] ) ? $availability['availability'] : '';
 	$class        = ! empty( $availability['class'] ) ? $availability['class'] : '';
 
-	// Fallback: manage_stock=false — WC returns empty text but stock status is set
 	if ( '' === $text ) {
 		if ( $product->is_in_stock() ) {
 			$text  = __( 'In stock', 'woocommerce' );
