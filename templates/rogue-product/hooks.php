@@ -23,9 +23,25 @@ remove_action( 'woocommerce_single_product_summary', 'woocommerce_template_singl
 add_action( 'woocommerce_single_product_summary', 'woocommerce_template_single_rating', 10 );
 remove_action( 'woocommerce_single_product_summary', 'woocommerce_template_single_price', 10 );
 add_action( 'woocommerce_single_product_summary', 'woocommerce_template_single_price', 10 );
-// Stock availability badge — WC default priority is 30, placed here between price and key-features
-remove_action( 'woocommerce_single_product_summary', 'woocommerce_template_single_availability', 30 );
-add_action( 'woocommerce_single_product_summary', 'woocommerce_template_single_availability', 12 );
+
+/**
+ * Stock availability badge — between price (10) and key-features (15).
+ * woocommerce_template_single_availability() was removed in WC 8.x.
+ * We render the availability <p> directly via wc_get_template().
+ */
+add_action( 'woocommerce_single_product_summary', function() {
+	global $product;
+	if ( ! $product instanceof WC_Product ) {
+		return;
+	}
+	$availability = $product->get_availability();
+	if ( empty( $availability['availability'] ) ) {
+		return;
+	}
+	$class = ! empty( $availability['class'] ) ? $availability['class'] : 'in-stock';
+	echo '<p class="stock ' . esc_attr( $class ) . '">' . esc_html( $availability['availability'] ) . '</p>';
+}, 12 );
+
 remove_action( 'woocommerce_single_product_summary', 'rockyjam_keyfeatures_render', 15 );
 if ( function_exists( 'rockyjam_keyfeatures_render' ) ) {
 	add_action( 'woocommerce_single_product_summary', 'rockyjam_keyfeatures_render', 15 );
