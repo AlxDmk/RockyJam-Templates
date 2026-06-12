@@ -1,29 +1,32 @@
 <?php
 /**
  * Rogue Product Template — functions.php
- * Disables WooCommerce Flexslider JS on single product pages
- * where this template is active.
+ * 1. Dequeues WC Flexslider/PhotoSwipe on single product pages.
+ * 2. Adds stock badge immediately after the price block.
  */
 
 if ( ! defined( 'ABSPATH' ) ) { exit; }
 
 /**
- * Dequeue WooCommerce Flexslider scripts and styles on single product pages.
- * Our custom gallery (product-image.php override) handles everything.
+ * Dequeue WC Flexslider, PhotoSwipe and wc-single-product JS.
  */
 add_action( 'wp_enqueue_scripts', function() {
     if ( ! is_singular( 'product' ) ) return;
 
-    // Remove WC Flexslider JS
     wp_dequeue_script( 'flexslider' );
     wp_deregister_script( 'flexslider' );
-
-    // Remove WC PhotoSwipe (lightbox)
     wp_dequeue_script( 'photoswipe' );
     wp_dequeue_script( 'photoswipe-ui-default' );
     wp_dequeue_style( 'photoswipe' );
     wp_dequeue_style( 'photoswipe-skin' );
-
-    // Remove WC single product JS that init Flexslider
     wp_dequeue_script( 'wc-single-product' );
 }, 99 );
+
+/**
+ * Output stock badge right after price (priority 11, price is 10).
+ */
+add_action( 'woocommerce_single_product_summary', function() {
+    global $product;
+    if ( ! $product ) return;
+    echo wc_get_stock_html( $product );
+}, 11 );

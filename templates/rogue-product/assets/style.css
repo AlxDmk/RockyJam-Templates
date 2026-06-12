@@ -1,49 +1,51 @@
 /*
  * Rogue Product Template — assets/style.css
- * Styles the WooCommerce single product page only.
- * No header/footer styles included.
+ * Matches reference design exactly: Roboto font, sizes, gray dividers, stock badge.
  */
 
 /* ========== CSS VARIABLES ========== */
 
-.rogue-product-page,
-.rogue-product-page * {
-    --rj-black:        #000;
-    --rj-white:        #fff;
-    --rj-light-gray:   #f5f5f5;
-    --rj-medium-gray:  #ddd;
-    --rj-dark-gray:    #3a3a3a;
-    --rj-text-dark:    #1a1a1a;
-    --rj-text-sec:     #666;
-    --rj-red:          #c41e2e;
-    --rj-gold:         #d4af37;
-    --rj-green:        #28a745;
-    --rj-green-tab:    #4a6b3c;
-    --rj-spacing-xs:   8px;
-    --rj-spacing-sm:   12px;
-    --rj-spacing-md:   16px;
-    --rj-spacing-lg:   24px;
-    --rj-spacing-xl:   32px;
-    --rj-spacing-2xl:  48px;
-    --rj-radius:       4px;
-    --rj-transition:   0.3s ease;
+.rogue-product-page {
+    --rj-black:       #000;
+    --rj-white:       #fff;
+    --rj-light-gray:  #f5f5f5;
+    --rj-mid-gray:    #ddd;
+    --rj-dark-gray:   #3a3a3a;
+    --rj-text-dark:   #1a1a1a;
+    --rj-text-sec:    #666;
+    --rj-red:         #c41e2e;
+    --rj-gold:        #d4af37;
+    --rj-green:       #28a745;
+    --rj-green-tab:   #4a6b3c;
+    --sp-xs:  8px;
+    --sp-sm:  12px;
+    --sp-md:  16px;
+    --sp-lg:  24px;
+    --sp-xl:  32px;
+    --sp-2xl: 48px;
+    --radius: 4px;
+    --transition: 0.3s ease;
 }
 
-/* ========== PRODUCT PAGE WRAPPER ========== */
+/* Base font for entire product page */
+.rogue-product-page,
+.rogue-product-page * {
+    font-family: 'Roboto', sans-serif;
+    box-sizing: border-box;
+}
 
 .rogue-product-page {
-    font-family: 'Roboto', sans-serif;
     line-height: 1.6;
     color: #333;
 }
 
-/* ========== 60/40 GRID LAYOUT ========== */
+/* ========== 60/40 GRID ========== */
 
 .rj-product-main {
     display: grid;
     grid-template-columns: 60% 40%;
-    gap: var(--rj-spacing-xl);
-    padding: var(--rj-spacing-xl) 0;
+    gap: var(--sp-xl);
+    padding: var(--sp-xl) 0;
 }
 
 /* ========== GALLERY COLUMN ========== */
@@ -53,21 +55,20 @@
     min-width: 0;
 }
 
-/* ========== CUSTOM GALLERY (replaces WC Flexslider) ========== */
+/* ========== CUSTOM GALLERY ========== */
 
 .rj-gallery-wrap {
     width: 100%;
 }
 
-/* Main image block — square */
 .rj-main-image-wrap {
     width: 100%;
     aspect-ratio: 1 / 1;
     overflow: hidden;
     background-color: var(--rj-light-gray);
-    border-radius: var(--rj-radius);
-    border: 1px solid var(--rj-medium-gray);
-    margin-bottom: var(--rj-spacing-lg);
+    border-radius: var(--radius);
+    border: 1px solid var(--rj-mid-gray);
+    margin-bottom: var(--sp-lg);
     position: relative;
     box-sizing: border-box;
 }
@@ -81,13 +82,12 @@
     transition: opacity 0.18s ease;
 }
 
-/* Sale flash */
 .rj-main-image-wrap .onsale {
     position: absolute;
     top: 8px;
     left: 8px;
     background: var(--rj-red);
-    border-radius: var(--rj-radius);
+    border-radius: var(--radius);
     font-size: 11px;
     font-weight: 700;
     padding: 4px 8px;
@@ -97,35 +97,35 @@
     color: var(--rj-white);
 }
 
-/* Thumbnails strip */
+/* Thumbnails — 6 columns, square, exactly as reference */
 .rj-thumbs {
     display: grid;
     grid-template-columns: repeat(6, 1fr);
-    gap: var(--rj-spacing-sm);
+    gap: var(--sp-sm);
     list-style: none;
     padding: 0;
-    margin: 0 0 var(--rj-spacing-lg);
+    margin: 0 0 var(--sp-lg);
 }
 
 .rj-thumb-item {
     margin: 0;
     aspect-ratio: 1 / 1;
     overflow: hidden;
-    border-radius: var(--rj-radius);
-    border: 2px solid var(--rj-medium-gray);
+    border-radius: var(--radius);
+    border: 2px solid var(--rj-mid-gray);
     cursor: pointer;
-    transition: border-color var(--rj-transition), box-shadow var(--rj-transition);
+    transition: border-color var(--transition), box-shadow var(--transition);
     box-sizing: border-box;
 }
 
 .rj-thumb-item:hover {
     border-color: var(--rj-red);
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.12);
 }
 
 .rj-thumb-item.active {
     border-color: var(--rj-black);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.18);
 }
 
 .rj-thumb {
@@ -137,12 +137,12 @@
     cursor: pointer;
 }
 
-/* Hide WC Flexslider remnants if they appear */
+/* Hide WC gallery if it leaks through */
 .rogue-product-page .woocommerce-product-gallery {
     display: none !important;
 }
 
-/* ========== SIDEBAR (40%) ========== */
+/* ========== SIDEBAR ========== */
 
 .rj-sidebar {
     position: sticky;
@@ -151,40 +151,41 @@
     min-width: 0;
 }
 
-/* ========== SHIPPING BADGE TOP (addon hook area) ========== */
+/* ========== SHIPPING BADGE (top of sidebar, addon area) ========== */
 
 .rj-sidebar .rj-shipping-badge-wrap {
-    margin-bottom: var(--rj-spacing-md);
+    margin-bottom: var(--sp-md);
 }
 
 /* ========== PRODUCT TITLE ========== */
 
 .rogue-product-page .product_title.entry-title {
     font-size: 32px !important;
-    font-weight: 700;
-    color: var(--rj-black);
-    margin-bottom: var(--rj-spacing-xs) !important;
-    line-height: 1.2;
-    letter-spacing: 0.5px;
+    font-weight: 700 !important;
+    color: var(--rj-black) !important;
+    margin-bottom: var(--sp-xs) !important;
+    line-height: 1.2 !important;
+    letter-spacing: 0.5px !important;
+    font-family: 'Roboto', sans-serif !important;
 }
 
-/* ========== SHORT DESCRIPTION ========== */
+/* ========== SHORT DESCRIPTION (subtitle) ========== */
 
 .rogue-product-page .woocommerce-product-details__short-description {
     font-size: 16px;
     color: var(--rj-text-sec);
-    margin-bottom: var(--rj-spacing-md);
+    margin-bottom: var(--sp-md);
 }
 
-/* ========== STAR RATING ========== */
+/* ========== STAR RATING — divider below ========== */
 
 .rogue-product-page .woocommerce-product-rating {
     display: flex;
     align-items: center;
-    gap: var(--rj-spacing-sm);
-    margin-bottom: var(--rj-spacing-md);
-    padding-bottom: var(--rj-spacing-md);
-    border-bottom: 1px solid var(--rj-medium-gray);
+    gap: var(--sp-sm);
+    margin-bottom: var(--sp-md);
+    padding-bottom: var(--sp-md);
+    border-bottom: 1px solid var(--rj-mid-gray);
 }
 
 .rogue-product-page .star-rating {
@@ -198,49 +199,66 @@
     text-decoration: none;
 }
 
-/* ========== PRICE ========== */
+/* ========== PRICE SECTION — divider below ========== */
 
+.rogue-product-page .rj-price-section,
+.rogue-product-page .price {
+    display: block;
+}
+
+/* "PRICE" label above the number */
 .rogue-product-page .price-label-custom {
     font-size: 12px;
     color: var(--rj-text-sec);
     text-transform: uppercase;
-    margin-bottom: var(--rj-spacing-xs);
+    margin-bottom: var(--sp-xs);
     display: block;
+    letter-spacing: 0.5px;
 }
 
-.rogue-product-page .woocommerce-Price-amount {
+/* Price number */
+.rogue-product-page p.price,
+.rogue-product-page .woocommerce-Price-amount.amount {
     font-size: 28px;
     font-weight: 700;
     color: var(--rj-black);
+    line-height: 1.2;
 }
 
-.rogue-product-page .price del .woocommerce-Price-amount {
+.rogue-product-page p.price del .woocommerce-Price-amount {
     font-size: 18px;
     color: var(--rj-text-sec);
+    font-weight: 400;
 }
 
-.rogue-product-page .price ins {
+.rogue-product-page p.price ins {
     text-decoration: none;
 }
 
-.rogue-product-page .rj-price-section {
-    margin-bottom: var(--rj-spacing-lg);
-    padding-bottom: var(--rj-spacing-md);
-    border-bottom: 1px solid var(--rj-medium-gray);
+/* The entire price wrapper — add bottom divider */
+.rogue-product-page .rj-price-wrapper {
+    margin-bottom: var(--sp-lg);
+    padding-bottom: var(--sp-md);
+    border-bottom: 1px solid var(--rj-mid-gray);
 }
 
-/* ========== STOCK STATUS ========== */
+/* ========== STOCK BADGE — under price, small ========== */
 
 .rogue-product-page .stock.in-stock {
     display: inline-block;
     background: var(--rj-green);
     color: var(--rj-white);
     padding: 4px 8px;
-    border-radius: var(--rj-radius);
-    font-size: 11px;
+    border-radius: var(--radius);
+    font-size: 11px !important;
     font-weight: 600;
     text-transform: uppercase;
-    margin-top: var(--rj-spacing-sm);
+    letter-spacing: 0.5px;
+    margin-top: var(--sp-sm);
+    margin-bottom: 0;
+    line-height: 1.4;
+    /* Sit right after the price, before the divider */
+    clear: both;
 }
 
 .rogue-product-page .stock.out-of-stock {
@@ -248,27 +266,38 @@
     background: var(--rj-red);
     color: var(--rj-white);
     padding: 4px 8px;
-    border-radius: var(--rj-radius);
-    font-size: 11px;
+    border-radius: var(--radius);
+    font-size: 11px !important;
     font-weight: 600;
     text-transform: uppercase;
-    margin-top: var(--rj-spacing-sm);
+    letter-spacing: 0.5px;
+    margin-top: var(--sp-sm);
+    clear: both;
 }
 
-/* ========== KEY FEATURES (addon) ========== */
+/* Wrap price + stock together so divider appears after both */
+.rogue-product-page .rj-price-section {
+    margin-bottom: var(--sp-lg);
+    padding-bottom: var(--sp-md);
+    border-bottom: 1px solid var(--rj-mid-gray);
+}
+
+/* ========== KEY FEATURES — divider below ========== */
 
 .rogue-product-page .rj-key-features {
-    margin-bottom: var(--rj-spacing-lg);
-    padding-bottom: var(--rj-spacing-md);
-    border-bottom: 1px solid var(--rj-medium-gray);
+    margin-bottom: var(--sp-lg);
+    padding-bottom: var(--sp-md);
+    border-bottom: 1px solid var(--rj-mid-gray);
 }
 
 .rogue-product-page .rj-key-features h3 {
-    font-size: 14px;
+    font-size: 14px !important;
     font-weight: 700;
-    margin-bottom: var(--rj-spacing-sm);
+    margin-bottom: var(--sp-sm);
     text-transform: uppercase;
     letter-spacing: 0.5px;
+    color: var(--rj-text-dark);
+    font-family: 'Roboto', sans-serif !important;
 }
 
 .rogue-product-page .rj-features-list {
@@ -292,28 +321,31 @@
     font-weight: 700;
 }
 
-/* ========== PRODUCT META ========== */
+/* ========== SHORT DESCRIPTION (wc) — divider below ========== */
+
+.rogue-product-page .woocommerce-product-details__short-description {
+    font-size: 13px;
+    line-height: 1.7;
+    color: var(--rj-text-sec);
+    margin-bottom: var(--sp-lg);
+    padding-bottom: var(--sp-md);
+    border-bottom: 1px solid var(--rj-mid-gray);
+}
+
+/* ========== PRODUCT META — divider below ========== */
 
 .rogue-product-page .product_meta {
     font-size: 12px;
     color: var(--rj-text-sec);
-    margin-bottom: var(--rj-spacing-lg);
-    padding-bottom: var(--rj-spacing-md);
-    border-bottom: 1px solid var(--rj-medium-gray);
+    margin-bottom: var(--sp-lg);
+    padding-bottom: var(--sp-md);
+    border-bottom: 1px solid var(--rj-mid-gray);
 }
 
 .rogue-product-page .product_meta span,
 .rogue-product-page .product_meta > span {
     display: block;
-    margin-bottom: var(--rj-spacing-xs);
-}
-
-.rogue-product-page .product_meta .sku_wrapper,
-.rogue-product-page .product_meta .posted_in,
-.rogue-product-page .product_meta .tagged_as {
-    display: block;
-    margin-bottom: var(--rj-spacing-xs);
-    font-size: 12px;
+    margin-bottom: var(--sp-xs);
 }
 
 .rogue-product-page .product_meta a {
@@ -325,29 +357,33 @@
     color: var(--rj-red);
 }
 
-/* ========== TRUST BADGES ========== */
+.rogue-product-page .product_meta strong {
+    color: var(--rj-text-dark);
+}
+
+/* ========== TRUST BADGES (2-col grid) — divider below ========== */
 
 .rogue-product-page .rj-trust-badges {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: var(--rj-spacing-md);
-    margin-bottom: var(--rj-spacing-lg);
-    padding-bottom: var(--rj-spacing-md);
-    border-bottom: 1px solid var(--rj-medium-gray);
+    gap: var(--sp-md);
+    margin-bottom: var(--sp-lg);
+    padding-bottom: var(--sp-md);
+    border-bottom: 1px solid var(--rj-mid-gray);
 }
 
 .rogue-product-page .rj-trust-badge {
     background: var(--rj-light-gray);
-    border: 1px solid var(--rj-medium-gray);
-    border-radius: var(--rj-radius);
-    padding: var(--rj-spacing-md);
+    border: 1px solid var(--rj-mid-gray);
+    border-radius: var(--radius);
+    padding: var(--sp-md);
     text-align: center;
 }
 
 .rogue-product-page .rj-trust-badge-title {
     font-size: 12px;
     font-weight: 700;
-    margin-bottom: var(--rj-spacing-xs);
+    margin-bottom: var(--sp-xs);
     text-transform: uppercase;
     color: var(--rj-text-dark);
 }
@@ -357,7 +393,7 @@
     color: var(--rj-text-sec);
 }
 
-/* ========== QTY CONTROLS + ADD TO CART ========== */
+/* ========== QTY + ADD TO CART ========== */
 
 .rogue-product-page .rj-cart-form {
     margin-bottom: 0;
@@ -366,21 +402,22 @@
 .rogue-product-page .rj-qty-section {
     display: flex;
     align-items: center;
-    gap: var(--rj-spacing-sm);
-    margin-bottom: var(--rj-spacing-lg);
+    gap: var(--sp-sm);
+    margin-bottom: var(--sp-lg);
 }
 
 .rogue-product-page .rj-qty-label {
     font-size: 13px;
     font-weight: 600;
     white-space: nowrap;
+    color: var(--rj-text-dark);
 }
 
 .rogue-product-page .rj-qty-controls {
     display: flex;
     align-items: center;
-    border: 1px solid var(--rj-medium-gray);
-    border-radius: var(--rj-radius);
+    border: 1px solid var(--rj-mid-gray);
+    border-radius: var(--radius);
     overflow: hidden;
 }
 
@@ -393,7 +430,7 @@
     cursor: pointer;
     font-size: 18px;
     line-height: 1;
-    transition: background var(--rj-transition);
+    transition: background var(--transition);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -402,7 +439,7 @@
 
 .rogue-product-page .rj-qty-minus:hover,
 .rogue-product-page .rj-qty-plus:hover {
-    background: var(--rj-medium-gray);
+    background: var(--rj-mid-gray);
 }
 
 .rogue-product-page .rj-qty-value,
@@ -410,8 +447,8 @@
     width: 60px;
     height: 40px;
     border: none;
-    border-left: 1px solid var(--rj-medium-gray);
-    border-right: 1px solid var(--rj-medium-gray);
+    border-left: 1px solid var(--rj-mid-gray);
+    border-right: 1px solid var(--rj-mid-gray);
     text-align: center;
     font-size: 14px;
     outline: none;
@@ -433,14 +470,15 @@
     background: var(--rj-black) !important;
     color: var(--rj-white) !important;
     border: none !important;
-    border-radius: var(--rj-radius) !important;
+    border-radius: var(--radius) !important;
     font-size: 14px !important;
     font-weight: 700 !important;
+    font-family: 'Roboto', sans-serif !important;
     cursor: pointer;
-    transition: all var(--rj-transition) !important;
+    transition: all var(--transition) !important;
     text-transform: uppercase !important;
     letter-spacing: 0.5px !important;
-    margin-bottom: var(--rj-spacing-lg) !important;
+    margin-bottom: var(--sp-lg) !important;
     display: block !important;
     text-align: center !important;
     text-decoration: none !important;
@@ -458,16 +496,15 @@
 
 /* ========== SOCIAL SHARING ========== */
 
-.rogue-product-page .woocommerce-product-details__social-sharing,
-.rogue-product-page .sharedaddy,
-.rogue-product-page .rj-social-sharing {
+.rogue-product-page .rj-social-sharing,
+.rogue-product-page .sharedaddy {
     display: flex;
     align-items: center;
-    gap: var(--rj-spacing-sm);
-    padding-top: var(--rj-spacing-md);
+    gap: var(--sp-sm);
+    padding-top: var(--sp-md);
 }
 
-.rogue-product-page .rj-social-sharing span.rj-share-label {
+.rogue-product-page .rj-social-sharing .rj-share-label {
     font-weight: 600;
     font-size: 13px;
 }
@@ -479,12 +516,12 @@
     width: 36px;
     height: 36px;
     background: var(--rj-light-gray);
-    border: 1px solid var(--rj-medium-gray);
+    border: 1px solid var(--rj-mid-gray);
     border-radius: 50%;
     color: var(--rj-text-dark);
     text-decoration: none;
     font-size: 14px;
-    transition: all var(--rj-transition);
+    transition: all var(--transition);
 }
 
 .rogue-product-page .rj-social-sharing a:hover {
@@ -503,7 +540,7 @@
 .rj-tabs-nav {
     display: flex;
     gap: 0.5rem;
-    border-bottom: 2px solid var(--rj-medium-gray);
+    border-bottom: 2px solid var(--rj-mid-gray);
     flex-wrap: wrap;
 }
 
@@ -516,13 +553,11 @@
     color: #666;
     border-bottom: 3px solid transparent;
     margin-bottom: -2px;
-    transition: all var(--rj-transition);
-    font-family: inherit;
+    transition: all var(--transition);
+    font-family: 'Roboto', sans-serif;
 }
 
-.rj-tab-link:hover {
-    color: var(--rj-green-tab);
-}
+.rj-tab-link:hover { color: var(--rj-green-tab); }
 
 .rj-tab-link.active {
     color: var(--rj-green-tab);
@@ -535,9 +570,7 @@
     padding: 2rem 0;
 }
 
-.rj-tab-content.active {
-    display: block;
-}
+.rj-tab-content.active { display: block; }
 
 .rj-tab-content h2 {
     font-size: 2rem;
@@ -549,19 +582,6 @@
 .rj-tab-content h3 {
     font-size: 1.5rem;
     margin: 1.5rem 0 1rem;
-}
-
-.rj-tab-content .specs-list,
-.rj-tab-content ul.woocommerce-product-attributes {
-    list-style: none;
-    padding: 0;
-}
-
-.rj-tab-content .specs-list li,
-.rj-tab-content ul.woocommerce-product-attributes li {
-    padding: 0.5rem 0;
-    border-bottom: 1px dotted #ccc;
-    font-size: 0.9rem;
 }
 
 .rj-tab-content table {
@@ -579,21 +599,11 @@
 }
 
 .rj-tab-content table td {
-    border: 1px solid var(--rj-medium-gray);
+    border: 1px solid var(--rj-mid-gray);
     padding: 0.75rem;
 }
 
-.rj-tab-content table tr:nth-child(even) {
-    background: #f9f9f9;
-}
-
-.rj-tab-content .woocommerce-Reviews .reviews-summary,
-.rj-tab-content .rj-reviews-summary {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    margin-bottom: 2rem;
-}
+.rj-tab-content table tr:nth-child(even) { background: #f9f9f9; }
 
 .rj-tab-content .rj-big-rating {
     font-size: 3rem;
@@ -607,24 +617,10 @@
     padding: 1.5rem 0;
 }
 
-/* ========== FILLER COMPARISON ========== */
-
-.rj-filler-comparison {
-    padding: var(--rj-spacing-2xl) 0;
-    border-top: 1px solid var(--rj-medium-gray);
-}
-
-.rj-filler-comparison h2 {
-    font-size: 2rem;
-    border-bottom: 2px solid var(--rj-green-tab);
-    padding-bottom: 0.5rem;
-    margin: 0 0 1rem;
-}
-
-/* ========== BENEFITS GRID ========== */
+/* ========== BENEFITS ========== */
 
 .rj-benefits-section {
-    padding: var(--rj-spacing-2xl) 0;
+    padding: var(--sp-2xl) 0;
 }
 
 .rj-benefit-grid {
@@ -669,40 +665,38 @@
     margin: 0;
 }
 
-/* ========== FAQ SECTION ========== */
+/* ========== FAQ ========== */
 
 .rj-faq-section {
-    padding: var(--rj-spacing-2xl) 0;
-    border-top: 1px solid var(--rj-medium-gray);
+    padding: var(--sp-2xl) 0;
+    border-top: 1px solid var(--rj-mid-gray);
 }
 
 .rj-faq-section .rj-section-title {
     font-size: 22px;
     font-weight: 700;
-    margin-bottom: var(--rj-spacing-xl);
+    margin-bottom: var(--sp-xl);
     color: var(--rj-text-dark);
 }
 
 .rj-faq-items {
     display: flex;
     flex-direction: column;
-    gap: var(--rj-spacing-md);
+    gap: var(--sp-md);
 }
 
 .rj-faq-item {
-    border: 1px solid var(--rj-medium-gray);
-    border-radius: var(--rj-radius);
+    border: 1px solid var(--rj-mid-gray);
+    border-radius: var(--radius);
     overflow: hidden;
-    transition: all var(--rj-transition);
+    transition: all var(--transition);
 }
 
-.rj-faq-item.active {
-    border-color: var(--rj-red);
-}
+.rj-faq-item.active { border-color: var(--rj-red); }
 
 .rj-faq-question {
     background: var(--rj-light-gray);
-    padding: var(--rj-spacing-md) var(--rj-spacing-lg);
+    padding: var(--sp-md) var(--sp-lg);
     cursor: pointer;
     font-size: 13px;
     font-weight: 700;
@@ -710,15 +704,13 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    transition: background var(--rj-transition);
+    transition: background var(--transition);
     user-select: none;
     margin: 0;
     list-style: none;
 }
 
-.rj-faq-question:hover {
-    background: var(--rj-medium-gray);
-}
+.rj-faq-question:hover { background: var(--rj-mid-gray); }
 
 .rj-faq-question::after {
     content: "+";
@@ -729,9 +721,7 @@
     margin-left: 12px;
 }
 
-.rj-faq-item.active .rj-faq-question::after {
-    content: "\2212";
-}
+.rj-faq-item.active .rj-faq-question::after { content: "\2212"; }
 
 .rj-faq-answer {
     background: var(--rj-white);
@@ -741,7 +731,7 @@
 }
 
 .rj-faq-answer-content {
-    padding: var(--rj-spacing-lg);
+    padding: var(--sp-lg);
     font-size: 13px;
     line-height: 1.7;
     color: var(--rj-text-sec);
@@ -750,34 +740,32 @@
 /* ========== RELATED PRODUCTS ========== */
 
 .rogue-product-page .related.products {
-    padding: var(--rj-spacing-2xl) 0;
-    border-top: 1px solid var(--rj-medium-gray);
+    padding: var(--sp-2xl) 0;
+    border-top: 1px solid var(--rj-mid-gray);
     clear: both;
 }
 
 .rogue-product-page .related.products > h2 {
     font-size: 22px;
     font-weight: 700;
-    margin-bottom: var(--rj-spacing-xl);
+    margin-bottom: var(--sp-xl);
     color: var(--rj-text-dark);
-    border-bottom: none;
-    padding-bottom: 0;
 }
 
 .rogue-product-page .related.products ul.products {
     display: grid !important;
     grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-    gap: var(--rj-spacing-lg);
+    gap: var(--sp-lg);
     list-style: none;
     padding: 0;
     margin: 0;
 }
 
 .rogue-product-page .related.products ul.products li.product {
-    border: 1px solid var(--rj-medium-gray);
-    border-radius: var(--rj-radius);
+    border: 1px solid var(--rj-mid-gray);
+    border-radius: var(--radius);
     overflow: hidden;
-    transition: all var(--rj-transition);
+    transition: all var(--transition);
     padding: 0;
     float: none;
     margin: 0;
@@ -799,7 +787,7 @@
     font-weight: 600;
     color: var(--rj-text-dark);
     line-height: 1.4;
-    padding: var(--rj-spacing-md) var(--rj-spacing-md) 0;
+    padding: var(--sp-md) var(--sp-md) 0;
     margin: 0;
 }
 
@@ -807,31 +795,28 @@
     font-size: 14px;
     font-weight: 700;
     color: var(--rj-black);
-    padding: var(--rj-spacing-sm) var(--rj-spacing-md);
+    padding: var(--sp-sm) var(--sp-md);
     display: block;
 }
 
-.rogue-product-page .related.products ul.products li.product .button,
-.rogue-product-page .related.products ul.products li.product .add_to_cart_button {
+.rogue-product-page .related.products ul.products li.product .button {
     display: block !important;
-    width: calc(100% - 2 * var(--rj-spacing-md));
-    margin: 0 var(--rj-spacing-md) var(--rj-spacing-md) !important;
+    width: calc(100% - 2 * var(--sp-md));
+    margin: 0 var(--sp-md) var(--sp-md) !important;
     padding: 10px !important;
     background: var(--rj-black) !important;
     color: var(--rj-white) !important;
     border: none !important;
-    border-radius: var(--rj-radius) !important;
+    border-radius: var(--radius) !important;
     font-size: 12px !important;
     font-weight: 600 !important;
     cursor: pointer;
-    transition: all var(--rj-transition) !important;
     text-transform: uppercase !important;
     text-align: center !important;
     text-decoration: none !important;
 }
 
-.rogue-product-page .related.products ul.products li.product .button:hover,
-.rogue-product-page .related.products ul.products li.product .add_to_cart_button:hover {
+.rogue-product-page .related.products ul.products li.product .button:hover {
     background: var(--rj-dark-gray) !important;
 }
 
@@ -840,7 +825,7 @@
 .rj-section-title {
     font-size: 22px;
     font-weight: 700;
-    margin-bottom: var(--rj-spacing-xl);
+    margin-bottom: var(--sp-xl);
     color: var(--rj-text-dark);
     letter-spacing: 0.5px;
 }
@@ -850,47 +835,30 @@
 @media (max-width: 1024px) {
     .rj-product-main {
         grid-template-columns: 1fr 1fr;
-        gap: var(--rj-spacing-lg);
+        gap: var(--sp-lg);
     }
-
     .rj-thumbs {
         grid-template-columns: repeat(4, 1fr);
-    }
-
-    .rogue-product-page .related.products ul.products {
-        grid-template-columns: repeat(2, 1fr);
     }
 }
 
 @media (max-width: 768px) {
     .rj-product-main {
         grid-template-columns: 1fr;
-        gap: var(--rj-spacing-lg);
+        gap: var(--sp-lg);
     }
-
     .rj-sidebar {
         position: relative;
         top: auto;
     }
-
     .rogue-product-page .product_title.entry-title {
         font-size: 24px !important;
     }
-
-    .rogue-product-page .woocommerce-Price-amount {
-        font-size: 22px;
-    }
-
-    .rogue-product-page .rj-trust-badges {
-        grid-template-columns: 1fr;
-    }
-
     .rj-thumbs {
         grid-template-columns: repeat(4, 1fr);
     }
-
-    .rj-tabs-nav {
-        flex-wrap: wrap;
+    .rogue-product-page .rj-trust-badges {
+        grid-template-columns: 1fr;
     }
 }
 
@@ -898,16 +866,10 @@
     .rogue-product-page .product_title.entry-title {
         font-size: 20px !important;
     }
-
     .rj-thumbs {
         grid-template-columns: repeat(3, 1fr);
     }
-
     .rj-section-title {
         font-size: 18px;
-    }
-
-    .rogue-product-page .related.products ul.products {
-        grid-template-columns: 1fr;
     }
 }

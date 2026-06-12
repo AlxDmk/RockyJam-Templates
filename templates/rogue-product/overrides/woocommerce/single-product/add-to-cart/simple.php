@@ -1,7 +1,7 @@
 <?php
 /**
  * Rogue Product Template — override of simple.php add-to-cart form.
- * Wraps WC quantity + add-to-cart button in custom markup matching the design.
+ * Stock badge is rendered by functions.php hook after price — NOT here.
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -11,8 +11,6 @@ global $product;
 if ( ! $product->is_purchasable() ) {
     return;
 }
-
-echo wc_get_stock_html( $product ); // WPCS: XSS ok.
 
 if ( $product->is_in_stock() ) : ?>
 
@@ -31,7 +29,7 @@ if ( $product->is_in_stock() ) : ?>
                     array(
                         'min_value'   => apply_filters( 'woocommerce_quantity_input_min', $product->get_min_purchase_quantity(), $product ),
                         'max_value'   => apply_filters( 'woocommerce_quantity_input_max', $product->get_max_purchase_quantity(), $product ),
-                        'input_value' => isset( $_POST['quantity'] ) ? wc_stock_amount( wp_unslash( $_POST['quantity'] ) ) : $product->get_min_purchase_quantity(), // WPCS: CSRF ok, input var ok.
+                        'input_value' => isset( $_POST['quantity'] ) ? wc_stock_amount( wp_unslash( $_POST['quantity'] ) ) : $product->get_min_purchase_quantity(),
                         'classes'     => array( 'qty', 'rj-qty-value' ),
                     )
                 );
