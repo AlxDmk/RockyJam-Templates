@@ -4,27 +4,36 @@
  * Custom tab navigation with green active indicator matching reference design.
  *
  * Tab «reviews»:
- *   — есть отзывы  → обычная кликабельная вкладка + контент
+ *   — есть отзывы  → обычная кликабельная вкладка + контент WC
  *   — отзывов нет  → <span> (некликабельный, серый) + скрытый пустой div
- *                    чтобы JS всегда находил #tab-reviews в DOM
+ *
+ * ВАЖНО: WooCommerce удаляет вкладку reviews из $product_tabs когда
+ * отзывы отключены на товаре или глобально. Мы принудительно
+ * добавляем её обратно, чтобы она всегда отображалась в nav.
  */
 
 defined( 'ABSPATH' ) || exit;
 
-/**
- * Filter tabs and allow third parties to add their own.
- *
- * Each tab is an array with keys:
- *   title    (string)
- *   priority (int)
- *   callback (callable)
- */
 $product_tabs = apply_filters( 'woocommerce_product_tabs', array() );
 
 if ( ! empty( $product_tabs ) ) :
 
     global $product;
     $review_count = ( $product instanceof WC_Product ) ? $product->get_review_count() : 0;
+
+    // Если WooCommerce убрал вкладку reviews — добавляем её принудительно.
+    if ( ! isset( $product_tabs['reviews'] ) ) {
+        $product_tabs['reviews'] = array(
+            'title'    => __( 'Отзывы', 'woocommerce' ),
+            'priority' => 30,
+            'callback' => 'comments_template',
+        );
+    }
+
+    // Сортируем по priority как это делает WC.
+    uasort( $product_tabs, function( $a, $b ) {
+        return ( $a['priority'] ?? 10 ) <=> ( $b['priority'] ?? 10 );
+    } );
 
 ?>
 
