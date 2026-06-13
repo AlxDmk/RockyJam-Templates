@@ -212,6 +212,7 @@
 }
 
 .rogue-product-page .star-rating {
+    font-family: "WooCommerce" !important;
     color: var(--rj-gold, #d4af37);
     font-size: 16px;
 }
