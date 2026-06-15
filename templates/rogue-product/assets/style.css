@@ -702,7 +702,7 @@
  * Специфичность: 2 класса (.rogue-product-page + .star-rating) — побеждает
  * глобальный сброс (1 класс + 1 тег: .rogue-product-page span).
  */
-.rogue-product-page .comment-text .star-rating {
+.rogue-product-page .comment-body .star-rating {
     display: inline-block;
     font-family: "WooCommerce" !important;
     font-size: 14px;
@@ -715,7 +715,7 @@
     width: 5.4em;
 }
 
-.rogue-product-page .comment-text .star-rating span {
+.rogue-product-page .comment-body .star-rating span {
     font-family: "WooCommerce" !important;
     color: var(--rj-gold, #d4af37);
     overflow: hidden;
@@ -724,8 +724,8 @@
     height: 1em;
 }
 
-.rogue-product-page .comment-text .star-rating::before,
-.rogue-product-page .comment-text .star-rating span::before {
+.rogue-product-page .comment-body .star-rating::before,
+.rogue-product-page .comment-body .star-rating span::before {
     font-family: "WooCommerce" !important;
     content: "\73\73\73\73\73";
     color: var(--rj-gold, #d4af37);
@@ -734,7 +734,7 @@
     position: absolute;
 }
 
-.rogue-product-page .comment-text .star-rating span::before {
+.rogue-product-page .comment-body .star-rating span::before {
     color: var(--rj-gold, #d4af37);
 }
 
