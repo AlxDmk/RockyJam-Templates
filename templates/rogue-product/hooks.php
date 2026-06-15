@@ -6,6 +6,28 @@
 
 if ( ! defined( 'ABSPATH' ) ) { exit; }
 
+// ===== BREADCRUMBS =====
+// Выводим хлебные крошки над основным блоком товара (до gallery/summary).
+add_action( 'woocommerce_before_single_product', 'rj_rogue_breadcrumbs', 5 );
+
+if ( ! function_exists( 'rj_rogue_breadcrumbs' ) ) {
+	function rj_rogue_breadcrumbs() {
+		if ( ! function_exists( 'woocommerce_breadcrumb' ) ) {
+			return;
+		}
+		echo '<nav class="rj-breadcrumb" aria-label="' . esc_attr__( 'Breadcrumb', 'woocommerce' ) . '">';
+		woocommerce_breadcrumb( array(
+			'delimiter'   => '<span class="rj-breadcrumb__sep" aria-hidden="true">/</span>',
+			'wrap_before' => '<ol class="rj-breadcrumb__list" itemscope itemtype="https://schema.org/BreadcrumbList">',
+			'wrap_after'  => '</ol>',
+			'before'      => '<li class="rj-breadcrumb__item" itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">',
+			'after'       => '</li>',
+			'home'        => _x( 'Home', 'breadcrumb', 'woocommerce' ),
+		) );
+		echo '</nav>';
+	}
+}
+
 // Hook: woocommerce_before_single_product_summary
 remove_action( 'woocommerce_before_single_product_summary', 'woocommerce_show_product_sale_flash', 10 );
 // Sale Flash Badge is disabled for rogue-product template via Hook Manager.
