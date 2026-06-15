@@ -76,13 +76,35 @@
 
 /* ========== BREADCRUMBS ========== */
 .rogue-product-page .rj-breadcrumb {
-    padding: 12px 0 10px;
-    margin: 0 0 8px;
-    border-bottom: 1px solid var(--rj-border, #ddd);
+        padding: 5px 0 6px;
+        margin: 0;
+        /* border-bottom removed — Rogue style has no separator line */
     font-size: 12px;
     line-height: 1.4;
     color: var(--rj-text-muted, #666);
     font-family: var(--rj-font-body, 'Roboto', sans-serif);
+}
+
+/* Нейтрализуем тему — убираем иконку дома и разделитель темы */
+.rogue-product-page .rj-breadcrumb a::before,
+.rogue-product-page .rj-breadcrumb a::after,
+.rogue-product-page .rj-breadcrumb .woocommerce-breadcrumb a::before,
+.rogue-product-page .rj-breadcrumb .woocommerce-breadcrumb a::after {
+    display: none !important;
+    content: none !important;
+}
+
+/* Скрываем иконку дома (⌂ / genericon / dashicon) из первой ссылки */
+.rogue-product-page .rj-breadcrumb .woocommerce-breadcrumb a:first-of-type .genericon,
+.rogue-product-page .rj-breadcrumb .woocommerce-breadcrumb a:first-of-type img {
+    display: none !important;
+}
+
+/* Разделитель через CSS на каждом item кроме последнего */
+.rogue-product-page .rj-breadcrumb .rj-breadcrumb__item:not(:last-of-type)::after {
+    content: ' / ';
+    color: var(--rj-text-muted, #666);
+    font-size: 12px;
 }
 
 /* WooCommerce рендерит breadcrumbs как span-ы внутри одного блока */
