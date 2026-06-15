@@ -233,15 +233,13 @@
 }
 
 /* Пустые звёзды (фон) — серый */
-.rogue-product-page .star-rating span::before {
+.rogue-product-page .star-rating::before {
     font-family: "WooCommerce" !important;
     content: "\73\73\73\73\73";
-    color: var(--rj-gold, #d4af37);
+    color: var(--rj-border, #ddd);
     position: absolute;
     top: 0;
     left: 0;
-    width: 5.6em;
-    white-space: nowrap;
 }
 
 /* Залитые звёзды (поверх) — золотой */
