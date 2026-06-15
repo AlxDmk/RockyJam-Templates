@@ -99,6 +99,21 @@
     list-style: none;
 }
 
+/* Каждый элемент крошки (span.rj-breadcrumb__item) */
+.rogue-product-page .rj-breadcrumb .rj-breadcrumb__item {
+    display: inline;
+    font-size: 12px;
+    color: var(--rj-text-muted, #666);
+}
+
+/* Разделитель / (span.rj-breadcrumb__sep) */
+.rogue-product-page .rj-breadcrumb .rj-breadcrumb__sep {
+    display: inline;
+    color: var(--rj-text-muted, #666);
+    font-size: 12px;
+    margin: 0 2px;
+}
+
 /* Ссылки в крошках */
 .rogue-product-page .rj-breadcrumb .woocommerce-breadcrumb a {
     color: var(--rj-text-muted, #666);
@@ -119,8 +134,8 @@
 }
 
 /* Текущая страница (последний элемент) — чуть темнее */
-.rogue-product-page .rj-breadcrumb .woocommerce-breadcrumb span:last-child,
-.rogue-product-page .rj-breadcrumb .woocommerce-breadcrumb > span:last-of-type {
+.rogue-product-page .rj-breadcrumb .rj-breadcrumb__item:last-of-type,
+.rogue-product-page .rj-breadcrumb .rj-breadcrumb__item:last-child {
     color: var(--rj-text, #1a1a1a);
 }
 
