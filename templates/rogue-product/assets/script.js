@@ -129,14 +129,15 @@
 
     // ========== LIGHTBOX ==========
     var rjLightbox = (function () {
-        var lb, lbMainImg, lbThumbsRow, lbBtnClose, lbBtnPrev, lbBtnNext;
+        var lb, lbMainImg, lbImgWrap, lbThumbsRow, lbBtnClose, lbBtnPrev, lbBtnNext;
         var images  = [];
         var current = 0;
-        var isMobile = false;
 
-        function checkMobile() {
-            isMobile = window.innerWidth <= 768;
-        }
+        // ---- Touch/swipe state ----
+        var touchStartX = 0;
+        var touchStartY = 0;
+        var touchDeltaX = 0;
+        var SWIPE_THRESHOLD = 40; // px минимум для засчитывания свайпа
 
         function collectImages() {
             images = [];
@@ -181,6 +182,7 @@
             document.body.appendChild(lb);
 
             lbMainImg   = document.getElementById('rj-lb-main-img');
+            lbImgWrap   = lb.querySelector('.rj-lb-img-wrap');
             lbThumbsRow = document.getElementById('rj-lb-thumbs');
             lbBtnClose  = lb.querySelector('.rj-lb-close');
             lbBtnPrev   = lb.querySelector('.rj-lb-prev');
@@ -194,6 +196,40 @@
             lb.addEventListener('click', function (e) {
                 if (e.target === lb) close();
             });
+
+            // ---- Свайп по главному изображению (мобильные) ----
+            lbImgWrap.addEventListener('touchstart', onTouchStart, { passive: true });
+            lbImgWrap.addEventListener('touchmove',  onTouchMove,  { passive: true });
+            lbImgWrap.addEventListener('touchend',   onTouchEnd,   { passive: true });
+        }
+
+        // ---- Touch handlers ----
+        function onTouchStart(e) {
+            var t = e.touches[0];
+            touchStartX = t.clientX;
+            touchStartY = t.clientY;
+            touchDeltaX = 0;
+        }
+
+        function onTouchMove(e) {
+            touchDeltaX = e.touches[0].clientX - touchStartX;
+        }
+
+        function onTouchEnd() {
+            var absX = Math.abs(touchDeltaX);
+            var absY = Math.abs(touchDeltaX); // используем сохранённый delta
+
+            // Засчитываем только горизонтальный свайп
+            if (absX >= SWIPE_THRESHOLD) {
+                if (touchDeltaX < 0) {
+                    // свайп влево → следующее
+                    goTo(current + 1);
+                } else {
+                    // свайп вправо → предыдущее
+                    goTo(current - 1);
+                }
+            }
+            touchDeltaX = 0;
         }
 
         function buildThumbs() {
@@ -214,8 +250,13 @@
             idx = Math.max(0, Math.min(idx, images.length - 1));
             current = idx;
 
+            // Плавная замена изображения
+            lbMainImg.style.opacity = '0.4';
             lbMainImg.src = images[idx].large;
             lbMainImg.alt = images[idx].alt;
+            lbMainImg.onload = function () { lbMainImg.style.opacity = '1'; };
+            // На случай если изображение уже в кеше
+            if (lbMainImg.complete) { lbMainImg.style.opacity = '1'; }
 
             var thumbEls = lbThumbsRow.querySelectorAll('.rj-lb-thumb');
             thumbEls.forEach(function (t, i) {
@@ -231,7 +272,6 @@
         }
 
         function open(startIdx) {
-            checkMobile();
             buildDOM();
             collectImages();
             buildThumbs();
@@ -253,8 +293,6 @@
             if (e.key === 'ArrowLeft')  goTo(current - 1);
             if (e.key === 'ArrowRight') goTo(current + 1);
         });
-
-        window.addEventListener('resize', checkMobile);
 
         return { open: open, close: close };
     })();
