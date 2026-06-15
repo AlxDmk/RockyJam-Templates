@@ -15,16 +15,12 @@ if ( ! function_exists( 'rj_rogue_breadcrumbs' ) ) {
 		if ( ! function_exists( 'woocommerce_breadcrumb' ) ) {
 			return;
 		}
-		echo '<nav class="rj-breadcrumb" aria-label="' . esc_attr__( 'Breadcrumb', 'woocommerce' ) . '">';
+		        echo '<div class="rj-breadcrumb">';
 		woocommerce_breadcrumb( array(
-			'delimiter'   => '<span class="rj-breadcrumb__sep" aria-hidden="true">/</span>',
-			'wrap_before' => '<ol class="rj-breadcrumb__list" itemscope itemtype="https://schema.org/BreadcrumbList">',
-			'wrap_after'  => '</ol>',
-			'before'      => '<li class="rj-breadcrumb__item" itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">',
-			'after'       => '</li>',
+			            'delimiter' => ' / ',
 			'home'        => _x( 'Home', 'breadcrumb', 'woocommerce' ),
 		) );
-		echo '</nav>';
+		        echo '</div>';
 	}
 }
 
