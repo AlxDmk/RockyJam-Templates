@@ -719,11 +719,9 @@
     font-family: "WooCommerce" !important;
     color: var(--rj-gold, #d4af37);
     overflow: hidden;
-    float: left;
-    top: 0;
-    left: 0;
-    position: absolute;
-    padding-top: 1.5em;
+    display: block;
+    position: relative;
+    height: 1em;
 }
 
 .rogue-product-page .comment-text .star-rating::before,
@@ -731,7 +729,6 @@
     font-family: "WooCommerce" !important;
     content: "\73\73\73\73\73";
     color: var(--rj-gold, #d4af37);
-    float: left;
     top: 0;
     left: 0;
     position: absolute;
