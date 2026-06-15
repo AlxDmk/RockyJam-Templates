@@ -61,7 +61,7 @@
  * Глобальный сброс font-family на .rogue-product-page span перебивает его.
  *
  * ВАЖНО: скоупируем в .rogue-product-page чтобы специфичность
- * была выше чем у ".rogue-product-page span" (2 класса vs 1 класс+1тег).
+ * была выше чем у ".rogue-product-page span" (2 класса vs 1 класс+1 тег).
  * Применяется и в сайдбаре (рейтинг товара) и во вкладке Отзывы.
  */
 .rogue-product-page .star-rating,
@@ -215,10 +215,52 @@
     border-bottom: 1px solid var(--rj-border, #ddd) !important;
 }
 
+/*
+ * ИСПРАВЛЕНИЕ (v2): звёзды в заголовке товара (.woocommerce-product-rating).
+ * Без width/position/overflow 5-я звезда обрезалась.
+ * Логика аналогична .comment-body .star-rating.
+ */
 .rogue-product-page .star-rating {
     font-family: "WooCommerce" !important;
     color: var(--rj-gold, #d4af37);
     font-size: 16px;
+    display: inline-block;
+    overflow: hidden;
+    position: relative;
+    height: 1em;
+    line-height: 1;
+    width: 5.6em;
+}
+
+/* Пустые звёзды (фон) — серый */
+.rogue-product-page .star-rating::before {
+    font-family: "WooCommerce" !important;
+    content: "\73\73\73\73\73";
+    color: var(--rj-border, #ddd);
+    top: 0;
+    left: 0;
+    position: absolute;
+}
+
+/* Залитые звёзды (поверх) — золотой */
+.rogue-product-page .star-rating span {
+    font-family: "WooCommerce" !important;
+    overflow: hidden;
+    display: block;
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 1em;
+    /* width задаётся WooCommerce инлайн-стилем (style="width:XX%") */
+}
+
+.rogue-product-page .star-rating span::before {
+    font-family: "WooCommerce" !important;
+    content: "\73\73\73\73\73";
+    color: var(--rj-gold, #d4af37);
+    top: 0;
+    left: 0;
+    position: absolute;
 }
 
 .rogue-product-page .woocommerce-review-link {
