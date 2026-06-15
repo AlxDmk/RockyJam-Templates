@@ -1,1 +1,9 @@
-`cat /tmp/style_fixed.css`
+/*
+ * Rogue Product Template — assets/style.css
+ * Цвета и шрифты задаются темой через Plugin Contract (--rj-*).
+ * Хардкодных цветов в этом файле НЕТ — только fallback-значения
+ * в var() для работы без RockyJam-Theme.
+ *
+ * Структурные стили (grid, flex, позиционирование) остаются в плагине.
+ * Font Awesome и Dashicons защищены от переопределения font-family.
+ */
