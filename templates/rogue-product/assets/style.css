@@ -59,11 +59,19 @@
 /*
  * WooCommerce star rating использует иконочный шрифт "WooCommerce"
  * через псевдоэлементы ::before на span внутри .star-rating.
- * Глобальный сброс font-family на .rogue-product-page * перебивает его,
- * поэтому явно восстанавливаем шрифт здесь.
+ * Глобальный сброс font-family на .rogue-product-page span перебивает его.
+ *
+ * ВАЖНО: скоупируем в .rogue-product-page чтобы специфичность
+ * была выше чем у ".rogue-product-page span" (2 класса vs 1 класс+1тег).
+ * Применяется и в сайдбаре (рейтинг товара) и во вкладке Отзывы.
  */
-.star-rating::before,
-.star-rating span::before {
+.rogue-product-page .star-rating,
+.rogue-product-page .star-rating span {
+    font-family: "WooCommerce" !important;
+}
+
+.rogue-product-page .star-rating::before,
+.rogue-product-page .star-rating span::before {
     font-family: "WooCommerce" !important;
 }
 
@@ -200,7 +208,7 @@
     line-height: 1.4;
 }
 
-/* ========== STAR RATING ========== */
+/* ========== STAR RATING (sidebar / summary) ========== */
 
 .rogue-product-page .woocommerce-product-rating {
     display: flex !important;
@@ -645,6 +653,129 @@
 .rogue-product-page .rj-tab-content strong {
     font-weight: 700;
     color: var(--rj-text, #1a1a1a);
+}
+
+/* ========== REVIEWS TAB — COMMENTS LIST ========== */
+
+/*
+ * Стили для списка отзывов внутри вкладки «Отзывы».
+ * WooCommerce рендерит comments_template() → ol.commentlist → li.comment.
+ * review.php (override) добавляет .star-rating внутри .comment-text.
+ *
+ * ПРОБЛЕМА БЫЛА: глобальный сброс ".rogue-product-page span { font-family: Roboto }"
+ * перебивал шрифт "WooCommerce" на <span> внутри .star-rating,
+ * из-за чего звёзды не рендерились (псевдоэлементы ::before оставались
+ * с обычным шрифтом без глифов звёзд).
+ *
+ * РЕШЕНИЕ: скоупированные правила с более высокой специфичностью:
+ * ".rogue-product-page .star-rating span" (2 класса) > ".rogue-product-page span" (1 класс + 1 тег).
+ */
+
+.rogue-product-page .commentlist {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 var(--sp-lg);
+}
+
+.rogue-product-page .commentlist .comment_container {
+    display: flex;
+    gap: var(--sp-md);
+    padding: var(--sp-lg) 0;
+    border-bottom: 1px solid var(--rj-border, #ddd);
+}
+
+.rogue-product-page .commentlist .comment_container img.avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    object-fit: cover;
+}
+
+.rogue-product-page .commentlist .comment-text {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+/*
+ * КЛЮЧЕВОЙ ФИX: звёзды в каждом отзыве.
+ * Специфичность: 2 класса (.rogue-product-page + .star-rating) — побеждает
+ * глобальный сброс (1 класс + 1 тег: .rogue-product-page span).
+ */
+.rogue-product-page .comment-text .star-rating {
+    display: inline-block;
+    font-family: "WooCommerce" !important;
+    font-size: 14px;
+    color: var(--rj-gold, #d4af37);
+    margin-bottom: var(--sp-xs);
+    overflow: hidden;
+    position: relative;
+    height: 1em;
+    line-height: 1;
+    width: 5.4em;
+}
+
+.rogue-product-page .comment-text .star-rating span {
+    font-family: "WooCommerce" !important;
+    color: var(--rj-gold, #d4af37);
+    overflow: hidden;
+    float: left;
+    top: 0;
+    left: 0;
+    position: absolute;
+    padding-top: 1.5em;
+}
+
+.rogue-product-page .comment-text .star-rating::before,
+.rogue-product-page .comment-text .star-rating span::before {
+    font-family: "WooCommerce" !important;
+    content: "\73\73\73\73\73";
+    color: var(--rj-gold, #d4af37);
+    float: left;
+    top: 0;
+    left: 0;
+    position: absolute;
+}
+
+.rogue-product-page .comment-text .star-rating span::before {
+    color: var(--rj-gold, #d4af37);
+}
+
+/* Мета-строка: автор, verified, дата */
+.rogue-product-page .commentlist .comment-text p.meta {
+    font-size: 13px;
+    color: var(--rj-text-muted, #666);
+    margin-bottom: var(--sp-xs);
+    line-height: 1.5;
+}
+
+.rogue-product-page .commentlist .woocommerce-review__author {
+    font-weight: 700;
+    color: var(--rj-text, #1a1a1a);
+    font-size: 13px;
+}
+
+.rogue-product-page .commentlist .woocommerce-review__verified {
+    font-size: 12px;
+    color: var(--rj-success, #28a745);
+    font-style: normal;
+}
+
+.rogue-product-page .commentlist .woocommerce-review__dash {
+    color: var(--rj-text-muted, #666);
+}
+
+.rogue-product-page .commentlist .woocommerce-review__published-date {
+    font-size: 12px;
+    color: var(--rj-text-muted, #666);
+}
+
+/* Текст отзыва */
+.rogue-product-page .commentlist .comment-text .description p {
+    font-size: 14px;
+    line-height: 1.7;
+    color: var(--rj-text, #333);
+    margin: 0;
 }
 
 /* ========== RELATED PRODUCTS (WooCommerce fallback) ========== */
