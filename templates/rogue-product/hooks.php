@@ -17,7 +17,7 @@ if ( ! function_exists( 'rj_rogue_breadcrumbs' ) ) {
 		}
 		echo '<nav class="rj-breadcrumb" aria-label="' . esc_attr__( 'Breadcrumb', 'woocommerce' ) . '">';
 		woocommerce_breadcrumb( array(
-			'delimiter'   => ' <span class="rj-breadcrumb__sep" aria-hidden="true">/</span> ',
+						'delimiter'   => '',
 			'wrap_before' => '<span class="rj-breadcrumb__list woocommerce-breadcrumb">',
 			'wrap_after'  => '</span>',
 			'before'      => '<span class="rj-breadcrumb__item">',
