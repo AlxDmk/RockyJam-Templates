@@ -11,9 +11,11 @@
  * отзывы отключены на товаре или глобально. Мы принудительно
  * добавляем её обратно, чтобы она всегда отображалась в nav.
  *
- * Для вкладки reviews используется wc_get_template( 'single-product/reviews.php' )
+ * Для вкладки reviews используется wc_get_template( 'single-product-reviews.php' )
  * вместо comments_template() — это гарантирует что каждый отзыв рендерится
  * через single-product/review.php с блоком .star-rating (шрифт "WooCommerce").
+ *
+ * Правильный путь: templates/single-product-reviews.php (в корне templates/, а не в подпапке)
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -95,21 +97,16 @@ if ( ! empty( $product_tabs ) ) :
                     <?php else : ?>
                         <?php
                         /**
-                         * FIX: Используем wc_get_template( 'single-product/reviews.php' )
-                         * вместо comments_template().
+                         * FIX: Правильный путь к шаблону WooCommerce.
                          *
-                         * comments_template() загружает comments.php темы (стандартный
-                         * WordPress-шаблон) — он рендерит отзывы без .star-rating HTML.
+                         * Файл находится в корне templates/ (без подпапки single-product/):
+                         * woocommerce/templates/single-product-reviews.php
                          *
-                         * wc_get_template( 'single-product/reviews.php' ) — WooCommerce-шаблон,
-                         * который вызывает wp_list_comments() с callback => 'woocommerce_comments',
-                         * что в итоге рендерит каждый отзыв через single-product/review.php
-                         * с корректным блоком .star-rating (шрифт "WooCommerce").
-                         *
-                         * Для rogue-product переопределён через:
-                         * overrides/woocommerce/single-product/review.php
+                         * Этот шаблон вызывает wp_list_comments() с
+                         * callback => 'woocommerce_comments', что рендерит каждый
+                         * отзыв через single-product/review.php с .star-rating.
                          */
-                        wc_get_template( 'single-product/reviews.php' );
+                        wc_get_template( 'single-product-reviews.php' );
                         ?>
                     <?php endif; ?>
                 <?php elseif ( isset( $product_tab['callback'] ) && is_callable( $product_tab['callback'] ) ) : ?>
