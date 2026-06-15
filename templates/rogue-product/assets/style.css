@@ -7,3 +7,1253 @@
  * Структурные стили (grid, flex, позиционирование) остаются в плагине.
  * Font Awesome и Dashicons защищены от переопределения font-family.
  */
+
+/* ========== SCOPED LAYOUT VARIABLES ========== */
+.rogue-product-page {
+    --sp-xs: 8px;
+    --sp-sm: 12px;
+    --sp-md: 16px;
+    --sp-lg: 24px;
+    --sp-xl: 32px;
+    --sp-2xl: 48px;
+    font-family: var(--rj-font-body, 'Roboto', sans-serif);
+    line-height: 1.6;
+    color: var(--rj-text, #333);
+    box-sizing: border-box;
+}
+
+.rogue-product-page p,
+.rogue-product-page span,
+.rogue-product-page div,
+.rogue-product-page h1,
+.rogue-product-page h2,
+.rogue-product-page h3,
+.rogue-product-page h4,
+.rogue-product-page h5,
+.rogue-product-page h6,
+.rogue-product-page a,
+.rogue-product-page li,
+.rogue-product-page label,
+.rogue-product-page button,
+.rogue-product-page input,
+.rogue-product-page select,
+.rogue-product-page textarea {
+    font-family: var(--rj-font-body, 'Roboto', sans-serif);
+    box-sizing: border-box;
+}
+
+/* ICON FONT PROTECTION */
+.fas, .fa, .far, .fab, .fal, .fad,
+.fas::before, .fa::before, .far::before, .fab::before, .fal::before,
+[class^="fa-"]::before,
+[class*=" fa-"]::before {
+    font-family: "Font Awesome 6 Free", "Font Awesome 6 Brands", "Font Awesome 5 Free", "Font Awesome 5 Brands", FontAwesome !important;
+}
+
+.dashicons,
+.dashicons-before::before {
+    font-family: dashicons !important;
+}
+
+/*
+ * WooCommerce star rating использует иконочный шрифт "WooCommerce"
+ * через псевдоэлементы ::before на span внутри .star-rating.
+ * Глобальный сброс font-family на .rogue-product-page span перебивает его.
+ *
+ * ВАЖНО: скоупируем в .rogue-product-page чтобы специфичность
+ * была выше чем у ".rogue-product-page span" (2 класса vs 1 класс+1 тег).
+ * Применяется и в сайдбаре (рейтинг товара) и во вкладке Отзывы.
+ */
+.rogue-product-page .star-rating,
+.rogue-product-page .star-rating span {
+    font-family: "WooCommerce" !important;
+}
+
+.rogue-product-page .star-rating::before,
+.rogue-product-page .star-rating span::before {
+    font-family: "WooCommerce" !important;
+}
+
+/* ========== 60/40 GRID ========== */
+.rj-product-main {
+    display: grid;
+    grid-template-columns: 60% 40%;
+    gap: var(--sp-xl);
+    padding: var(--sp-xl) 0;
+}
+
+/* ========== GALLERY COLUMN ========== */
+.rj-gallery-column {
+    position: relative;
+    min-width: 0;
+}
+
+.rj-gallery-wrap {
+    width: 100%;
+}
+
+.rj-main-image-wrap {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    overflow: hidden;
+    background-color: var(--rj-surface, #f5f5f5);
+    border-radius: var(--rj-radius, 4px);
+    border: 1px solid var(--rj-border, #ddd);
+    margin-bottom: var(--sp-lg);
+    position: relative;
+    box-sizing: border-box;
+}
+
+.rj-main-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center center;
+    display: block;
+    transition: opacity 0.18s ease;
+}
+
+.rj-main-image-wrap .onsale {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    background: var(--rj-accent, #c41e2e);
+    border-radius: var(--rj-radius, 4px);
+    font-size: 11px;
+    font-weight: 700;
+    padding: 4px 8px;
+    min-height: unset;
+    line-height: 1;
+    z-index: 10;
+    color: #fff;
+}
+
+/* Thumbnails — 6 columns */
+.rj-thumbs {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: var(--sp-sm);
+    list-style: none;
+    padding: 0;
+    margin: 0 0 var(--sp-lg);
+}
+
+.rj-thumb-item {
+    margin: 0;
+    aspect-ratio: 1 / 1;
+    overflow: hidden;
+    border-radius: var(--rj-radius, 4px);
+    border: 2px solid var(--rj-border, #ddd);
+    cursor: pointer;
+    transition: border-color var(--rj-transition, 0.3s ease), box-shadow var(--rj-transition, 0.3s ease);
+    box-sizing: border-box;
+}
+
+.rj-thumb-item:hover {
+    border-color: var(--rj-accent, #c41e2e);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.12);
+}
+
+.rj-thumb-item.active {
+    border-color: var(--rj-text, #1a1a1a);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.18);
+}
+
+.rj-thumb {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center center;
+    display: block;
+    cursor: pointer;
+}
+
+.rogue-product-page .woocommerce-product-gallery {
+    display: none !important;
+}
+
+/* ========== SIDEBAR ========== */
+.rj-sidebar {
+    position: sticky;
+    top: 150px;
+    height: fit-content;
+    min-width: 0;
+}
+
+.rj-sidebar .rj-shipping-badge-wrap {
+    margin-bottom: var(--sp-md);
+}
+
+/* ========== PRODUCT TITLE ========== */
+.rogue-product-page .product_title.entry-title {
+    font-size: clamp(18px, 1.8vw, 24px) !important;
+    font-weight: 700 !important;
+    color: var(--rj-text, #1a1a1a) !important;
+    margin-bottom: var(--sp-xs) !important;
+    line-height: 1.2 !important;
+    letter-spacing: 0.5px !important;
+    font-family: var(--rj-font-body, 'Roboto', sans-serif) !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+}
+
+.rogue-product-page .rj-product-subtitle {
+    font-size: 14px;
+    color: var(--rj-text-muted, #666);
+    margin-bottom: 8px;
+    line-height: 1.4;
+}
+
+/* ========== STAR RATING (sidebar / summary) ========== */
+.rogue-product-page .woocommerce-product-rating {
+    display: flex !important;
+    align-items: center !important;
+    gap: var(--sp-sm) !important;
+    margin-bottom: var(--sp-md) !important;
+    padding-bottom: var(--sp-md) !important;
+    border-bottom: 1px solid var(--rj-border, #ddd) !important;
+}
+
+/*
+ * ИСПРАВЛЕНИЕ (v2): звёзды в заголовке товара (.woocommerce-product-rating).
+ * Без width/position/overflow 5-я звезда обрезалась.
+ * Логика аналогична .comment-body .star-rating.
+ */
+.rogue-product-page .star-rating {
+    font-family: "WooCommerce" !important;
+    color: var(--rj-gold, #d4af37);
+    font-size: 16px;
+    display: inline-block;
+    overflow: hidden;
+    position: relative;
+    height: 1em;
+    line-height: 1;
+    width: 5.6em;
+}
+
+/* Пустые звёзды (фон) — серый */
+.rogue-product-page .star-rating span::before {
+    font-family: "WooCommerce" !important;
+    content: "\73\73\73\73\73";
+    color: var(--rj-gold, #d4af37);
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 5.6em;
+    white-space: nowrap;
+}
+
+/* Залитые звёзды (поверх) — золотой */
+.rogue-product-page .star-rating span {
+    font-family: "WooCommerce" !important;
+    overflow: hidden;
+    display: block;
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 1em;
+    /* width задаётся WooCommerce инлайн-стилем (style="width:XX%") */
+}
+
+.rogue-product-page .star-rating span::before {
+    font-family: "WooCommerce" !important;
+    content: "\73\73\73\73\73";
+    color: var(--rj-gold, #d4af37);
+    top: 0;
+    left: 0;
+    position: absolute;
+}
+
+.rogue-product-page .woocommerce-review-link {
+    font-size: 13px;
+    color: var(--rj-text-muted, #666);
+    text-decoration: none;
+}
+
+.rogue-product-page .woocommerce-review-link:hover {
+    color: var(--rj-accent, #c41e2e);
+}
+
+/* Fallback: пустые звёзды когда отзывов нет */
+.rogue-product-page .rj-empty-rating {
+    display: flex !important;
+    align-items: center !important;
+    gap: var(--sp-sm) !important;
+    margin-bottom: var(--sp-md) !important;
+    padding-bottom: var(--sp-md) !important;
+    border-bottom: 1px solid var(--rj-border, #ddd) !important;
+}
+
+.rogue-product-page .rj-empty-rating .rj-empty-stars {
+    font-size: 16px;
+    color: var(--rj-border, #ddd);    
+    line-height: 1;
+}
+
+.rogue-product-page .rj-empty-rating .rj-empty-count {
+    font-size: 13px;
+    color: var(--rj-text-muted, #666);
+    text-decoration: none;
+}
+
+/* ========== PRICE ========== */
+.rogue-product-page .rj-price-section {
+    margin-bottom: var(--sp-lg) !important;
+    padding-top: var(--sp-md) !important;
+    padding-bottom: var(--sp-md) !important;
+    border-top: 1px solid var(--rj-border, #ddd) !important;
+    border-bottom: 1px solid var(--rj-border, #ddd) !important;
+}
+
+.rogue-product-page .rj-price-section::before {
+    content: "ЦЕНА";
+    display: block;
+    font-size: 12px;
+    font-weight: 400;
+    color: var(--rj-text-muted, #666);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: var(--sp-xs);
+    font-family: var(--rj-font-body, 'Roboto', sans-serif);
+}
+
+.rogue-product-page p.price .woocommerce-Price-amount,
+.rogue-product-page span.price .woocommerce-Price-amount {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--rj-text, #1a1a1a);
+    line-height: 1.2;
+}
+
+.rogue-product-page p.price del .woocommerce-Price-amount {
+    font-size: 18px;
+    color: var(--rj-text-muted, #666);
+    font-weight: 400;
+}
+
+.rogue-product-page p.price ins {
+    text-decoration: none;
+}
+
+.rogue-product-page p.price,
+.rogue-product-page .woocommerce-Price-currencySymbol {
+    margin-bottom: 0;
+}
+
+/* ========== STOCK BADGE ========== */
+.rogue-product-page p.stock {
+    display: inline-block !important;
+    border-radius: var(--rj-radius, 4px);
+    font-size: 11px !important;
+    font-weight: 600 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.5px;
+    padding: 4px 8px !important;
+    margin-top: var(--sp-sm) !important;
+    margin-bottom: var(--sp-lg) !important;
+    line-height: 1.4;
+    clear: both;
+}
+
+.rogue-product-page p.stock.in-stock {
+    background: var(--rj-success, #28a745) !important;
+    color: #fff !important;
+    border: none !important;
+}
+
+.rogue-product-page p.stock.out-of-stock {
+    background: var(--rj-accent, #c41e2e) !important;
+    color: #fff !important;
+    border: none !important;
+}
+
+.rogue-product-page p.stock + * {
+    border-top: none;
+    padding-top: 0;
+    margin-top: 0;
+}
+
+/* ========== KEY FEATURES ADDON ========== */
+.rogue-product-page .product-key-features {
+    margin-bottom: var(--sp-lg) !important;
+    padding: 0 !important;
+    padding-bottom: var(--sp-md) !important;
+    border-bottom: 1px solid var(--rj-border, #ddd) !important;
+    background: transparent !important;
+    border-top: none !important;
+    border-left: none !important;
+    border-right: none !important;
+    border-radius: 0 !important;
+}
+
+.rogue-product-page .product-key-features__title {
+    font-size: 14px !important;
+    font-weight: 700 !important;
+    margin-bottom: var(--sp-sm) !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.5px !important;
+    color: var(--rj-text, #1a1a1a) !important;
+    font-family: var(--rj-font-body, 'Roboto', sans-serif) !important;
+}
+
+.rogue-product-page .product-key-features__list {
+    list-style: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+.rogue-product-page .product-key-features__item {
+    font-size: 13px !important;
+    color: var(--rj-text-muted, #666) !important;
+    padding: 4px 0 !important;
+    border-bottom: none !important;
+    gap: 8px;
+    display: flex;
+    align-items: flex-start;
+    line-height: 1.5;
+}
+
+.rogue-product-page .product-key-features__item .dashicons {
+    color: var(--rj-accent, #c41e2e) !important;
+    font-size: 16px !important;
+    width: 16px !important;
+    height: 16px !important;
+    flex-shrink: 0;
+    margin-top: 2px;
+    font-family: dashicons !important;
+}
+
+/* ========== SHORT DESCRIPTION ========== */
+.rogue-product-page .woocommerce-product-details__short-description {
+    font-size: 13px;
+    line-height: 1.7;
+    color: var(--rj-text-muted, #666);
+    margin-bottom: var(--sp-lg);
+    padding-bottom: var(--sp-md);
+    border-bottom: 1px solid var(--rj-border, #ddd);
+}
+
+/* ========== PRODUCT META ========== */
+.rogue-product-page .product_meta {
+    font-size: 12px;
+    color: var(--rj-text-muted, #666);
+    margin-bottom: var(--sp-lg);
+    padding-bottom: var(--sp-md);
+    border-bottom: 1px solid var(--rj-border, #ddd);
+}
+
+.rogue-product-page .product_meta .sku_wrapper,
+.rogue-product-page .product_meta .posted_in,
+.rogue-product-page .product_meta .tagged_as,
+.rogue-product-page .product_meta > span {
+    display: block !important;
+    margin-bottom: var(--sp-xs);
+    line-height: 1.5;
+}
+
+.rogue-product-page .product_meta strong,
+.rogue-product-page .product_meta .sku_wrapper strong,
+.rogue-product-page .product_meta .posted_in strong,
+.rogue-product-page .product_meta .tagged_as strong {
+    display: inline !important;
+    font-weight: 700 !important;
+    color: var(--rj-text, #1a1a1a) !important;
+    font-size: 12px !important;
+    margin-right: 4px;
+    font-family: var(--rj-font-body, 'Roboto', sans-serif) !important;
+}
+
+.rogue-product-page .product_meta .sku,
+.rogue-product-page .product_meta a {
+    display: inline !important;
+    color: var(--rj-text-muted, #666) !important;
+    text-decoration: none;
+}
+
+.rogue-product-page .product_meta a:hover {
+    color: var(--rj-accent, #c41e2e);
+}
+
+/* ========== QUANTITY ========== */
+.rogue-product-page .rj-qty-section {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-sm);
+    margin-bottom: var(--sp-lg);
+}
+
+.rogue-product-page .rj-qty-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--rj-text, #1a1a1a);
+    white-space: nowrap;
+}
+
+.rogue-product-page .rj-qty-controls {
+    display: flex;
+    align-items: center;
+    border: 1px solid var(--rj-border, #ddd);
+    border-radius: var(--rj-radius, 4px);
+    overflow: hidden;
+}
+
+.rogue-product-page .rj-qty-controls .rj-qty-minus,
+.rogue-product-page .rj-qty-controls .rj-qty-plus {
+    background: var(--rj-surface, #f5f5f5);
+    border: none;
+    width: 40px;
+    height: 40px;
+    cursor: pointer;
+    font-size: 16px;
+    color: var(--rj-text, #1a1a1a);
+    transition: background var(--rj-transition, 0.3s ease);
+    padding: 0;
+    flex-shrink: 0;
+    line-height: 1;
+}
+
+.rogue-product-page .rj-qty-controls .rj-qty-minus:hover,
+.rogue-product-page .rj-qty-controls .rj-qty-plus:hover {
+    background: var(--rj-border, #ddd);
+}
+
+.rogue-product-page .rj-qty-controls input[type="number"] {
+    width: 60px;
+    height: 40px;
+    border: none;
+    border-left: 1px solid var(--rj-border, #ddd);
+    border-right: 1px solid var(--rj-border, #ddd);
+    text-align: center;
+    font-size: 14px;
+    color: var(--rj-text, #1a1a1a);
+    background: var(--rj-surface-2, #fff);
+    -moz-appearance: textfield;
+    padding: 0;
+    outline: none;
+}
+
+.rogue-product-page .rj-qty-controls input[type="number"]::-webkit-outer-spin-button,
+.rogue-product-page .rj-qty-controls input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+/* ========== ADD TO CART BUTTON ========== */
+.rogue-product-page .single_add_to_cart_button,
+.rogue-product-page button.single_add_to_cart_button {
+    background: var(--rj-btn-bg, #000) !important;
+    color: var(--rj-btn-color, #fff) !important;
+    border: none !important;
+    border-radius: var(--rj-radius, 4px) !important;
+    font-family: var(--rj-font-body, 'Roboto', sans-serif) !important;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.5px !important;
+    padding: 14px 24px !important;
+    width: 100% !important;
+    font-size: 14px !important;
+    cursor: pointer !important;
+    transition: background var(--rj-transition, 0.3s ease) !important;
+}
+
+.rogue-product-page .single_add_to_cart_button:hover,
+.rogue-product-page button.single_add_to_cart_button:hover {
+    background: var(--rj-btn-bg-hover, #3a3a3a) !important;
+}
+
+/* ========== PRODUCT TABS ========== */
+.rogue-product-page .rj-product-tabs {
+    margin: var(--sp-2xl) 0;
+}
+
+.rogue-product-page .woocommerce-tabs.wc-tabs-wrapper {
+    display: none !important;
+}
+
+/* NAV */
+.rogue-product-page .rj-tabs-nav {
+    display: flex;
+    gap: 0;
+    border-bottom: 2px solid var(--rj-border, #ddd);
+    margin-bottom: 0;
+    padding: 0;
+    list-style: none;
+    background: transparent;
+}
+
+/* Обычная кликабельная вкладка */
+.rogue-product-page .rj-tab-link {
+    display: inline-block;
+    padding: 0.75rem 1.5rem;
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -2px;
+    font-size: 1.1rem;
+    font-weight: 400;
+    color: var(--rj-text-muted, #666);
+    cursor: pointer;
+    text-decoration: none;
+    line-height: 1.4;
+    transition: color var(--rj-transition, 0.3s ease), border-color var(--rj-transition, 0.3s ease), font-weight 0s;
+    white-space: nowrap;
+    font-family: var(--rj-font-body, 'Roboto', sans-serif);
+    letter-spacing: normal;
+    text-transform: none;
+    border-radius: 0;
+    outline: none;
+}
+
+.rogue-product-page .rj-tab-link:hover {
+    color: var(--rj-tabs-active-color, #4a6b3c);
+    background: none;
+}
+
+.rogue-product-page .rj-tab-link.active {
+    color: var(--rj-tabs-active-color, #4a6b3c);
+    border-bottom-color: var(--rj-tabs-active-color, #4a6b3c);
+    font-weight: 700;
+    background: none;
+}
+
+/*
+ * Деактивированная вкладка (отзывов нет).
+ * Рендерится как <span>, не получает focus/click.
+ * pointer-events:none — страховка от мыши.
+ * opacity:0.4 — визуально показываем что вкладка есть, но недоступна.
+ */
+.rogue-product-page .rj-tab-disabled {
+    display: inline-block;
+    padding: 0.75rem 1.5rem;
+    font-size: 1.1rem;
+    font-weight: 400;
+    color: var(--rj-text-faint, #bbb);
+    cursor: default;
+    pointer-events: none;
+    user-select: none;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -2px;
+    white-space: nowrap;
+    font-family: var(--rj-font-body, 'Roboto', sans-serif);
+    opacity: 0.4;
+    line-height: 1.4;
+}
+
+.rogue-product-page .rj-tabs-content {
+    padding: 0;
+}
+
+.rogue-product-page .rj-tab-content {
+    display: none;
+    padding: 2rem 0;
+}
+
+.rogue-product-page .rj-tab-content.active {
+    display: block;
+}
+
+/* Заглушка «Отзывов пока нет» */
+.rogue-product-page .rj-no-reviews {
+    font-size: 14px;
+    color: var(--rj-text-muted, #666);
+    font-style: italic;
+    margin: 0;
+}
+
+.rogue-product-page .rj-tab-content h2 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--rj-text, #1a1a1a);
+    border-bottom: 2px solid var(--rj-tabs-active-color, #4a6b3c);
+    padding-bottom: 0.5rem;
+    margin: 0 0 1rem;
+    letter-spacing: normal;
+    font-family: var(--rj-font-body, 'Roboto', sans-serif);
+}
+
+.rogue-product-page .rj-tab-content p {
+    font-size: 14px;
+    line-height: 1.7;
+    color: var(--rj-text, #333);
+    margin-bottom: 1rem;
+    max-width: none;
+}
+
+.rogue-product-page .rj-tab-content p strong,
+.rogue-product-page .rj-tab-content strong {
+    font-weight: 700;
+    color: var(--rj-text, #1a1a1a);
+}
+
+/* ========== REVIEWS TAB — COMMENTS LIST ========== */
+/*
+ * Стили для списка отзывов внутри вкладки «Отзывы».
+ * WooCommerce рендерит comments_template() → ol.commentlist → li.comment.
+ * review.php (override) добавляет .star-rating внутри .comment-text.
+ *
+ * ПРОБЛЕМА БЫЛА: глобальный сброс ".rogue-product-page span { font-family: Roboto }"
+ * перебивал шрифт "WooCommerce" на <span> внутри .star-rating,
+ * из-за чего звёзды не рендерились (псевдоэлементы ::before оставались
+ * с обычным шрифтом без глифов звёзд).
+ *
+ * РЕШЕНИЕ: скоупированные правила с более высокой специфичностью:
+ * ".rogue-product-page .star-rating span" (2 класса) > ".rogue-product-page span" (1 класс + 1 тег).
+ */
+.rogue-product-page .commentlist {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 var(--sp-lg);
+}
+
+.rogue-product-page .commentlist .comment_container {
+    display: flex;
+    gap: var(--sp-md);
+    padding: var(--sp-lg) 0;
+    border-bottom: 1px solid var(--rj-border, #ddd);
+}
+
+.rogue-product-page .commentlist .comment_container img.avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    object-fit: cover;
+}
+
+.rogue-product-page .commentlist .comment-text {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+/*
+ * КЛЮЧЕВОЙ ФИX: звёзды в каждом отзыве.
+ * Специфичность: 2 класса (.rogue-product-page + .star-rating) — побеждает
+ * глобальный сброс (1 класс + 1 тег: .rogue-product-page span).
+ *
+ * ИСПРАВЛЕНИЯ (v2):
+ * 1. width: 5.6em (было 5.4em) — убирает обрезание 5-й звезды.
+ * 2. span: position: absolute (было relative) — залитые звёзды корректно
+ *    перекрывают пустые, занимая ширину из инлайн-стиля WooCommerce.
+ * 3. ::before на контейнере — серый цвет для пустых звёзд.
+ * 4. span::before — золотой цвет для залитых звёзд.
+ */
+.rogue-product-page .comment-body .star-rating {
+    display: inline-block;
+    font-family: "WooCommerce" !important;
+    font-size: 14px;
+    color: var(--rj-gold, #d4af37);
+    margin-bottom: var(--sp-xs);
+    overflow: hidden;
+    position: relative;
+    height: 1em;
+    line-height: 1;
+    width: 5.6em;
+}
+
+.rogue-product-page .comment-body .star-rating span {
+    font-family: "WooCommerce" !important;
+    overflow: hidden;
+    display: block;
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 1em;
+    /* width задаётся WooCommerce инлайн-стилем (style="width:XX%") */
+}
+
+/* Пустые звёзды (фон) — серый */
+.rogue-product-page .comment-body .star-rating::before {
+    font-family: "WooCommerce" !important;
+    content: "\73\73\73\73\73";
+    color: var(--rj-border, #ddd);
+    top: 0;
+    left: 0;
+    position: absolute;
+}
+
+/* Залитые звёзды (поверх) — золотой */
+.rogue-product-page .comment-body .star-rating span::before {
+    font-family: "WooCommerce" !important;
+    content: "\73\73\73\73\73";
+    color: var(--rj-gold, #d4af37);
+    top: 0;
+    left: 0;
+    position: absolute;
+}
+
+/* Мета-строка: автор, verified, дата */
+.rogue-product-page .commentlist .comment-text p.meta {
+    font-size: 13px;
+    color: var(--rj-text-muted, #666);
+    margin-bottom: var(--sp-xs);
+    line-height: 1.5;
+}
+
+.rogue-product-page .commentlist .woocommerce-review__author {
+    font-weight: 700;
+    color: var(--rj-text, #1a1a1a);
+    font-size: 13px;
+}
+
+.rogue-product-page .commentlist .woocommerce-review__verified {
+    font-size: 12px;
+    color: var(--rj-success, #28a745);
+    font-style: normal;
+}
+
+.rogue-product-page .commentlist .woocommerce-review__dash {
+    color: var(--rj-text-muted, #666);
+}
+
+.rogue-product-page .commentlist .woocommerce-review__published-date {
+    font-size: 12px;
+    color: var(--rj-text-muted, #666);
+}
+
+/* Текст отзыва */
+.rogue-product-page .commentlist .comment-text .description p {
+    font-size: 14px;
+    line-height: 1.7;
+    color: var(--rj-text, #333);
+    margin: 0;
+}
+
+/* ========== RELATED PRODUCTS (WooCommerce fallback) ========== */
+.rogue-product-page .related.products {
+    padding: var(--sp-2xl) 0;
+    border-top: 1px solid var(--rj-border, #ddd);
+    clear: both;
+}
+
+/* Заголовок секции — H2 с зелёной чертой снизу */
+.rogue-product-page .related.products > h2 {
+    font-size: 2rem !important;
+    font-weight: 700 !important;
+    color: var(--rj-text, #1a1a1a) !important;
+    border-bottom: 2px solid var(--rj-tabs-active-color, #4a6b3c) !important;
+    padding-bottom: 0.5rem !important;
+    margin: 0 0 var(--sp-lg) !important;
+    letter-spacing: normal !important;
+    font-family: var(--rj-font-body, 'Roboto', sans-serif) !important;
+    text-transform: none !important;
+}
+
+/* Сетка товаров — 4 колонки */
+.rogue-product-page .related.products ul.products {
+    display: grid !important;
+    grid-template-columns: repeat(4, 1fr) !important;
+    gap: var(--sp-lg) !important;
+    list-style: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+/* Карточка товара */
+.rogue-product-page .related.products ul.products li.product {
+    border: 1px solid var(--rj-border, #ddd) !important;
+    border-radius: var(--rj-radius, 4px) !important;
+    overflow: hidden !important;
+    transition: border-color var(--rj-transition, 0.3s ease), box-shadow var(--rj-transition, 0.3s ease) !important;
+    background: var(--rj-surface-2, #fff) !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+}
+
+.rogue-product-page .related.products ul.products li.product:hover {
+    border-color: var(--rj-text, #000) !important;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08) !important;
+}
+
+/* Изображение товара */
+.rogue-product-page .related.products ul.products li.product a.woocommerce-loop-product__link img,
+.rogue-product-page .related.products ul.products li.product img {
+    width: 100% !important;
+    height: 200px !important;
+    object-fit: cover !important;
+    object-position: center !important;
+    display: block !important;
+    border-radius: 0 !important;
+}
+
+/* Плейсхолдер когда нет изображения */
+.rogue-product-page .related.products ul.products li.product a.woocommerce-loop-product__link:not(:has(img)) {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 200px;
+    background: var(--rj-surface, #f5f5f5);
+    font-size: 14px;
+    color: var(--rj-text-muted, #666);
+}
+
+/* Контентная часть карточки */
+.rogue-product-page .related.products ul.products li.product .woocommerce-loop-product__title {
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    color: var(--rj-text, #1a1a1a) !important;
+    line-height: 1.4 !important;
+    padding: var(--sp-md) var(--sp-md) var(--sp-sm) !important;
+    margin: 0 !important;
+    min-height: 44px !important;
+    font-family: var(--rj-font-body, 'Roboto', sans-serif) !important;
+}
+
+.rogue-product-page .related.products ul.products li.product .price {
+    display: block !important;
+    font-size: 14px !important;
+    font-weight: 700 !important;
+    color: var(--rj-text, #000) !important;
+    padding: 0 var(--sp-md) var(--sp-md) !important;
+    margin: 0 !important;
+    line-height: 1.4 !important;
+}
+
+.rogue-product-page .related.products ul.products li.product .price .woocommerce-Price-amount {
+    font-size: 14px !important;
+    font-weight: 700 !important;
+    color: var(--rj-text, #000) !important;
+}
+
+/* Кнопка ADD TO CART */
+.rogue-product-page .related.products ul.products li.product .button,
+.rogue-product-page .related.products ul.products li.product a.button,
+.rogue-product-page .related.products ul.products li.product .add_to_cart_button {
+    display: block !important;
+    width: calc(100% - var(--sp-md) * 2) !important;
+    margin: auto var(--sp-md) var(--sp-md) !important;
+    padding: 10px var(--sp-md) !important;
+    background: var(--rj-btn-bg, #000) !important;
+    color: var(--rj-btn-color, #fff) !important;
+    border: none !important;
+    border-radius: var(--rj-radius, 4px) !important;
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.5px !important;
+    text-align: center !important;
+    text-decoration: none !important;
+    cursor: pointer !important;
+    transition: background var(--rj-transition, 0.3s ease) !important;
+    font-family: var(--rj-font-body, 'Roboto', sans-serif) !important;
+    box-sizing: border-box !important;
+    margin-top: auto !important;
+}
+
+.rogue-product-page .related.products ul.products li.product .button:hover,
+.rogue-product-page .related.products ul.products li.product a.button:hover,
+.rogue-product-page .related.products ul.products li.product .add_to_cart_button:hover {
+    background: var(--rj-btn-bg-hover, #3a3a3a) !important;
+}
+
+/* Скрываем значок «sale» на карточках в «Похожих» */
+.rogue-product-page .related.products ul.products li.product .onsale {
+    display: none !important;
+}
+
+/* Адаптив: 2 колонки на планшете */
+@media (max-width: 1024px) {
+    .rogue-product-page .related.products ul.products {
+        grid-template-columns: repeat(2, 1fr) !important;
+    }
+}
+
+/* Адаптив: 2 колонки на мобильном */
+@media (max-width: 768px) {
+    .rogue-product-page .related.products ul.products {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: var(--sp-md) !important;
+    }
+    .rogue-product-page .related.products > h2 {
+        font-size: 1.5rem !important;
+    }
+}
+
+/* Адаптив: 1 колонка на маленьком экране */
+@media (max-width: 480px) {
+    .rogue-product-page .related.products ul.products {
+        grid-template-columns: 1fr !important;
+    }
+}
+
+/* ========== RELATED PRODUCTS (CUSTOM rj-related MARKUP) ========== */
+.rogue-product-page .rj-related {
+    padding: var(--sp-2xl) 0;
+    clear: both;
+}
+
+.rogue-product-page .rj-related__title {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--rj-text, #1a1a1a);
+    border-bottom: 2px solid var(--rj-tabs-active-color, #4a6b3c);
+    padding-bottom: 0.5rem;
+    margin: 0 0 var(--sp-lg);
+    line-height: 1.2;
+    font-family: var(--rj-font-body, 'Roboto', sans-serif);
+    letter-spacing: normal;
+    text-transform: none;
+}
+
+.rogue-product-page .rj-related__grid {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: var(--sp-lg);
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.rogue-product-page .rj-related__card {
+    list-style: none;
+    border: 1px solid var(--rj-border, #ddd);
+    border-radius: var(--rj-radius, 4px);
+    overflow: hidden;
+    background: var(--rj-surface-2, #fff);
+    transition: border-color var(--rj-transition, 0.3s ease), box-shadow var(--rj-transition, 0.3s ease);
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.rogue-product-page .rj-related__card:hover {
+    border-color: var(--rj-text, #000);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+.rogue-product-page .rj-related__card-link {
+    display: block;
+    text-decoration: none;
+    color: inherit;
+}
+
+.rogue-product-page .rj-related__img-wrap {
+    width: 100%;
+    height: 200px;
+    background: var(--rj-surface, #f5f5f5);
+    overflow: hidden;
+}
+
+.rogue-product-page .rj-related__img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    display: block;
+}
+
+.rogue-product-page .rj-related__body {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    padding: var(--sp-md);
+}
+
+.rogue-product-page .rj-related__name {
+    margin: 0 0 var(--sp-sm);
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 1.4;
+    color: var(--rj-text, #1a1a1a);
+    font-family: var(--rj-font-body, 'Roboto', sans-serif);
+}
+
+.rogue-product-page .rj-related__name a {
+    color: inherit;
+    text-decoration: none;
+}
+
+.rogue-product-page .rj-related__price {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--rj-text, #000);
+    margin-bottom: var(--sp-md);
+    line-height: 1.4;
+}
+
+.rogue-product-page .rj-related__price del {
+    color: var(--rj-text-muted, #666);
+    font-weight: 400;
+    margin-right: 6px;
+    text-decoration: line-through;
+}
+
+.rogue-product-page .rj-related__price ins {
+    text-decoration: none;
+}
+
+.rogue-product-page .rj-related__price .screen-reader-text {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0,0,0,0);
+    white-space: nowrap;
+}
+
+.rogue-product-page .rj-related__btn {
+    display: block;
+    width: 100%;
+    margin-top: auto;
+    padding: 10px var(--sp-md);
+    background: var(--rj-btn-bg, #000);
+    color: var(--rj-btn-color, #fff);
+    border: none;
+    border-radius: var(--rj-radius, 4px);
+    text-align: center;
+    text-decoration: none;
+    text-transform: uppercase;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    transition: background var(--rj-transition, 0.3s ease);
+    box-sizing: border-box;
+    font-family: var(--rj-font-body, 'Roboto', sans-serif);
+}
+
+.rogue-product-page .rj-related__btn:hover {
+    background: var(--rj-btn-bg-hover, #3a3a3a);
+    color: var(--rj-btn-color, #fff);
+}
+
+@media (max-width: 1280px) {
+    .rogue-product-page .rj-related__grid {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 1024px) {
+    .rogue-product-page .rj-related__grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 768px) {
+    .rogue-product-page .rj-related__grid {
+        gap: var(--sp-md);
+    }
+}
+
+@media (max-width: 480px) {
+    .rogue-product-page .rj-related__grid {
+        grid-template-columns: 1fr;
+    }
+    .rogue-product-page .rj-related__title {
+        font-size: 1.5rem;
+    }
+}
+
+/* ========== RESPONSIVE — MAIN LAYOUT ========== */
+/* --- 1024px: планшет --- */
+@media (max-width: 1024px) {
+    .rogue-product-page .rj-product-main {
+        grid-template-columns: 1fr 1fr;
+        gap: var(--sp-lg);
+    }
+    .rogue-product-page .rj-thumbs {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+/* --- 768px: мобильный (основной breakpoint) --- */
+@media (max-width: 768px) {
+    /* Основная сетка → одна колонка */
+    .rogue-product-page .rj-product-main {
+        grid-template-columns: 1fr;
+        gap: var(--sp-lg);
+    }
+
+    /* Галерея — убираем sticky, становится обычным блоком */
+    .rogue-product-page .rj-gallery-column {
+        position: relative;
+    }
+
+    /* Сайдбар — убираем sticky */
+    .rogue-product-page .rj-sidebar {
+        position: relative;
+        top: auto;
+    }
+
+    /* Заголовок товара */
+    .rogue-product-page .product_title.entry-title {
+        font-size: 24px !important;
+        white-space: normal !important;
+    }
+
+    /* Цена */
+    .rogue-product-page p.price .woocommerce-Price-amount,
+    .rogue-product-page span.price .woocommerce-Price-amount {
+        font-size: 22px;
+    }
+
+    /* Миниатюры — 4 колонки */
+    .rogue-product-page .rj-thumbs {
+        grid-template-columns: repeat(4, 1fr);
+    }
+
+    /* Бейджи (Made USA / Warranty etc.) → одна колонка */
+    .rogue-product-page .rj-badges-grid {
+        grid-template-columns: 1fr !important;
+    }
+
+    /* Вкладки — горизонтальный скролл если не влезают */
+    .rogue-product-page .rj-tabs-nav {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+        flex-wrap: nowrap;
+    }
+
+    .rogue-product-page .rj-tabs-nav::-webkit-scrollbar {
+        display: none;
+    }
+
+    /* Вкладки — уменьшаем padding */
+    .rogue-product-page .rj-tab-link,
+    .rogue-product-page .rj-tab-disabled {
+        padding: 0.6rem 1rem;
+        font-size: 0.95rem;
+    }
+
+    /* Секция qty + кнопка */
+    .rogue-product-page .rj-qty-section {
+        gap: var(--sp-xs);
+    }
+}
+
+/* --- 480px: маленький экран --- */
+@media (max-width: 480px) {
+    /* Заголовок */
+    .rogue-product-page .product_title.entry-title {
+        font-size: 20px !important;
+    }
+
+    /* Цена */
+    .rogue-product-page p.price .woocommerce-Price-amount,
+    .rogue-product-page span.price .woocommerce-Price-amount {
+        font-size: 18px;
+    }
+
+    /* Миниатюры → 3 колонки */
+    .rogue-product-page .rj-thumbs {
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+    /* Вкладки */
+    .rogue-product-page .rj-tab-link,
+    .rogue-product-page .rj-tab-disabled {
+        padding: 0.5rem 0.75rem;
+        font-size: 0.875rem;
+    }
+
+    /* Таблица Filler Bag — горизонтальный скролл */
+    .rogue-product-page .rj-tab-content table {
+        display: block;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        font-size: 12px;
+    }
+}
