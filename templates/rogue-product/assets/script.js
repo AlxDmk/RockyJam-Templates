@@ -18,11 +18,9 @@
                 if (!thumb) return;
 
                 thumb.addEventListener('click', function () {
-                    // Active border
                     thumbItems.forEach(function (t) { t.classList.remove('active'); });
                     item.classList.add('active');
 
-                    // Fade-swap main image
                     var fullSrc = thumb.getAttribute('data-full');
                     var fullAlt = thumb.getAttribute('data-alt') || '';
 
@@ -35,7 +33,6 @@
                 });
             });
 
-            // Open lightbox on main image click
             if (mainImgWrap) {
                 mainImgWrap.style.cursor = 'zoom-in';
                 mainImgWrap.addEventListener('click', function () {
@@ -134,10 +131,14 @@
         var current = 0;
 
         // ---- Touch/swipe state ----
-        var touchStartX = 0;
-        var touchStartY = 0;
-        var touchDeltaX = 0;
-        var SWIPE_THRESHOLD = 40; // px минимум для засчитывания свайпа
+        var touchStartX  = 0;
+        var touchStartY  = 0;
+        var touchDeltaX  = 0;
+        var touchDeltaY  = 0;
+        var swipeDir     = null; // 'h' | 'v' | null — направление фиксируется после 10px движения
+        var DIR_LOCK_PX  = 10;  // px до фиксации направления
+        var SWIPE_H_PX   = 40;  // px минимум для горизонтального свайпа (навигация)
+        var SWIPE_V_PX   = 60;  // px минимум для вертикального свайпа (закрытие)
 
         function collectImages() {
             images = [];
@@ -151,7 +152,6 @@
                     alt   : thumb.getAttribute('data-alt') || thumb.alt || ''
                 });
             });
-            // Fallback: если нет миниатюр — берём только главное изображение
             if (!images.length) {
                 var mainImg = document.getElementById('rj-main-img');
                 if (mainImg) {
@@ -162,6 +162,7 @@
 
         function buildDOM() {
             if (document.getElementById('rj-lightbox')) return;
+
             lb = document.createElement('div');
             lb.id = 'rj-lightbox';
             lb.className = 'rj-lightbox';
@@ -192,44 +193,82 @@
             lbBtnPrev.addEventListener('click', function () { goTo(current - 1); });
             lbBtnNext.addEventListener('click', function () { goTo(current + 1); });
 
-            // Закрыть по клику на фон
             lb.addEventListener('click', function (e) {
                 if (e.target === lb) close();
             });
 
-            // ---- Свайп по главному изображению (мобильные) ----
+            // ---- Свайп по главному изображению ----
+            // passive:false для touchmove — чтобы блокировать скролл страницы во время гориз. свайпа
             lbImgWrap.addEventListener('touchstart', onTouchStart, { passive: true });
-            lbImgWrap.addEventListener('touchmove',  onTouchMove,  { passive: true });
+            lbImgWrap.addEventListener('touchmove',  onTouchMove,  { passive: false });
             lbImgWrap.addEventListener('touchend',   onTouchEnd,   { passive: true });
         }
 
         // ---- Touch handlers ----
         function onTouchStart(e) {
-            var t = e.touches[0];
+            var t    = e.touches[0];
             touchStartX = t.clientX;
             touchStartY = t.clientY;
             touchDeltaX = 0;
+            touchDeltaY = 0;
+            swipeDir    = null;
         }
 
         function onTouchMove(e) {
-            touchDeltaX = e.touches[0].clientX - touchStartX;
+            var t = e.touches[0];
+            touchDeltaX = t.clientX - touchStartX;
+            touchDeltaY = t.clientY - touchStartY;
+
+            // Фиксируем направление после первых DIR_LOCK_PX
+            if (!swipeDir) {
+                var absX = Math.abs(touchDeltaX);
+                var absY = Math.abs(touchDeltaY);
+                if (absX > DIR_LOCK_PX || absY > DIR_LOCK_PX) {
+                    swipeDir = absX >= absY ? 'h' : 'v';
+                }
+            }
+
+            // Блокируем стандартный скролл страницы только если направление фиксировано
+            // (избегаем блокировки вертикального скролла страницы когда направление ещё не определено)
+            if (swipeDir === 'h') {
+                e.preventDefault();
+            }
+
+            // Визуальный отклик: при вертикальном свайпе сдвигаем изображение вниз
+            if (swipeDir === 'v') {
+                var opacity = Math.max(0.3, 1 - Math.abs(touchDeltaY) / 250);
+                lbMainImg.style.transform = 'translateY(' + touchDeltaY + 'px)';
+                lbMainImg.style.opacity   = opacity;
+            }
         }
 
         function onTouchEnd() {
             var absX = Math.abs(touchDeltaX);
-            var absY = Math.abs(touchDeltaX); // используем сохранённый delta
+            var absY = Math.abs(touchDeltaY);
 
-            // Засчитываем только горизонтальный свайп
-            if (absX >= SWIPE_THRESHOLD) {
-                if (touchDeltaX < 0) {
-                    // свайп влево → следующее
-                    goTo(current + 1);
-                } else {
-                    // свайп вправо → предыдущее
-                    goTo(current - 1);
-                }
+            if (swipeDir === 'h' && absX >= SWIPE_H_PX) {
+                // Горизонтальный свайп — навигация
+                goTo(touchDeltaX < 0 ? current + 1 : current - 1);
+            } else if (swipeDir === 'v' && absY >= SWIPE_V_PX) {
+                // Вертикальный свайп — закрыть лайтбокс
+                close();
+            } else {
+                // Недостаточно далеко — возвращаем изображение на место
+                resetImgTransform();
             }
+
             touchDeltaX = 0;
+            touchDeltaY = 0;
+            swipeDir    = null;
+        }
+
+        function resetImgTransform() {
+            lbMainImg.style.transition = 'transform 0.25s ease, opacity 0.25s ease';
+            lbMainImg.style.transform  = 'translateY(0)';
+            lbMainImg.style.opacity    = '1';
+            setTimeout(function () {
+                lbMainImg.style.transition = '';
+            }, 260);
         }
 
         function buildThumbs() {
@@ -250,19 +289,19 @@
             idx = Math.max(0, Math.min(idx, images.length - 1));
             current = idx;
 
-            // Плавная замена изображения
-            lbMainImg.style.opacity = '0.4';
+            // Сбрасываем визуальный отклик от свайпа и меняем изображение
+            lbMainImg.style.transition = '';
+            lbMainImg.style.transform  = 'translateY(0)';
+            lbMainImg.style.opacity    = '0.4';
             lbMainImg.src = images[idx].large;
             lbMainImg.alt = images[idx].alt;
             lbMainImg.onload = function () { lbMainImg.style.opacity = '1'; };
-            // На случай если изображение уже в кеше
             if (lbMainImg.complete) { lbMainImg.style.opacity = '1'; }
 
             var thumbEls = lbThumbsRow.querySelectorAll('.rj-lb-thumb');
             thumbEls.forEach(function (t, i) {
                 t.classList.toggle('is-active', i === idx);
             });
-
             if (thumbEls[idx]) {
                 thumbEls[idx].scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
             }
@@ -282,11 +321,21 @@
         }
 
         function close() {
-            if (lb) lb.hidden = true;
-            document.body.style.overflow = '';
+            // Анимация закрытия: изображение улетает вниз
+            if (lb && !lb.hidden) {
+                lbMainImg.style.transition = 'transform 0.22s ease, opacity 0.22s ease';
+                lbMainImg.style.transform  = 'translateY(60px)';
+                lbMainImg.style.opacity    = '0';
+                setTimeout(function () {
+                    lb.hidden = true;
+                    lbMainImg.style.transition = '';
+                    lbMainImg.style.transform  = 'translateY(0)';
+                    lbMainImg.style.opacity    = '1';
+                    document.body.style.overflow = '';
+                }, 230);
+            }
         }
 
-        // Клавиатура
         document.addEventListener('keydown', function (e) {
             if (!lb || lb.hidden) return;
             if (e.key === 'Escape')     close();
