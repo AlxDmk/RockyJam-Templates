@@ -17,11 +17,11 @@ if ( ! function_exists( 'rj_rogue_breadcrumbs' ) ) {
 		}
 		echo '<nav class="rj-breadcrumb" aria-label="' . esc_attr__( 'Breadcrumb', 'woocommerce' ) . '">';
 		woocommerce_breadcrumb( array(
-			'delimiter'   => '<span class="rj-breadcrumb__sep" aria-hidden="true">/</span>',
-			'wrap_before' => '<ol class="rj-breadcrumb__list" itemscope itemtype="https://schema.org/BreadcrumbList">',
-			'wrap_after'  => '</ol>',
-			'before'      => '<li class="rj-breadcrumb__item" itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">',
-			'after'       => '</li>',
+			'delimiter'   => ' <span class="rj-breadcrumb__sep" aria-hidden="true">/</span> ',
+			'wrap_before' => '<span class="rj-breadcrumb__list woocommerce-breadcrumb">',
+			'wrap_after'  => '</span>',
+			'before'      => '<span class="rj-breadcrumb__item">',
+			'after'       => '</span>',
 			'home'        => _x( 'Home', 'breadcrumb', 'woocommerce' ),
 		) );
 		echo '</nav>';
