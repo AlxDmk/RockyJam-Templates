@@ -1,16 +1,14 @@
 <?php
 /**
  * Rogue Product Template — override of WooCommerce tabs.php
- * Custom tab navigation with green active indicator matching reference design.
  *
  * Tab «reviews»:
- *   — есть отзывы  → обычная кликабельная вкладка + контент WC
- *   — отзывов нет  → <span> (некликабельный, серый) + скрытый пустой div
+ *   — есть отзывы  → список .star-rating + форма
+ *   — отзывов нет  → <span> (некликабельный) + пустой div
  *
- * Для вкладки reviews: отзывы рендерятся напрямую через wp_list_comments()
- * с callback 'woocommerce_comments' — так как делает сам WooCommerce внутри
- * single-product-reviews.php, но без внешнего файлового include.
- * Каждый отзыв рендерится через single-product/review.php с блоком .star-rating.
+ * Отзывы рендерятся через get_comments(post_id) + wp_list_comments(woocommerce_comments).
+ * Это обходит ограничение wp_list_comments() вне comments_template() контекста:
+ * без явной передачи $comments список пуст, даже если отзывы в БД есть.
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -85,73 +83,92 @@ if ( ! empty( $product_tabs ) ) :
                     <?php else : ?>
                         <div id="reviews" class="woocommerce-Reviews">
                             <div id="comments">
-                                <ol class="commentlist">
-                                    <?php
-                                    wp_list_comments(
-                                        apply_filters(
-                                            'woocommerce_product_review_list_args',
-                                            array( 'callback' => 'woocommerce_comments' )
-                                        )
-                                    );
-                                    ?>
-                                </ol>
-                            </div>
-                            <?php if ( get_option( 'woocommerce_review_rating_verification_required' ) === 'no' || wc_customer_bought_product( '', get_current_user_id(), $post->ID ) ) : ?>
-                                <div id="review_form_wrapper">
-                                    <div id="review_form">
+                                <?php
+                                /**
+                                 * Явно получаем отзывы из БД по post_id.
+                                 * wp_list_comments() вне comments_template() не имеет
+                                 * инициализированного $wp_query->comments, поэтому передаём
+                                 * $comments вторым аргументом напрямую.
+                                 */
+                                $post_id       = $post->ID;
+                                $product_reviews = get_comments( array(
+                                    'post_id' => $post_id,
+                                    'status'  => 'approve',
+                                    'type'    => 'review',
+                                    'orderby' => 'comment_date_gmt',
+                                    'order'   => 'ASC',
+                                ) );
+
+                                if ( $product_reviews ) : ?>
+                                    <ol class="commentlist">
                                         <?php
-                                        $commenter    = wp_get_current_commenter();
-                                        $comment_form = array(
-                                            /* translators: %s is product title */
-                                            'title_reply'         => have_comments() ? esc_html__( 'Add a review', 'woocommerce' ) : sprintf( esc_html__( 'Be the first to review &ldquo;%s&rdquo;', 'woocommerce' ), get_the_title() ),
-                                            /* translators: %s is product title */
-                                            'title_reply_to'      => esc_html__( 'Leave a Reply to %s', 'woocommerce' ),
-                                            'title_reply_before'  => '<span id="reply-title" class="comment-reply-title">',
-                                            'title_reply_after'   => '</span>',
-                                            'comment_notes_after' => '',
-                                            'label_submit'        => esc_html__( 'Submit', 'woocommerce' ),
-                                            'logged_in_as'        => '',
-                                            'comment_field'       => '',
-                                        );
-
-                                        $name_email_required = (bool) get_option( 'require_name_email', 1 );
-                                        $fields              = array(
-                                            'author' => array(
-                                                'label'    => __( 'Name', 'woocommerce' ),
-                                                'type'     => 'text',
-                                                'value'    => $commenter['comment_author'],
-                                                'required' => $name_email_required,
+                                        wp_list_comments(
+                                            apply_filters(
+                                                'woocommerce_product_review_list_args',
+                                                array( 'callback' => 'woocommerce_comments' )
                                             ),
-                                            'email'  => array(
-                                                'label'    => __( 'Email', 'woocommerce' ),
-                                                'type'     => 'email',
-                                                'value'    => $commenter['comment_author_email'],
-                                                'required' => $name_email_required,
-                                            ),
+                                            $product_reviews
                                         );
-
-                                        $comment_form['fields'] = array();
-                                        foreach ( $fields as $key_f => $field ) {
-                                            $comment_form['fields'][ $key_f ] = '<p class="comment-form-' . esc_attr( $key_f ) . '"><label for="' . esc_attr( $key_f ) . '">' . esc_html( $field['label'] ) . ( $field['required'] ? '&nbsp;<span class="required">*</span>' : '' ) . '</label><input id="' . esc_attr( $key_f ) . '" name="' . esc_attr( $key_f ) . '" type="' . esc_attr( $field['type'] ) . '" value="' . esc_attr( $field['value'] ) . '" size="30" ' . ( $field['required'] ? 'required' : '' ) . ' /></p>';
-                                        }
-
-                                        if ( wc_review_ratings_enabled() ) {
-                                            $comment_form['comment_field'] = '<div class="comment-form-rating"><label for="rating">' . esc_html__( 'Your rating', 'woocommerce' ) . ( wc_review_ratings_required() ? '&nbsp;<span class="required">*</span>' : '' ) . '</label><select name="rating" id="rating" required>
-                                                <option value="">' . esc_html__( 'Rate&hellip;', 'woocommerce' ) . '</option>
-                                                <option value="5">' . esc_html__( 'Perfect', 'woocommerce' ) . '</option>
-                                                <option value="4">' . esc_html__( 'Good', 'woocommerce' ) . '</option>
-                                                <option value="3">' . esc_html__( 'Average', 'woocommerce' ) . '</option>
-                                                <option value="2">' . esc_html__( 'Not that bad', 'woocommerce' ) . '</option>
-                                                <option value="1">' . esc_html__( 'Very poor', 'woocommerce' ) . '</option>
-                                            </select></div>';
-                                            $comment_form['comment_field'] .= '<p class="comment-form-comment"><label for="comment">' . esc_html__( 'Your review', 'woocommerce' ) . '&nbsp;<span class="required">*</span></label><textarea id="comment" name="comment" cols="45" rows="8" required></textarea></p>';
-                                        }
-
-                                        comment_form( apply_filters( 'woocommerce_product_review_comment_form_args', $comment_form ) );
                                         ?>
-                                    </div>
+                                    </ol>
+                                <?php endif; ?>
+                            </div>
+
+                            <div id="review_form_wrapper">
+                                <div id="review_form">
+                                    <?php
+                                    $commenter    = wp_get_current_commenter();
+                                    $comment_form = array(
+                                        'title_reply'         => $product_reviews
+                                            ? esc_html__( 'Add a review', 'woocommerce' )
+                                            : sprintf( esc_html__( 'Be the first to review &ldquo;%s&rdquo;', 'woocommerce' ), get_the_title() ),
+                                        'title_reply_to'      => esc_html__( 'Leave a Reply to %s', 'woocommerce' ),
+                                        'title_reply_before'  => '<span id="reply-title" class="comment-reply-title">',
+                                        'title_reply_after'   => '</span>',
+                                        'comment_notes_after' => '',
+                                        'label_submit'        => esc_html__( 'Submit', 'woocommerce' ),
+                                        'logged_in_as'        => '',
+                                        'comment_field'       => '',
+                                    );
+
+                                    $name_email_required = (bool) get_option( 'require_name_email', 1 );
+                                    $fields              = array(
+                                        'author' => array(
+                                            'label'    => __( 'Name', 'woocommerce' ),
+                                            'type'     => 'text',
+                                            'value'    => $commenter['comment_author'],
+                                            'required' => $name_email_required,
+                                        ),
+                                        'email'  => array(
+                                            'label'    => __( 'Email', 'woocommerce' ),
+                                            'type'     => 'email',
+                                            'value'    => $commenter['comment_author_email'],
+                                            'required' => $name_email_required,
+                                        ),
+                                    );
+
+                                    $comment_form['fields'] = array();
+                                    foreach ( $fields as $key_f => $field ) {
+                                        $comment_form['fields'][ $key_f ] = '<p class="comment-form-' . esc_attr( $key_f ) . '"><label for="' . esc_attr( $key_f ) . '">' . esc_html( $field['label'] ) . ( $field['required'] ? '&nbsp;<span class="required">*</span>' : '' ) . '</label><input id="' . esc_attr( $key_f ) . '" name="' . esc_attr( $key_f ) . '" type="' . esc_attr( $field['type'] ) . '" value="' . esc_attr( $field['value'] ) . '" size="30" ' . ( $field['required'] ? 'required' : '' ) . ' /></p>';
+                                    }
+
+                                    if ( wc_review_ratings_enabled() ) {
+                                        $comment_form['comment_field']  = '<div class="comment-form-rating"><label for="rating">' . esc_html__( 'Your rating', 'woocommerce' ) . ( wc_review_ratings_required() ? '&nbsp;<span class="required">*</span>' : '' ) . '</label>';
+                                        $comment_form['comment_field'] .= '<select name="rating" id="rating" required>';
+                                        $comment_form['comment_field'] .= '<option value="">' . esc_html__( 'Rate&hellip;', 'woocommerce' ) . '</option>';
+                                        $comment_form['comment_field'] .= '<option value="5">' . esc_html__( 'Perfect', 'woocommerce' ) . '</option>';
+                                        $comment_form['comment_field'] .= '<option value="4">' . esc_html__( 'Good', 'woocommerce' ) . '</option>';
+                                        $comment_form['comment_field'] .= '<option value="3">' . esc_html__( 'Average', 'woocommerce' ) . '</option>';
+                                        $comment_form['comment_field'] .= '<option value="2">' . esc_html__( 'Not that bad', 'woocommerce' ) . '</option>';
+                                        $comment_form['comment_field'] .= '<option value="1">' . esc_html__( 'Very poor', 'woocommerce' ) . '</option>';
+                                        $comment_form['comment_field'] .= '</select></div>';
+                                        $comment_form['comment_field'] .= '<p class="comment-form-comment"><label for="comment">' . esc_html__( 'Your review', 'woocommerce' ) . '&nbsp;<span class="required">*</span></label><textarea id="comment" name="comment" cols="45" rows="8" required></textarea></p>';
+                                    }
+
+                                    comment_form( apply_filters( 'woocommerce_product_review_comment_form_args', $comment_form ) );
+                                    ?>
                                 </div>
-                            <?php endif; ?>
+                            </div>
                         </div>
                     <?php endif; ?>
                 <?php elseif ( isset( $product_tab['callback'] ) && is_callable( $product_tab['callback'] ) ) : ?>
