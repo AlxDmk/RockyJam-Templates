@@ -10,6 +10,11 @@
  * ВАЖНО: WooCommerce удаляет вкладку reviews из $product_tabs когда
  * отзывы отключены на товаре или глобально. Мы принудительно
  * добавляем её обратно, чтобы она всегда отображалась в nav.
+ *
+ * Колбэк 'woocommerce_product_reviews_tab' — стандартный WC-колбэк,
+ * который вызывает comments_template() внутри себя правильным образом
+ * и не триггерит Deprecated notice в отличие от прямого вызова
+ * 'comments_template' как строки-колбэка.
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -26,7 +31,7 @@ if ( ! empty( $product_tabs ) ) :
         $product_tabs['reviews'] = array(
             'title'    => __( 'Отзывы', 'woocommerce' ),
             'priority' => 30,
-            'callback' => 'comments_template',
+            'callback' => 'woocommerce_product_reviews_tab',
         );
     }
 
