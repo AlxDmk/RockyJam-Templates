@@ -74,6 +74,68 @@
     font-family: "WooCommerce" !important;
 }
 
+/* ========== BREADCRUMBS ========== */
+.rogue-product-page .rj-breadcrumb {
+    padding: 12px 0 10px;
+    margin: 0 0 8px;
+    border-bottom: 1px solid var(--rj-border, #ddd);
+    font-size: 12px;
+    line-height: 1.4;
+    color: var(--rj-text-muted, #666);
+    font-family: var(--rj-font-body, 'Roboto', sans-serif);
+}
+
+/* WooCommerce рендерит breadcrumbs как span-ы внутри одного блока */
+.rogue-product-page .rj-breadcrumb .woocommerce-breadcrumb {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: transparent !important;
+    font-size: 12px !important;
+    color: var(--rj-text-muted, #666) !important;
+    list-style: none;
+}
+
+/* Ссылки в крошках */
+.rogue-product-page .rj-breadcrumb .woocommerce-breadcrumb a {
+    color: var(--rj-text-muted, #666);
+    text-decoration: none;
+    transition: color var(--rj-transition, 0.3s ease);
+    font-size: 12px;
+}
+
+.rogue-product-page .rj-breadcrumb .woocommerce-breadcrumb a:hover {
+    color: var(--rj-accent, #c41e2e);
+    text-decoration: none;
+}
+
+/* Разделитель / между крошками */
+.rogue-product-page .rj-breadcrumb .woocommerce-breadcrumb .woocommerce-breadcrumb__sep,
+.rogue-product-page .rj-breadcrumb .woocommerce-breadcrumb > span:not(:last-child)::after {
+    content: none; /* сброс возможных дефолтов */
+}
+
+/* Текущая страница (последний элемент) — чуть темнее */
+.rogue-product-page .rj-breadcrumb .woocommerce-breadcrumb span:last-child,
+.rogue-product-page .rj-breadcrumb .woocommerce-breadcrumb > span:last-of-type {
+    color: var(--rj-text, #1a1a1a);
+}
+
+/* Мобильный: чуть уменьшаем и разрешаем перенос */
+@media (max-width: 768px) {
+    .rogue-product-page .rj-breadcrumb {
+        font-size: 11px;
+        padding: 10px 0 8px;
+    }
+    .rogue-product-page .rj-breadcrumb .woocommerce-breadcrumb {
+        font-size: 11px !important;
+        flex-wrap: wrap;
+    }
+}
+
 /* ========== 60/40 GRID ========== */
 .rj-product-main {
     display: grid;
