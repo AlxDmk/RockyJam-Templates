@@ -11,10 +11,10 @@
  * отзывы отключены на товаре или глобально. Мы принудительно
  * добавляем её обратно, чтобы она всегда отображалась в nav.
  *
- * Колбэк 'woocommerce_product_reviews_tab' — стандартный WC-колбэк,
- * который вызывает comments_template() внутри себя правильным образом
- * и не триггерит Deprecated notice в отличие от прямого вызова
- * 'comments_template' как строки-колбэка.
+ * Колбэк reviews НЕ передаётся строкой — это вызывало Deprecated notice
+ * как для 'comments_template' так и для 'woocommerce_product_reviews_tab'.
+ * Вместо этого для вкладки reviews рендеринг делается inline через
+ * прямой вызов comments_template() внутри PHP-блока шаблона.
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -27,12 +27,16 @@ if ( ! empty( $product_tabs ) ) :
     $review_count = ( $product instanceof WC_Product ) ? $product->get_review_count() : 0;
 
     // Если WooCommerce убрал вкладку reviews — добавляем её принудительно.
+    // callback намеренно пустой — рендер делается inline ниже.
     if ( ! isset( $product_tabs['reviews'] ) ) {
         $product_tabs['reviews'] = array(
             'title'    => __( 'Отзывы', 'woocommerce' ),
             'priority' => 30,
-            'callback' => 'woocommerce_product_reviews_tab',
+            'callback' => null,
         );
+    } else {
+        // Убираем стандартный строковый колбэк WC чтобы не было deprecated.
+        $product_tabs['reviews']['callback'] = null;
     }
 
     // Сортируем по priority как это делает WC.
@@ -86,9 +90,13 @@ if ( ! empty( $product_tabs ) ) :
                 id="tab-<?php echo esc_attr( $key ); ?>"
                 <?php echo $is_disabled ? 'aria-hidden="true"' : ''; ?>
             >
-                <?php if ( $is_disabled ) : ?>
-                    <p class="rj-no-reviews"><?php esc_html_e( 'Отзывов пока нет.', 'woocommerce' ); ?></p>
-                <?php elseif ( isset( $product_tab['callback'] ) ) : ?>
+                <?php if ( $is_reviews ) : ?>
+                    <?php if ( $is_disabled ) : ?>
+                        <p class="rj-no-reviews"><?php esc_html_e( 'Отзывов пока нет.', 'woocommerce' ); ?></p>
+                    <?php else : ?>
+                        <?php comments_template(); ?>
+                    <?php endif; ?>
+                <?php elseif ( isset( $product_tab['callback'] ) && is_callable( $product_tab['callback'] ) ) : ?>
                     <?php call_user_func( $product_tab['callback'], $key, $product_tab ); ?>
                 <?php endif; ?>
             </div>
