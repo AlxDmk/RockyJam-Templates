@@ -1,9 +1,8 @@
 <?php
-
 namespace RockyJamTemplates\Core;
 
 if ( ! defined( 'ABSPATH' ) ) {
-	exit;
+ exit;
 }
 
 /**
@@ -12,348 +11,285 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * Config structure (hooks-config.json):
  * [
- *   {
- *     "hook": "woocommerce_single_product_summary",
- *     "callbacks": [
- *       {
- *         "id":       "woocommerce_template_single_title",
- *         "function": "woocommerce_template_single_title",
- *         "priority": 5,
- *         "enabled":  true,
- *         "custom":   false,
- *         "label":    "Product Title",
- *         "code":     ""       // only for custom callbacks
- *       },
- *       ...
- *     ]
- *   },
- *   ...
+ * {
+ * "hook": "woocommerce_single_product_summary",
+ * "callbacks": [
+ * {
+ * "id": "woocommerce_template_single_title",
+ * "function": "woocommerce_template_single_title",
+ * "priority": 5,
+ * "enabled": true,
+ * "custom": false,
+ * "label": "Product Title",
+ * "code": "" // only for custom callbacks
+ * },
+ * ...
+ * ]
+ * },
+ * ...
  * ]
  *
  * @package RockyJamTemplates
  */
 class HooksConfig {
+ private string $template_dir;
+ private string $config_path;
+ private string $hooks_php_path;
+ public function __construct( string $slug ) {
+  $this->template_dir = TemplateManager::templates_dir() . $slug . '/';
+  $this->config_path = $this->template_dir . 'hooks-config.json';
+  $this->hooks_php_path = $this->template_dir . 'hooks.php';
+ }
 
-	private string $template_dir;
-	private string $config_path;
-	private string $hooks_php_path;
+ // ------------------------------------------------------------------
+ // Registry helpers
+ // ------------------------------------------------------------------
 
-	public function __construct( string $slug ) {
-		$this->template_dir   = TemplateManager::templates_dir() . $slug . '/';
-		$this->config_path    = $this->template_dir . 'hooks-config.json';
-		$this->hooks_php_path = $this->template_dir . 'hooks.php';
-	}
+ /**
+  * Returns the path to the WC hooks registry JSON file.
+  */
+ public static function registry_path(): string {
+  return RJT_PATH . 'data/wc-hooks-registry.json';
+ }
 
-	// ------------------------------------------------------------------
-	// Registry helpers
-	// ------------------------------------------------------------------
+ /**
+  * Loads the WC hooks registry.
+  *
+  * @return array[] List of hook definitions.
+  */
+ public static function load_registry(): array {
+  $path = self::registry_path();
+  if ( ! file_exists( $path ) ) {
+  return [];
+  }
+  $json = file_get_contents( $path );
+  $data = json_decode( $json, true );
+  return is_array( $data['hooks'] ?? null ) ? $data['hooks'] : [];
+ }
 
-	/**
-	 * Returns the path to the WC hooks registry JSON file.
-	 */
-	public static function registry_path(): string {
-		return RJT_PATH . 'data/wc-hooks-registry.json';
-	}
+ // ------------------------------------------------------------------
+ // Read
+ // ------------------------------------------------------------------
 
-	/**
-	 * Loads the WC hooks registry with a transient cache layer.
-	 *
-	 * Performance improvement: avoids repeated disk I/O on every admin page load.
-	 * Transient is invalidated on plugin update via rockyjam_flush_registry_cache().
-	 *
-	 * @return array[] List of hook definitions.
-	 */
-	public static function load_registry(): array {
-		$cache_key = 'rjt_hooks_registry';
-		$cached    = get_transient( $cache_key );
+ /**
+  * Reads hooks-config.json for this template.
+  * If it doesn't exist, returns the default config built from the registry.
+  *
+  * @return array[]
+  */
+ public function read(): array {
+  if ( file_exists( $this->config_path ) ) {
+  $json = file_get_contents( $this->config_path );
+  $data = json_decode( $json, true );
+  if ( is_array( $data ) ) {
+  return $data;
+  }
+  }
+  return $this->build_default_config();
+ }
 
-		if ( false !== $cached && is_array( $cached ) ) {
-			return $cached;
-		}
+ /**
+  * Builds the initial config from the registry (all standard hooks / callbacks).
+  *
+  * @return array[]
+  */
+ private function build_default_config(): array {
+  $registry = self::load_registry();
+  $config = [];
+  foreach ( $registry as $hook_def ) {
+  $entry = [
+  'hook' => $hook_def['hook'],
+  'callbacks' => [],
+  ];
+  foreach ( $hook_def['callbacks'] ?? [] as $cb ) {
+  $entry['callbacks'][] = [
+  'id' => $cb['id'],
+  'function' => $cb['function'],
+  'priority' => (int) $cb['priority'],
+  'original_priority' => (int) $cb['priority'],
+  'enabled' => (bool) $cb['enabled'],
+  'custom' => false,
+  'label' => $cb['label'] ?? $cb['function'],
+  'code' => '',
+  ];
+  }
+  $config[] = $entry;
+  }
+  return $config;
+ }
 
-		$path = self::registry_path();
-		if ( ! file_exists( $path ) ) {
-			return [];
-		}
+ // ------------------------------------------------------------------
+ // Write
+ // ------------------------------------------------------------------
 
-		$json = file_get_contents( $path ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
-		$data = json_decode( $json, true );
-		$result = is_array( $data['hooks'] ?? null ) ? $data['hooks'] : [];
+ /**
+  * Saves a config array to hooks-config.json.
+  *
+  * @param array[] $config
+  * @return true|\WP_Error
+  */
+ public function save( array $config ) {
+  $config = $this->sanitize_config( $config );
+  $json = wp_json_encode( $config, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE );
+  if ( false === file_put_contents( $this->config_path, $json ) ) {
+  return new \WP_Error( 'write_error', __( 'Could not write hooks-config.json. Check permissions.', 'rockyjam-templates' ) );
+  }
+  return $this->regenerate_hooks_php( $config );
+ }
 
-		set_transient( $cache_key, $result, HOUR_IN_SECONDS );
+ // ------------------------------------------------------------------
+ // PHP generation
+ // ------------------------------------------------------------------
 
-		return $result;
-	}
+ /**
+  * Regenerates hooks.php from the given config.
+  *
+  * @param array[] $config
+  * @return true|\WP_Error
+  */
+ public function regenerate_hooks_php( array $config ): bool|\WP_Error {
+  $lines = [];
+  $lines[] = '<?php';
+  $lines[] = '/**';
+  $lines[] = ' * Auto-generated by RockyJam Hook Manager. Do not edit manually.';
+  $lines[] = ' * Edit via: Templates -> [template] -> Hooks';
+  $lines[] = ' */';
+  $lines[] = '';
+  $lines[] = "if ( ! defined( 'ABSPATH' ) ) { exit; }";
+  $lines[] = '';
+  foreach ( $config as $hook_entry ) {
+  $hook = $hook_entry['hook'] ?? '';
+  if ( ! $hook ) {
+  continue;
+  }
+  $callbacks = $hook_entry['callbacks'] ?? [];
+  if ( empty( $callbacks ) ) {
+  continue;
+  }
+  $lines[] = '// Hook: ' . $hook;
+  foreach ( $callbacks as $cb ) {
+  $priority = (int) ( $cb['priority'] ?? 10 );
+  $original_priority = (int) ( $cb['original_priority'] ?? $priority );
+  $enabled = (bool) ( $cb['enabled'] ?? true );
+  $custom = (bool) ( $cb['custom'] ?? false );
+  $func = $cb['function'] ?? '';
+  $code = $cb['code'] ?? '';
+  $id = $cb['id'] ?? '';
+  if ( $custom ) {
+  if ( ! $enabled || ! $func || ! $code ) {
+  continue;
+  }
+  $safe_code = $this->indent_code( trim( $code ) );
+  $lines[] = "if ( ! function_exists( '" . $func . "' ) ) {";
+  $lines[] = "\tfunction " . $func . '() {';
+  $lines[] = $safe_code;
+  $lines[] = "\t}";
+  $lines[] = '}';
+  $lines[] = "add_action( '" . $hook . "', '" . $func . "', " . $priority . " );";
+  } else {
+  if ( ! $func ) {
+  continue;
+  }
+  $is_addon = str_starts_with( $id, 'addon_' );
+  $lines[] = "remove_action( '" . $hook . "', '" . $func . "', " . $original_priority . " );";
+  if ( $enabled ) {
+  if ( $is_addon ) {
+  $lines[] = "if ( function_exists( '" . $func . "' ) ) {";
+  $lines[] = "\t" . "add_action( '" . $hook . "', '" . $func . "', " . $priority . " );";
+  $lines[] = '}';
+  } else {
+  $lines[] = "add_action( '" . $hook . "', '" . $func . "', " . $priority . " );";
+  }
+  }
+  }
+  }
+  $lines[] = '';
+  }
+  $php = implode( "\n", $lines );
+  if ( false === file_put_contents( $this->hooks_php_path, $php ) ) {
+  return new \WP_Error( 'write_error', __( 'Could not write hooks.php. Check permissions.', 'rockyjam-templates' ) );
+  }
+  return true;
+ }
 
-	// ------------------------------------------------------------------
-	// Read
-	// ------------------------------------------------------------------
+ // ------------------------------------------------------------------
+ // Sanitization
+ // ------------------------------------------------------------------
 
-	/**
-	 * Reads hooks-config.json for this template.
-	 * If it doesn't exist, returns the default config built from the registry.
-	 *
-	 * @return array[]
-	 */
-	public function read(): array {
-		if ( file_exists( $this->config_path ) ) {
-			$json = file_get_contents( $this->config_path ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
-			$data = json_decode( $json, true );
-			if ( is_array( $data ) ) {
-				return $data;
-			}
-		}
-		return $this->build_default_config();
-	}
+ /**
+  * Sanitizes a config array received from the browser.
+  *
+  * @param array[] $config
+  * @return array[]
+  */
+ private function sanitize_config( array $config ): array {
+  $clean = [];
+  $registry_priority = [];
+  foreach ( self::load_registry() as $hook_def ) {
+  foreach ( $hook_def['callbacks'] ?? [] as $rcb ) {
+  if ( ! empty( $rcb['function'] ) ) {
+  $registry_priority[ $rcb['function'] ] = (int) $rcb['priority'];
+  }
+  }
+  }
+  foreach ( $config as $hook_entry ) {
+  if ( ! is_array( $hook_entry ) ) {
+  continue;
+  }
+  $hook = sanitize_key( $hook_entry['hook'] ?? '' );
+  if ( ! $hook ) {
+  continue;
+  }
+  $entry = [
+  'hook' => $hook,
+  'callbacks' => [],
+  ];
+  foreach ( $hook_entry['callbacks'] ?? [] as $cb ) {
+  if ( ! is_array( $cb ) ) {
+  continue;
+  }
+  $custom = (bool) ( $cb['custom'] ?? false );
+  $func = sanitize_key( $cb['function'] ?? '' );
+  $priority = max( 1, min( 999, (int) ( $cb['priority'] ?? 10 ) ) );
+  $enabled = (bool) ( $cb['enabled'] ?? true );
+  $label = sanitize_text_field( $cb['label'] ?? $func );
+  $id = sanitize_key( $cb['id'] ?? $func );
+  $code = $cb['code'] ?? '';
+  if ( ! $func ) {
+  continue;
+  }
+  if ( $custom ) {
+  $original_priority = $priority;
+  } elseif ( isset( $registry_priority[ $func ] ) ) {
+  $original_priority = $registry_priority[ $func ];
+  } else {
+  $original_priority = max( 1, min( 999, (int) ( $cb['original_priority'] ?? $priority ) ) );
+  }
+  $entry['callbacks'][] = [
+  'id' => $id,
+  'function' => $func,
+  'priority' => $priority,
+  'original_priority' => $original_priority,
+  'enabled' => $enabled,
+  'custom' => $custom,
+  'label' => $label,
+  'code' => $code,
+  ];
+  }
+  $clean[] = $entry;
+  }
+  return $clean;
+ }
 
-	/**
-	 * Builds the initial config from the registry (all standard hooks / callbacks).
-	 *
-	 * @return array[]
-	 */
-	private function build_default_config(): array {
-		$registry = self::load_registry();
-		$config   = [];
-		foreach ( $registry as $hook_def ) {
-			$entry = [
-				'hook'      => $hook_def['hook'],
-				'callbacks' => [],
-			];
-			foreach ( $hook_def['callbacks'] ?? [] as $cb ) {
-				$entry['callbacks'][] = [
-					'id'               => $cb['id'],
-					'function'         => $cb['function'],
-					'priority'         => (int) $cb['priority'],
-					'original_priority' => (int) $cb['priority'],
-					'enabled'          => (bool) $cb['enabled'],
-					'custom'           => false,
-					'label'            => $cb['label'] ?? $cb['function'],
-					'code'             => '',
-				];
-			}
-			$config[] = $entry;
-		}
-		return $config;
-	}
+ // ------------------------------------------------------------------
+ // Helpers
+ // ------------------------------------------------------------------
 
-	// ------------------------------------------------------------------
-	// Write
-	// ------------------------------------------------------------------
-
-	/**
-	 * Saves a config array to hooks-config.json.
-	 *
-	 * FIX H-5: Added explicit capability check at the method level.
-	 * Even though the AJAX handler checks the nonce, this guard ensures
-	 * that if save() is ever called from a non-AJAX context (e.g. CLI,
-	 * WP-Cron, or a future code path) it will refuse to write without
-	 * the manage_options capability.
-	 *
-	 * @param array[] $config
-	 * @return true|\WP_Error
-	 */
-	public function save( array $config ) {
-		if ( ! current_user_can( 'manage_options' ) ) {
-			return new \WP_Error(
-				'permission_denied',
-				__( 'You do not have permission to modify hook configurations.', 'rockyjam-templates' )
-			);
-		}
-
-		$config = $this->sanitize_config( $config );
-		$json   = wp_json_encode( $config, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE );
-
-		if ( false === file_put_contents( $this->config_path, $json ) ) { // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents
-			return new \WP_Error( 'write_error', __( 'Could not write hooks-config.json. Check permissions.', 'rockyjam-templates' ) );
-		}
-
-		return $this->regenerate_hooks_php( $config );
-	}
-
-	// ------------------------------------------------------------------
-	// PHP generation
-	// ------------------------------------------------------------------
-
-	/**
-	 * Regenerates hooks.php from the given config.
-	 *
-	 * @param array[] $config
-	 * @return true|\WP_Error
-	 */
-	public function regenerate_hooks_php( array $config ): bool|\WP_Error {
-		$lines   = [];
-		$lines[] = '<?php';
-		$lines[] = '/**';
-		$lines[] = ' * Auto-generated by RockyJam Hook Manager. Do not edit manually.';
-		$lines[] = ' * Edit via: Templates → [template] → Hooks';
-		$lines[] = ' */';
-		$lines[] = '';
-		$lines[] = 'if ( ! defined( \'ABSPATH\' ) ) { exit; }';
-		$lines[] = '';
-
-		foreach ( $config as $hook_entry ) {
-			$hook = $hook_entry['hook'] ?? '';
-			if ( ! $hook ) {
-				continue;
-			}
-
-			$callbacks = $hook_entry['callbacks'] ?? [];
-			if ( empty( $callbacks ) ) {
-				continue;
-			}
-
-			$lines[] = '// Hook: ' . $hook;
-
-			foreach ( $callbacks as $cb ) {
-				$priority          = (int) ( $cb['priority']          ?? 10 );
-				$original_priority = (int) ( $cb['original_priority'] ?? $priority );
-				$enabled           = (bool) ( $cb['enabled']          ?? true );
-				$custom            = (bool) ( $cb['custom']           ?? false );
-				$func              = $cb['function'] ?? '';
-				$code              = $cb['code']     ?? '';
-				$id                = $cb['id']       ?? '';
-
-				if ( $custom ) {
-					// ── Custom inline function ────────────────────────────────────────────
-					if ( ! $enabled || ! $func || ! $code ) {
-						continue;
-					}
-					// Strip any accidental PHP open tags from user-submitted code.
-					$code      = preg_replace( '/^\s*<\?php\s*/i', '', trim( $code ) );
-					$safe_code = $this->indent_code( $code );
-					$lines[]   = 'if ( ! function_exists( \'' . $func . '\' ) ) {';
-					$lines[]   = "\tfunction " . $func . '() {';
-					$lines[]   = $safe_code;
-					$lines[]   = "\t}";
-					$lines[]   = '}';
-					$lines[]   = 'add_action( \'' . $hook . '\', \'' . $func . '\', ' . $priority . ' );';
-				} else {
-					// ── Standard / Addon callback ─────────────────────────────────────────
-					if ( ! $func ) {
-						continue;
-					}
-					$is_addon = str_starts_with( $id, 'addon_' );
-					$lines[] = 'remove_action( \'' . $hook . '\', \'' . $func . '\', ' . $original_priority . ' );';
-					if ( $enabled ) {
-						if ( $is_addon ) {
-							$lines[] = 'if ( function_exists( \'' . $func . '\' ) ) {';
-							$lines[] = "\t" . 'add_action( \'' . $hook . '\', \'' . $func . '\', ' . $priority . ' );';
-							$lines[] = '}';
-						} else {
-							$lines[] = 'add_action( \'' . $hook . '\', \'' . $func . '\', ' . $priority . ' );';
-						}
-					}
-				}
-			}
-
-			$lines[] = '';
-		}
-
-		$php = implode( "\n", $lines );
-
-		if ( false === file_put_contents( $this->hooks_php_path, $php ) ) { // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents
-			return new \WP_Error( 'write_error', __( 'Could not write hooks.php. Check permissions.', 'rockyjam-templates' ) );
-		}
-
-		return true;
-	}
-
-	// ------------------------------------------------------------------
-	// Sanitization
-	// ------------------------------------------------------------------
-
-	/**
-	 * Sanitizes a config array received from the browser.
-	 *
-	 * @param array[] $config
-	 * @return array[]
-	 */
-	private function sanitize_config( array $config ): array {
-		$clean = [];
-
-		// Build a lookup: function_name => original WC priority from registry.
-		$registry_priority = [];
-		foreach ( self::load_registry() as $hook_def ) {
-			foreach ( $hook_def['callbacks'] ?? [] as $rcb ) {
-				if ( ! empty( $rcb['function'] ) ) {
-					$registry_priority[ $rcb['function'] ] = (int) $rcb['priority'];
-				}
-			}
-		}
-
-		foreach ( $config as $hook_entry ) {
-			if ( ! is_array( $hook_entry ) ) {
-				continue;
-			}
-			$hook = sanitize_key( $hook_entry['hook'] ?? '' );
-			if ( ! $hook ) {
-				continue;
-			}
-
-			$entry = [
-				'hook'      => $hook,
-				'callbacks' => [],
-			];
-
-			foreach ( $hook_entry['callbacks'] ?? [] as $cb ) {
-				if ( ! is_array( $cb ) ) {
-					continue;
-				}
-				$custom   = (bool) ( $cb['custom']  ?? false );
-				$func     = sanitize_key( $cb['function'] ?? '' );
-				$priority = max( 1, min( 999, (int) ( $cb['priority'] ?? 10 ) ) );
-				$enabled  = (bool) ( $cb['enabled'] ?? true );
-				$label    = sanitize_text_field( $cb['label'] ?? $func );
-				$id       = sanitize_key( $cb['id'] ?? $func );
-
-				// FIX M-4: Strip accidental PHP open tags from user-submitted code.
-				$code = preg_replace( '/^\s*<\?php\s*/i', '', $cb['code'] ?? '' );
-
-				if ( ! $func ) {
-					continue;
-				}
-
-				if ( $custom ) {
-					$original_priority = $priority;
-				} elseif ( isset( $registry_priority[ $func ] ) ) {
-					$original_priority = $registry_priority[ $func ];
-				} else {
-					$original_priority = max( 1, min( 999, (int) ( $cb['original_priority'] ?? $priority ) ) );
-				}
-
-				$entry['callbacks'][] = [
-					'id'                => $id,
-					'function'          => $func,
-					'priority'          => $priority,
-					'original_priority' => $original_priority,
-					'enabled'           => $enabled,
-					'custom'            => $custom,
-					'label'             => $label,
-					'code'              => $code,
-				];
-			}
-
-			$clean[] = $entry;
-		}
-
-		return $clean;
-	}
-
-	// ------------------------------------------------------------------
-	// Helpers
-	// ------------------------------------------------------------------
-
-	/**
-	 * Indents code lines by one tab (for function body).
-	 *
-	 * @param string $code Raw code string (may be empty).
-	 * @return string Indented code, or empty string if $code is empty.
-	 */
-	private function indent_code( string $code ): string {
-		if ( '' === $code ) {
-			return '';
-		}
-		$lines = explode( "\n", $code );
-		return implode( "\n", array_map( fn( $l ) => "\t" . $l, $lines ) );
-	}
+ /**
+  * Indents code lines by one tab (for function body).
+  */
+ private function indent_code( string $code ): string {
+  $lines = explode( "\n", $code );
+  return implode( "\n", array_map( fn( $l ) => "\t" . $l, $lines ) );
+ }
 }
