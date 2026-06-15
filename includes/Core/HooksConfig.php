@@ -56,18 +56,33 @@ class HooksConfig {
 	}
 
 	/**
-	 * Loads the WC hooks registry.
+	 * Loads the WC hooks registry with a transient cache layer.
+	 *
+	 * Performance improvement: avoids repeated disk I/O on every admin page load.
+	 * Transient is invalidated on plugin update via rockyjam_flush_registry_cache().
 	 *
 	 * @return array[] List of hook definitions.
 	 */
 	public static function load_registry(): array {
+		$cache_key = 'rjt_hooks_registry';
+		$cached    = get_transient( $cache_key );
+
+		if ( false !== $cached && is_array( $cached ) ) {
+			return $cached;
+		}
+
 		$path = self::registry_path();
 		if ( ! file_exists( $path ) ) {
 			return [];
 		}
-		$json = file_get_contents( $path );
+
+		$json = file_get_contents( $path ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
 		$data = json_decode( $json, true );
-		return is_array( $data['hooks'] ?? null ) ? $data['hooks'] : [];
+		$result = is_array( $data['hooks'] ?? null ) ? $data['hooks'] : [];
+
+		set_transient( $cache_key, $result, HOUR_IN_SECONDS );
+
+		return $result;
 	}
 
 	// ------------------------------------------------------------------
@@ -82,7 +97,7 @@ class HooksConfig {
 	 */
 	public function read(): array {
 		if ( file_exists( $this->config_path ) ) {
-			$json = file_get_contents( $this->config_path );
+			$json = file_get_contents( $this->config_path ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
 			$data = json_decode( $json, true );
 			if ( is_array( $data ) ) {
 				return $data;
@@ -128,14 +143,27 @@ class HooksConfig {
 	/**
 	 * Saves a config array to hooks-config.json.
 	 *
+	 * FIX H-5: Added explicit capability check at the method level.
+	 * Even though the AJAX handler checks the nonce, this guard ensures
+	 * that if save() is ever called from a non-AJAX context (e.g. CLI,
+	 * WP-Cron, or a future code path) it will refuse to write without
+	 * the manage_options capability.
+	 *
 	 * @param array[] $config
 	 * @return true|\WP_Error
 	 */
 	public function save( array $config ) {
+		if ( ! current_user_can( 'manage_options' ) ) {
+			return new \WP_Error(
+				'permission_denied',
+				__( 'You do not have permission to modify hook configurations.', 'rockyjam-templates' )
+			);
+		}
+
 		$config = $this->sanitize_config( $config );
 		$json   = wp_json_encode( $config, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE );
 
-		if ( false === file_put_contents( $this->config_path, $json ) ) {
+		if ( false === file_put_contents( $this->config_path, $json ) ) { // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents
 			return new \WP_Error( 'write_error', __( 'Could not write hooks-config.json. Check permissions.', 'rockyjam-templates' ) );
 		}
 
@@ -186,12 +214,13 @@ class HooksConfig {
 				$id                = $cb['id']       ?? '';
 
 				if ( $custom ) {
-					// ── Custom inline function ───────────────────────────────────
+					// ── Custom inline function ────────────────────────────────────────────
 					if ( ! $enabled || ! $func || ! $code ) {
 						continue;
 					}
-					// Wrap body in a proper named function declaration.
-					$safe_code = $this->indent_code( trim( $code ) );
+					// Strip any accidental PHP open tags from user-submitted code.
+					$code      = preg_replace( '/^\s*<\?php\s*/i', '', trim( $code ) );
+					$safe_code = $this->indent_code( $code );
 					$lines[]   = 'if ( ! function_exists( \'' . $func . '\' ) ) {';
 					$lines[]   = "\tfunction " . $func . '() {';
 					$lines[]   = $safe_code;
@@ -199,29 +228,18 @@ class HooksConfig {
 					$lines[]   = '}';
 					$lines[]   = 'add_action( \'' . $hook . '\', \'' . $func . '\', ' . $priority . ' );';
 				} else {
-					// ── Standard / Addon callback ────────────────────────────────
-					// Strategy: always remove_action first (safe even if not registered),
-					// then re-add only if enabled. This correctly handles:
-					//   disabled          → remove only  (turns WC default off)
-					//   enabled, same p   → remove + re-add at same priority (net: no change, but correct)
-					//   enabled, new p    → remove old + add at new priority
-					// Addon callbacks (id starts with 'addon_') are guarded by function_exists
-					// because the addon may be disabled/missing at render time.
+					// ── Standard / Addon callback ─────────────────────────────────────────
 					if ( ! $func ) {
 						continue;
 					}
 					$is_addon = str_starts_with( $id, 'addon_' );
-					// remove_action MUST use original_priority (what WC/addon actually registered),
-					// not the user-edited priority — otherwise WC's registration stays and we get duplicates.
 					$lines[] = 'remove_action( \'' . $hook . '\', \'' . $func . '\', ' . $original_priority . ' );';
 					if ( $enabled ) {
 						if ( $is_addon ) {
-							// Guard: only add if addon function is actually loaded.
 							$lines[] = 'if ( function_exists( \'' . $func . '\' ) ) {';
 							$lines[] = "\t" . 'add_action( \'' . $hook . '\', \'' . $func . '\', ' . $priority . ' );';
 							$lines[] = '}';
 						} else {
-							// Standard WC callback — always exists, no guard needed.
 							$lines[] = 'add_action( \'' . $hook . '\', \'' . $func . '\', ' . $priority . ' );';
 						}
 					}
@@ -233,7 +251,7 @@ class HooksConfig {
 
 		$php = implode( "\n", $lines );
 
-		if ( false === file_put_contents( $this->hooks_php_path, $php ) ) {
+		if ( false === file_put_contents( $this->hooks_php_path, $php ) ) { // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents
 			return new \WP_Error( 'write_error', __( 'Could not write hooks.php. Check permissions.', 'rockyjam-templates' ) );
 		}
 
@@ -254,8 +272,6 @@ class HooksConfig {
 		$clean = [];
 
 		// Build a lookup: function_name => original WC priority from registry.
-		// This is the ONLY trusted source for original_priority — browser data cannot be trusted
-		// because drag-and-drop reprioritization may have overwritten it.
 		$registry_priority = [];
 		foreach ( self::load_registry() as $hook_def ) {
 			foreach ( $hook_def['callbacks'] ?? [] as $rcb ) {
@@ -289,24 +305,19 @@ class HooksConfig {
 				$enabled  = (bool) ( $cb['enabled'] ?? true );
 				$label    = sanitize_text_field( $cb['label'] ?? $func );
 				$id       = sanitize_key( $cb['id'] ?? $func );
-				$code     = $cb['code'] ?? '';
+
+				// FIX M-4: Strip accidental PHP open tags from user-submitted code.
+				$code = preg_replace( '/^\s*<\?php\s*/i', '', $cb['code'] ?? '' );
 
 				if ( ! $func ) {
 					continue;
 				}
 
-				// original_priority: always taken from registry for standard/addon callbacks.
-				// Custom functions have no WC registration, so original_priority == priority.
 				if ( $custom ) {
 					$original_priority = $priority;
 				} elseif ( isset( $registry_priority[ $func ] ) ) {
-					// Standard WC callback — use exact registry value, never trust browser.
 					$original_priority = $registry_priority[ $func ];
 				} else {
-					// Addon callback (not in WC registry) — addon registered it at priority
-					// stored in the id prefix; fall back to current priority as best-guess.
-					// The addon row sets original_priority == priority at first inject,
-					// which is correct because that IS what the addon registered.
 					$original_priority = max( 1, min( 999, (int) ( $cb['original_priority'] ?? $priority ) ) );
 				}
 
@@ -334,8 +345,14 @@ class HooksConfig {
 
 	/**
 	 * Indents code lines by one tab (for function body).
+	 *
+	 * @param string $code Raw code string (may be empty).
+	 * @return string Indented code, or empty string if $code is empty.
 	 */
 	private function indent_code( string $code ): string {
+		if ( '' === $code ) {
+			return '';
+		}
 		$lines = explode( "\n", $code );
 		return implode( "\n", array_map( fn( $l ) => "\t" . $l, $lines ) );
 	}
