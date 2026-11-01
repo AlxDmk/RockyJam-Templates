@@ -37,9 +37,12 @@ add_action( 'woocommerce_single_product_summary', function() {
 /**
  * Product title: allow wrapping and reduce font size for long names.
  * Overrides `white-space: nowrap; text-overflow: ellipsis` from assets/style.css.
- * Printed late in <head> (priority 99) so it wins over the template stylesheet.
+ *
+ * NOTE: this file is loaded from hooks.php on woocommerce_before_single_product,
+ * i.e. AFTER wp_head has already been printed, so the style and script are
+ * output in wp_footer.
  */
-add_action( 'wp_head', function() {
+add_action( 'wp_footer', function() {
     if ( ! is_singular( 'product' ) ) return;
     ?>
     <style id="rj-rogue-title-wrap">
@@ -60,12 +63,6 @@ add_action( 'wp_head', function() {
         line-height: 1.25 !important;
     }
     </style>
-    <?php
-}, 99 );
-
-add_action( 'wp_footer', function() {
-    if ( ! is_singular( 'product' ) ) return;
-    ?>
     <script>
     (function () {
         var el = document.querySelector('.rogue-product-page .product_title.entry-title');
