@@ -1,0 +1,21 @@
+/*
+ * Rogue Product — extra.css (loaded after style.css).
+ * Длинное название товара переносится с уменьшением шрифта вместо обрезки «…».
+ * Перебивает white-space:nowrap / text-overflow:ellipsis из style.css.
+ */
+body .rogue-product-page .product_title.entry-title {
+    white-space: normal !important;
+    overflow: visible !important;
+    text-overflow: clip !important;
+    overflow-wrap: anywhere;
+    hyphens: auto;
+    text-wrap: balance;
+    line-height: 1.2 !important;
+}
+body .rogue-product-page .product_title.entry-title.rj-title--long {
+    font-size: clamp(16px, 1.4vw, 20px) !important;
+}
+body .rogue-product-page .product_title.entry-title.rj-title--xlong {
+    font-size: clamp(14px, 1.2vw, 17px) !important;
+    line-height: 1.25 !important;
+}

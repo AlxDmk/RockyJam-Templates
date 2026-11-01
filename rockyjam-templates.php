@@ -49,6 +49,32 @@ add_action( 'plugins_loaded', function () {
 	rockyjam_templates()->boot();
 } );
 
+/**
+ * Optional per-template extra assets.
+ * If templates/{slug}/assets/extra.css and/or extra.js exist, they are enqueued
+ * on the product page AFTER the template's style.css / script.js.
+ */
+add_action( 'wp_enqueue_scripts', function () {
+	if ( ! function_exists( 'is_product' ) || ! is_product() ) {
+		return;
+	}
+
+	$slug = ( new \RockyJamTemplates\Core\TemplateManager() )->resolve_for_product( (int) get_queried_object_id() );
+	if ( ! $slug ) {
+		return;
+	}
+
+	$base_path = RJT_PATH . 'templates/' . $slug . '/assets/';
+	$base_url  = RJT_URL . 'templates/' . $slug . '/assets/';
+
+	if ( file_exists( $base_path . 'extra.css' ) ) {
+		wp_enqueue_style( 'rjt-tpl-' . $slug . '-extra', $base_url . 'extra.css', [ 'rjt-tpl-' . $slug ], (string) filemtime( $base_path . 'extra.css' ) );
+	}
+	if ( file_exists( $base_path . 'extra.js' ) ) {
+		wp_enqueue_script( 'rjt-tpl-' . $slug . '-extra', $base_url . 'extra.js', [], (string) filemtime( $base_path . 'extra.js' ), true );
+	}
+}, 20 );
+
 register_activation_hook( __FILE__, function () {
 	\RockyJamTemplates\Core\TemplateManager::register_cpt();
 	flush_rewrite_rules();
